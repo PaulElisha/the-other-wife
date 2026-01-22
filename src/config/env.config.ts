@@ -1,7 +1,7 @@
 /** @format */
 
 import { config } from "dotenv";
-config({ path: ".env" });
+config({ path: "./.env" });
 
 type EnvConfig = {
   PORT: string;
