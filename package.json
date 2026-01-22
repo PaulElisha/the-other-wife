@@ -17,12 +17,12 @@
     "bcrypt": "^6.0.0",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
+    "crypto-js": "^4.2.0",
     "express": "^5.2.1",
     "joi": "^17.13.3",
     "jsonwebtoken": "^9.0.3",
     "mongodb": "^6.21.0",
-    "mongoose": "^8.21.0",
-    "crypto-js": "^4.2.0"
+    "mongoose": "^8.21.0"
   },
   "devDependencies": {
     "@tsconfig/node18": "^18.2.6",

@@ -19,7 +19,7 @@ export interface UserDocument extends Document {
   isPhoneVerified: boolean;
   createdAt: Date;
   updatedAt: Date;
-  lastLoginAt: Date;
+  lastLogin: Date;
   comparePassword: (password: string) => Promise<boolean>;
   omitPassword: () => Omit<UserDocument, "password">;
 }
@@ -77,7 +77,7 @@ const UserSchema = new Schema(
     authType: {
       type: String,
       enum: ["email", "google", "phone"],
-      default: "email",
+      default: "phone",
     },
     isEmailVerified: {
       type: Boolean,
@@ -92,7 +92,6 @@ const UserSchema = new Schema(
     lastLogin: {
       type: Date,
       required: false,
-      default: null,
     },
   },
   {

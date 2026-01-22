@@ -106,6 +106,9 @@ export class AuthService {
         );
       }
 
+      user.lastLogin = new Date();
+      await user.save();
+
       const { token } = generateToken(user._id);
       return { token };
     } catch (error) {
