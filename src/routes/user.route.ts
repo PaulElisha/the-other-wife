@@ -1,11 +1,11 @@
 /** @format */
 
 import { Router } from "express";
-import { UserController } from "../controllers/user.controller";
+import { UserController } from "../controllers/user.controller.js";
 
-import { validateEditUser } from "../validation/user.validation";
-import { roleGuardMiddleware } from "../middlewares/role-guard.middleware";
-import { authMiddleware } from "../middlewares/auth.middleware";
+import { validateEditUser } from "../validation/user.validation.js";
+import { roleGuardMiddleware } from "../middlewares/role-guard.middleware.js";
+import { authMiddleware } from "../middlewares/auth.middleware.js";
 
 class UserRouter {
   userController: UserController;

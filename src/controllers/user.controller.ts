@@ -1,9 +1,9 @@
 /** @format */
 
 import { Request, Response } from "express";
-import { handleAsyncControl } from "../middlewares/handleAsyncControl.middleware";
-import { UserService } from "../services/user.service";
-import { HttpStatus } from "../config/http.config";
+import { handleAsyncControl } from "../middlewares/handleAsyncControl.middleware.js";
+import { UserService } from "../services/user.service.js";
+import { HttpStatus } from "../config/http.config.js";
 
 export class UserController {
   userService: UserService;

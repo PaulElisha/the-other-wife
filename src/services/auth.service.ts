@@ -2,19 +2,19 @@
 
 import mongoose, { ClientSession } from "mongoose";
 
-import { HttpStatus } from "../config/http.config";
-import { ErrorCode } from "../enums/error-code.enum";
+import { HttpStatus } from "../config/http.config.js";
+import { ErrorCode } from "../enums/error-code.enum.js";
 
-import { BadRequestException } from "../errors/bad-request-exception.error";
-import { UnauthorizedExceptionError } from "../errors/unauthorized-exception.error";
-import { NotFoundException } from "../errors/not-found-exception.error";
+import { BadRequestException } from "../errors/bad-request-exception.error.js";
+import { UnauthorizedExceptionError } from "../errors/unauthorized-exception.error.js";
+import { NotFoundException } from "../errors/not-found-exception.error.js";
 
-import User, { UserDocument } from "../models/user.model";
-import Customer from "../models/customer.model";
-import Vendor from "../models/vendor.model";
+import User, { UserDocument } from "../models/user.model.js";
+import Customer from "../models/customer.model.js";
+import Vendor from "../models/vendor.model.js";
 
-import { generateToken } from "../utils/generate-token";
-import { nodeEnv } from "../constants/constants";
+import { generateToken } from "../utils/generate-token.js";
+import { nodeEnv } from "../constants/constants.js";
 
 export class AuthService {
   signup = async (body: {

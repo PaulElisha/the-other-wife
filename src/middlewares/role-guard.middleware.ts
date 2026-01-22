@@ -1,9 +1,9 @@
 /** @format */
 
 import { NextFunction, Request, Response } from "express";
-import { UnauthorizedExceptionError } from "../errors/unauthorized-exception.error";
-import { HttpStatus } from "../config/http.config";
-import { ErrorCode } from "../enums/error-code.enum";
+import { UnauthorizedExceptionError } from "../errors/unauthorized-exception.error.js";
+import { HttpStatus } from "../config/http.config.js";
+import { ErrorCode } from "../enums/error-code.enum.js";
 
 export const roleGuardMiddleware = (roles: string[]) => {
   return async (req: Request, res: Response, next: NextFunction) => {

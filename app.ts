@@ -4,15 +4,15 @@ import express, { Express } from "express";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 
-import { errorHandler } from "./src/middlewares/errorHandler.middleware";
-import { roleGuardMiddleware } from "./src/middlewares/role-guard.middleware";
+import { errorHandler } from "./src/middlewares/errorHandler.middleware.js";
+import { roleGuardMiddleware } from "./src/middlewares/role-guard.middleware.js";
 
-import { Db } from "./src/config/db.config";
+import { Db } from "./src/config/db.config.js";
 
-import { hostName, port, mongoUri } from "./src/constants/constants";
+import { hostName, port, mongoUri } from "./src/constants/constants.js";
 
-import { authRouter } from "./src/routes/auth.route";
-import { userRouter } from "./src/routes/user.route";
+import { authRouter } from "./src/routes/auth.route.js";
+import { userRouter } from "./src/routes/user.route.js";
 
 export class App {
   app: Express;

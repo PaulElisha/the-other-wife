@@ -1,11 +1,11 @@
 /** @format */
 
-import { AuthService } from "../services/auth.service";
+import { AuthService } from "../services/auth.service.js";
 
-import { handleAsyncControl } from "../middlewares/handleAsyncControl.middleware";
+import { handleAsyncControl } from "../middlewares/handleAsyncControl.middleware.js";
 
 import { NextFunction, Request, Response } from "express";
-import { HttpStatus } from "../config/http.config";
+import { HttpStatus } from "../config/http.config.js";
 
 export class AuthController {
   authService: AuthService;
