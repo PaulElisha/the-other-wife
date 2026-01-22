@@ -15,12 +15,12 @@ import { authRouter } from "./src/routes/auth.route.js";
 import { userRouter } from "./src/routes/user.route.js";
 
 export class App {
+  [x: string]: any;
   app: Express;
-  db: Db;
 
   constructor() {
     this.app = express();
-    this.db = new Db();
+    this.db.connect();
     this.initiializeMiddlewares();
     this.initializeRoutes();
   }
