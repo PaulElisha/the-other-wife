@@ -1,8 +1,8 @@
 /** @format */
 
-import { ErrorCodeType } from "../enums/error-code.enum";
-import { AppError } from "./app.error";
-import { HttpStatusCodeType } from "../config/http.config";
+import { ErrorCodeType } from "../enums/error-code.enum.js";
+import { AppError } from "./app.error.js";
+import { HttpStatusCodeType } from "../config/http.config.js";
 
 export class BadRequestException extends AppError {
   constructor(

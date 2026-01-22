@@ -2,10 +2,10 @@
 
 import mongoose from "mongoose";
 
-import User from "../models/user.model";
-import { NotFoundException } from "../errors/not-found-exception.error";
-import { HttpStatus } from "../config/http.config";
-import { ErrorCode } from "../enums/error-code.enum";
+import User from "../models/user.model.js";
+import { NotFoundException } from "../errors/not-found-exception.error.js";
+import { HttpStatus } from "../config/http.config.js";
+import { ErrorCode } from "../enums/error-code.enum.js";
 
 export class UserService {
   getCurrentUser = async (userId: mongoose.Types.ObjectId) => {
