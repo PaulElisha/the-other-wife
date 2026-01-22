@@ -43,6 +43,8 @@ export class AuthController {
         phoneNumber,
       } = req.body;
 
+      this.db.connect();
+
       try {
         await this.authService.signup({
           firstName,
@@ -69,6 +71,8 @@ export class AuthController {
     ): Promise<any> => {
       const { phoneNumber, passwordHash } = req.body;
 
+      this.db.connect();
+
       try {
         const { token } = await this.authService.login({
           phoneNumber,
@@ -87,6 +91,7 @@ export class AuthController {
 
   handleLogout = handleAsyncControl(
     async (req: Request, res: Response): Promise<any> => {
+      this.db.connect();
       try {
         const { cookieOptions } = this.authService.logout();
         res.clearCookie("token", cookieOptions);

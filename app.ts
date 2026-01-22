@@ -9,7 +9,7 @@ import { roleGuardMiddleware } from "./src/middlewares/role-guard.middleware.js"
 
 import { Db } from "./src/config/db.config.js";
 
-import { hostName, port, mongoUri } from "./src/constants/constants.js";
+import { hostName, port } from "./src/constants/constants.js";
 
 import { authRouter } from "./src/routes/auth.route.js";
 import { userRouter } from "./src/routes/user.route.js";
@@ -45,7 +45,6 @@ export class App {
   }
 
   startServer() {
-    this.db.connect();
     this.app.listen(port, () => {
       console.log(`Server is running on ${hostName}:${port}`);
     });
