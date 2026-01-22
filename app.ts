@@ -16,11 +16,9 @@ import { userRouter } from "./src/routes/user.route.js";
 
 export class App {
   app: Express;
-  db: Db;
 
   constructor() {
     this.app = express();
-    this.db = new Db();
     this.initiializeMiddlewares();
     this.initializeRoutes();
   }
