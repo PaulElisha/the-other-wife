@@ -1,16 +1,15 @@
 /** @format */
 
 import { Request, Response, NextFunction } from "express";
-import { UnauthorizedExceptionError } from "../errors/unauthorized-exception.error.ts";
-import { HttpStatus } from "../config/http.config.ts";
-import { ErrorCode } from "../enums/error-code.enum.ts";
+import { UnauthorizedExceptionError } from "../errors/unauthorized-exception.error";
+import { HttpStatus } from "../config/http.config";
+import { ErrorCode } from "../enums/error-code.enum";
 
 export const authMiddleware = (
   req: Request,
   res: Response,
   next: NextFunction,
 ) => {
-  // if(req.user.user_type)
   if (!req.user || !req.user._id) {
     throw new UnauthorizedExceptionError(
       "Unauthorized. Please log in.",
