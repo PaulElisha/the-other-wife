@@ -11,12 +11,12 @@ import { Db } from "../config/db.config.js";
 
 export class AuthController {
   authService: AuthService;
-  // db: Db;
+  db: Db;
 
   constructor() {
     this.authService = new AuthService();
-    // this.db = new Db();
-    // this.db.connect();
+    this.db = new Db();
+    this.db.connect();
   }
 
   handleSignup = handleAsyncControl(
