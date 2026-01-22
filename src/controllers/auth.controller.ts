@@ -7,11 +7,15 @@ import { handleAsyncControl } from "../middlewares/handleAsyncControl.middleware
 import { NextFunction, Request, Response } from "express";
 import { HttpStatus } from "../config/http.config.js";
 
+import { Db } from "../config/db.config.js";
+
 export class AuthController {
   authService: AuthService;
+  db: Db;
 
   constructor() {
     this.authService = new AuthService();
+    this.db = new Db();
   }
 
   handleSignup = handleAsyncControl(
@@ -38,6 +42,9 @@ export class AuthController {
         userType,
         phoneNumber,
       } = req.body;
+
+      this.db.connect();
+
       try {
         await this.authService.signup({
           firstName,
@@ -63,6 +70,9 @@ export class AuthController {
       next: NextFunction,
     ): Promise<any> => {
       const { phoneNumber, passwordHash } = req.body;
+
+      this.db.connect();
+
       try {
         const { token } = await this.authService.login({
           phoneNumber,
@@ -81,6 +91,7 @@ export class AuthController {
 
   handleLogout = handleAsyncControl(
     async (req: Request, res: Response): Promise<any> => {
+      this.db.connect();
       try {
         const { cookieOptions } = this.authService.logout();
         res.clearCookie("token", cookieOptions);

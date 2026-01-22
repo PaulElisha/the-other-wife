@@ -45,7 +45,6 @@ export class App {
   }
 
   startServer() {
-    this.db.connect();
     this.app.listen(port, () => {
       console.log(`Server is running on ${hostName}:${port}`);
     });
