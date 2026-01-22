@@ -2,7 +2,7 @@
     "extends": "@tsconfig/node18/tsconfig.json",
     "compilerOptions": {
         "rootDir": ".",
-        "outDir": "dist",
+        "outDir": "./dist",
         "noEmit": true,
         "emitDecoratorMetadata": true,
         "emitDeclarationOnly": true,
