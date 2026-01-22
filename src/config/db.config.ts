@@ -2,8 +2,10 @@
 
 import mongoose from "mongoose";
 
+import { mongoUri } from "../constants/constants.js";
+
 class Db {
-  async connect(mongoUri: string): Promise<void> {
+  async connect(): Promise<void> {
     try {
       await mongoose.connect(mongoUri);
 
