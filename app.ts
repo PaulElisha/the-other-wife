@@ -15,12 +15,12 @@ import { authRouter } from "./src/routes/auth.route.js";
 import { userRouter } from "./src/routes/user.route.js";
 
 export class App {
-  [x: string]: any;
   app: Express;
+  db: Db;
 
   constructor() {
     this.app = express();
-    this.db.connect();
+    this.db = new Db();
     this.initiializeMiddlewares();
     this.initializeRoutes();
   }
@@ -45,6 +45,7 @@ export class App {
   }
 
   startServer() {
+    this.db.connect();
     this.app.listen(port, () => {
       console.log(`Server is running on ${hostName}:${port}`);
     });
