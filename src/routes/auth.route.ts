@@ -1,11 +1,11 @@
 /** @format */
 
 import { Router } from "express";
-import { AuthController } from "../controllers/auth.controller";
+import { AuthController } from "../controllers/auth.controller.js";
 import {
   validateLoginUser,
   validateSignupUser,
-} from "../validation/auth.validation";
+} from "../validation/auth.validation.js";
 
 class AuthRouter {
   router: Router;
