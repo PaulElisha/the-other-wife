@@ -18,8 +18,8 @@ class UserRouter {
   }
 
   initializeRoutes() {
-    this.router.post(
-      "/",
+    this.router.put(
+      "/update",
       authMiddleware,
       roleGuardMiddleware(["customer", "vendor"]),
       validateEditUser,

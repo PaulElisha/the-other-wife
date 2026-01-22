@@ -8,7 +8,7 @@ import { HttpStatus } from "../config/http.config.js";
 import { ErrorCode } from "../enums/error-code.enum.js";
 
 export class UserService {
-  getCurrentUser = async (userId: mongoose.Types.ObjectId) => {
+  getCurrentUser = async (userId: mongoose.Types.ObjectId | undefined) => {
     const user = await User.findById(userId).select("-passwordHash");
 
     if (!user) {
@@ -23,7 +23,7 @@ export class UserService {
   };
 
   editUser = async (
-    userId: mongoose.Types.ObjectId,
+    userId: mongoose.Types.ObjectId | undefined,
     body: {
       firstName: string;
       lastName: string;

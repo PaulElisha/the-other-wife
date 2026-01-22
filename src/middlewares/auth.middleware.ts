@@ -5,18 +5,38 @@ import { UnauthorizedExceptionError } from "../errors/unauthorized-exception.err
 import { HttpStatus } from "../config/http.config.js";
 import { ErrorCode } from "../enums/error-code.enum.js";
 
-export const authMiddleware = (
+import jwt from "jsonwebtoken";
+import User from "../models/user.model.js";
+import { jwtSecret } from "../constants/constants.js";
+
+export const authMiddleware = async (
   req: Request,
   res: Response,
   next: NextFunction,
 ) => {
-  if (!req.user || !req.user._id) {
-    throw new UnauthorizedExceptionError(
-      "Unauthorized. Please log in.",
-      HttpStatus.UNAUTHORIZED,
-      ErrorCode.AUTH_UNAUTHORIZED_ACCESS,
-    );
+  const accessToken = req.cookies?.token;
+
+  if (!accessToken) {
+    return res.status(HttpStatus.OK).json({ mesage: "Please login first" });
   }
 
-  next();
+  try {
+    const decoded = jwt.verify(accessToken, jwtSecret);
+
+    if (!decoded || typeof decoded === "string") {
+      return res
+        .status(HttpStatus.UNAUTHORIZED)
+        .json({ message: "Invalid token" });
+    }
+
+    req.user = await User.findById(decoded.id).select("-passwordHash");
+
+    if (!req.user)
+      return res
+        .status(HttpStatus.UNAUTHORIZED)
+        .json({ message: "User not found" });
+    next();
+  } catch (error) {
+    throw error;
+  }
 };

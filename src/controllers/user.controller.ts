@@ -15,13 +15,6 @@ export class UserController {
   getCurrentUser = handleAsyncControl(
     async (req: Request, res: Response): Promise<Response> => {
       try {
-        if (!req.user || !req.user?._id) {
-          return res.status(HttpStatus.UNAUTHORIZED).json({
-            status: "error",
-            message: "User not authenticated",
-          });
-        }
-
         const { user } = await this.userService.getCurrentUser(req.user?._id);
         return res.status(HttpStatus.OK).json({
           data: user,
@@ -37,13 +30,6 @@ export class UserController {
   editUser = handleAsyncControl(
     async (req: Request, res: Response): Promise<Response> => {
       try {
-        if (!req.user || !req.user?._id) {
-          return res.status(HttpStatus.UNAUTHORIZED).json({
-            status: "error",
-            message: "User not authenticated",
-          });
-        }
-
         const { user } = await this.userService.editUser(
           req.user?._id,
           req.body,
