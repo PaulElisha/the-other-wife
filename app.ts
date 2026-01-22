@@ -1,0 +1,68 @@
+/** @format */
+
+import express, { Express } from "express";
+import cookieParser from "cookie-parser";
+import cors from "cors";
+
+import { errorHandler } from "./src/middlewares/errorHandler.middleware";
+import { roleGuardMiddleware } from "./src/middlewares/role-guard.middleware";
+
+import { Db } from "./src/config/db.config";
+
+import { hostName, port, mongoUri } from "./src/constants/constants";
+
+import { authRouter } from "./src/routes/auth.route";
+import { userRouter } from "./src/routes/user.route";
+
+export class App {
+  app: Express;
+  db: Db;
+
+  constructor() {
+    this.app = express();
+    this.db = new Db();
+    this.initiializeMiddlewares();
+    this.initializeRoutes();
+  }
+
+  initiializeMiddlewares() {
+    this.app.use(express.json());
+    this.app.use(express.urlencoded({ extended: true }));
+    this.app.use(
+      cors({
+        origin: "*",
+        credentials: true,
+      }),
+    );
+    this.app.use(cookieParser());
+  }
+
+  initializeRoutes() {
+    this.app.use("/api/v1/auth", authRouter);
+    this.app.use("/api/v1/user", userRouter);
+
+    this.app.use(errorHandler);
+  }
+
+  startServer() {
+    this.db.connect(mongoUri);
+    this.app.listen(port, () => {
+      console.log(`Server is running on ${hostName}:${port}`);
+    });
+  }
+}
+
+const app = new App();
+app.startServer();
+
+// const appInstance = new App();
+// const app = appInstance.app;
+
+// // Only start the server if this file is the main entry point (not imported by Vercel)
+// // In Vercel, we export the app to be used as a serverless function
+// if (import.meta.url === `file://${process.argv[1]}`) {
+//   appInstance.startServer();
+// }
+
+// export default app;
+// export { app };

@@ -1,0 +1,28 @@
+{
+    "extends": "@tsconfig/node18/tsconfig.json",
+    "compilerOptions": {
+        "rootDir": ".",
+        "outDir": "dist",
+        "noEmit": true,
+        "emitDecoratorMetadata": true,
+        "emitDeclarationOnly": true,
+        "declaration": true,
+        "allowImportingTsExtensions": true,
+        "experimentalDecorators": true,
+        "moduleResolution": "node",
+        "module": "ES2022",
+        "target": "ES2022",
+        "allowJs": true,
+        "allowSyntheticDefaultImports": true,
+    },
+    "include": [
+        "src/**/*.ts",
+        "api/**/*.ts",
+        "src/@types/**/*.ts",
+        "app.ts"
+    ],
+    "exclude": [
+        "node_modules",
+        "dist"
+    ]
+}

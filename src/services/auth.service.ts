@@ -1,0 +1,161 @@
+/** @format */
+
+import mongoose, { ClientSession } from "mongoose";
+
+import { HttpStatus } from "../config/http.config";
+import { ErrorCode } from "../enums/error-code.enum";
+
+import { BadRequestException } from "../errors/bad-request-exception.error";
+import { UnauthorizedExceptionError } from "../errors/unauthorized-exception.error";
+import { NotFoundException } from "../errors/not-found-exception.error";
+
+import User, { UserDocument } from "../models/user.model";
+import Customer from "../models/customer.model";
+import Vendor from "../models/vendor.model";
+
+import { generateToken } from "../utils/generate-token";
+import { nodeEnv } from "../constants/constants";
+
+export class AuthService {
+  signup = async (body: {
+    firstName: string;
+    lastName: string;
+    email: string;
+    passwordHash: string;
+    userType: string;
+    phoneNumber: string;
+  }): Promise<{
+    userId: mongoose.Types.ObjectId;
+    userType: {
+      roleId: mongoose.Types.ObjectId | undefined;
+    };
+  }> => {
+    const { firstName, lastName, passwordHash, userType, phoneNumber, email } =
+      body;
+
+    try {
+      const user = await User.findOne({ phoneNumber });
+      if (user) {
+        throw new BadRequestException(
+          "User already exists",
+          HttpStatus.BAD_REQUEST,
+          ErrorCode.AUTH_PHONE_NUMBER_ALREADY_EXISTS,
+        );
+      }
+
+      const newUser = await User.create({
+        firstName,
+        lastName,
+        email,
+        passwordHash,
+        userType,
+        phoneNumber,
+      });
+
+      let roleId;
+
+      if (userType === "customer") {
+        const customer = await Customer.create({
+          userId: newUser._id,
+        });
+
+        roleId = customer._id;
+      }
+
+      if (userType === "vendor") {
+        const vendor = await Vendor.create({
+          userId: newUser._id,
+        });
+
+        roleId = vendor._id;
+      }
+
+      return {
+        userId: newUser._id,
+        userType: {
+          roleId,
+        },
+      };
+    } catch (error) {
+      throw error;
+    }
+  };
+
+  login = async (body: {
+    phoneNumber: string;
+    passwordHash: string;
+  }): Promise<any> => {
+    const { phoneNumber, passwordHash } = body;
+
+    try {
+      const user = await User.findOne({ phoneNumber });
+      if (!user) {
+        throw new NotFoundException(
+          "User not found",
+          HttpStatus.NOT_FOUND,
+          ErrorCode.AUTH_USER_NOT_FOUND,
+        );
+      }
+
+      const isValid = await user.comparePassword(passwordHash);
+      if (!isValid) {
+        throw new UnauthorizedExceptionError(
+          "Invalid phone number or password",
+          HttpStatus.UNAUTHORIZED,
+          ErrorCode.AUTH_UNAUTHORIZED_ACCESS,
+        );
+      }
+
+      const { token } = generateToken(user._id);
+      return { token };
+    } catch (error) {
+      throw error;
+    }
+  };
+
+  logout = (): any => {
+    return {
+      httpOnly: true,
+      secure: nodeEnv === "production",
+      sameSite: "strict",
+    };
+  };
+
+  // passwordResetRequest = async (phoneNumber: string) => {
+  //   const user = await User.findOne({ phoneNumber });
+
+  //   if (!user) {
+  //     throw new NotFoundException(
+  //       "User not found",
+  //       HttpStatus.NOT_FOUND,
+  //       ErrorCode.AUTH_USER_NOT_FOUND,
+  //     );
+  //   }
+
+  //   const token = Crypto.randomBytes(20).toString("hex");
+  //   user.resetToken = token;
+  //   user.resetTokenExpiry = Date.now() + 20 * 60 * 1000;
+  //   await user.save();
+
+  //   return { token };
+  // };
+
+  // passwordReset = async (newPassword: string, token: string) => {
+  //   const user = await User.findOne({
+  //     resetToken: token,
+  //     resetTokenExpiry: { $gt: Date.now(), $lt: Date.now() + 20 * 60 * 1000 },
+  //   });
+  //   if (!user) {
+  //     throw new NotFoundException(
+  //       "User not found",
+  //       HttpStatus.NOT_FOUND,
+  //       ErrorCode.AUTH_USER_NOT_FOUND,
+  //     );
+  //   }
+
+  //   user.passwordHash = await bcrypt.hash(newPassword, 10);
+  //   user.resetToken = null;
+  //   user.resetTokenExpiry = null;
+  //   await user.save();
+  // };
+}
