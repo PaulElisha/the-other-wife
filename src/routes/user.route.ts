@@ -27,10 +27,17 @@ class UserRouter {
     );
 
     this.router.get(
-      "/",
+      "/current-user",
       authMiddleware,
       roleGuardMiddleware(["customer", "vendor"]),
       this.userController.getCurrentUser,
+    );
+
+    this.router.get(
+      "/all",
+      authMiddleware,
+      roleGuardMiddleware(["admin"]),
+      this.userController.getAllUsers,
     );
   }
 }

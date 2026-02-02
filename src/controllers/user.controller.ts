@@ -27,6 +27,21 @@ export class UserController {
     },
   );
 
+  getAllUsers = handleAsyncControl(
+    async (req: Request, res: Response): Promise<Response> => {
+      try {
+        const { users } = await this.userService.getAllUsers();
+        return res.status(HttpStatus.OK).json({
+          data: users,
+          status: "ok",
+          message: "Users fetched successfully",
+        });
+      } catch (error) {
+        throw error;
+      }
+    },
+  );
+
   editUser = handleAsyncControl(
     async (req: Request, res: Response): Promise<Response> => {
       try {
@@ -38,6 +53,20 @@ export class UserController {
           data: user,
           status: "ok",
           message: "User updated successfully",
+        });
+      } catch (error) {
+        throw error;
+      }
+    },
+  );
+
+  deleteUser = handleAsyncControl(
+    async (req: Request, res: Response): Promise<Response> => {
+      try {
+        await this.userService.deleteUser(req.user?._id);
+        return res.status(HttpStatus.OK).json({
+          status: "ok",
+          message: "User deleted successfully",
         });
       } catch (error) {
         throw error;

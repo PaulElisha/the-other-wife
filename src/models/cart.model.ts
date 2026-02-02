@@ -6,6 +6,7 @@ export interface CartDocument extends Document {
   customerId: mongoose.Types.ObjectId;
   meals: {
     mealId: mongoose.Types.ObjectId;
+    price: number;
     quantity: number;
     totalPrice: number;
   }[];
@@ -16,7 +17,7 @@ const CartSchema = new Schema(
   {
     customerId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Customer",
+      ref: "User",
       required: true,
     },
     meals: [
@@ -24,6 +25,10 @@ const CartSchema = new Schema(
         mealId: {
           type: mongoose.Schema.Types.ObjectId,
           ref: "Meal",
+          required: true,
+        },
+        price: {
+          type: Number,
           required: true,
         },
         quantity: {
@@ -36,18 +41,6 @@ const CartSchema = new Schema(
         },
       },
     ],
-    subTotal: {
-      type: Number,
-      required: false,
-    },
-    deliveryFee: {
-      type: Number,
-      required: false,
-    },
-    serviceCharge: {
-      type: Number,
-      required: false,
-    },
     totalAmount: {
       type: Number,
       required: false,

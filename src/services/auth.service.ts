@@ -26,9 +26,6 @@ export class AuthService {
     phoneNumber: string;
   }): Promise<{
     userId: mongoose.Types.ObjectId;
-    userType: {
-      roleId: mongoose.Types.ObjectId | undefined;
-    };
   }> => {
     const { firstName, lastName, passwordHash, userType, phoneNumber, email } =
       body;
@@ -52,30 +49,19 @@ export class AuthService {
         phoneNumber,
       });
 
-      let roleId;
-
-      if (userType === "customer") {
-        const customer = await Customer.create({
+      if (userType === "customer" || userType === undefined) {
+        await Customer.create({
           userId: newUser._id,
         });
-
-        roleId = customer._id;
       }
 
       if (userType === "vendor") {
-        const vendor = await Vendor.create({
+        await Vendor.create({
           userId: newUser._id,
         });
-
-        roleId = vendor._id;
       }
 
-      return {
-        userId: newUser._id,
-        userType: {
-          roleId,
-        },
-      };
+      return { userId: newUser._id };
     } catch (error) {
       throw error;
     }

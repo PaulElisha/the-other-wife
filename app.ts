@@ -5,14 +5,14 @@ import cookieParser from "cookie-parser";
 import cors from "cors";
 
 import { errorHandler } from "./src/middlewares/errorHandler.middleware.js";
-import { roleGuardMiddleware } from "./src/middlewares/role-guard.middleware.js";
-
-import { Db } from "./src/config/db.config.js";
 
 import { hostName, port } from "./src/constants/constants.js";
 
 import { authRouter } from "./src/routes/auth.route.js";
 import { userRouter } from "./src/routes/user.route.js";
+import { addressRouter } from "./src/routes/address.route.js";
+import { customerRouter } from "./src/routes/customer.route.js";
+import { vendorRouter } from "./src/routes/vendor.route.js";
 
 export class App {
   app: Express;
@@ -38,6 +38,9 @@ export class App {
   initializeRoutes() {
     this.app.use("/api/v1/auth", authRouter);
     this.app.use("/api/v1/user", userRouter);
+    this.app.use("/api/v1/address", addressRouter);
+    this.app.use("/api/v1/customer", customerRouter);
+    this.app.use("/api/v1/vendor", vendorRouter);
 
     this.app.use(errorHandler);
   }

@@ -9,6 +9,13 @@ import { ErrorCode } from "../enums/error-code.enum.js";
 
 export class UserService {
   getCurrentUser = async (userId: mongoose.Types.ObjectId | undefined) => {
+    if (!userId) {
+      throw new NotFoundException(
+        "User not logged in",
+        HttpStatus.NOT_FOUND,
+        ErrorCode.AUTH_USER_NOT_FOUND,
+      );
+    }
     const user = await User.findById(userId).select("-passwordHash");
 
     if (!user) {
@@ -22,6 +29,20 @@ export class UserService {
     return { user };
   };
 
+  getAllUsers = async () => {
+    const users = await User.find().select("-passwordHash");
+
+    if (!users) {
+      throw new NotFoundException(
+        "Users not found",
+        HttpStatus.NOT_FOUND,
+        ErrorCode.AUTH_USER_NOT_FOUND,
+      );
+    }
+
+    return { users };
+  };
+
   editUser = async (
     userId: mongoose.Types.ObjectId | undefined,
     body: {
@@ -32,6 +53,7 @@ export class UserService {
     },
   ) => {
     const { firstName, lastName, email, phoneNumber } = body;
+
     const user = await User.findById(userId);
 
     if (!user) {
@@ -50,5 +72,9 @@ export class UserService {
     await user.save();
 
     return { user };
+  };
+
+  deleteUser = async (userId: mongoose.Types.ObjectId | undefined) => {
+    await User.findByIdAndDelete(userId);
   };
 }

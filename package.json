@@ -5,6 +5,7 @@
   "main": "app.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
+    "seed": "tsx src/seeder/seeder.ts",
     "build": "npx tsc",
     "start": "tsx app.ts",
     "dev": "tsx watch app.ts"

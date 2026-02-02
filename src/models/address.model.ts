@@ -55,10 +55,6 @@ const AddressSchema = new Schema({
     type: Number,
     required: true,
   },
-  deliveryInstructions: {
-    type: String,
-    required: true,
-  },
   isDefault: {
     type: Boolean,
     required: false,

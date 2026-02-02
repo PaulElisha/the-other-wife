@@ -45,7 +45,7 @@ export class AuthController {
       } = req.body;
 
       try {
-        await this.authService.signup({
+        const { userId } = await this.authService.signup({
           firstName,
           lastName,
           email,
@@ -53,9 +53,11 @@ export class AuthController {
           userType,
           phoneNumber,
         });
-        return res
-          .status(201)
-          .json({ message: "User registered successfully" });
+        return res.status(HttpStatus.OK).json({
+          status: "ok",
+          message: "User registered successfully",
+          userId,
+        });
       } catch (error) {
         throw error;
       }
