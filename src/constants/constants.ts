@@ -7,6 +7,7 @@ export const hostName: string = envconfig.HOST_NAME;
 export const mongoUri: string = envconfig.MONGODB_URI;
 export const nodeEnv: string = envconfig.NODE_ENV;
 export const jwtSecret: string = envconfig.JWT_SECRET;
+export const corsOrigin: string | undefined = envconfig.CORS_ORIGIN;
 
 console.log("port", !!port);
 console.log("hostName", !!hostName);

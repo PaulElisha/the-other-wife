@@ -44,7 +44,6 @@ const UserSchema = new Schema(
     passwordHash: {
       type: String,
       required: true,
-      unique: true,
     },
     phoneNumber: {
       type: String,

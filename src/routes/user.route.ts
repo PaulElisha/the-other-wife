@@ -7,6 +7,57 @@ import { validateEditUser } from "../validation/user.validation.js";
 import { roleGuardMiddleware } from "../middlewares/role-guard.middleware.js";
 import { authMiddleware } from "../middlewares/auth.middleware.js";
 
+/**
+ * @openapi
+ * /api/v1/user/update:
+ *   put:
+ *     summary: Update current user
+ *     tags: [User]
+ *     security:
+ *       - cookieAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [firstName, lastName, email, phoneNumber]
+ *             properties:
+ *               firstName: { type: string }
+ *               lastName: { type: string }
+ *               email: { type: string, format: email }
+ *               phoneNumber: { type: string }
+ *     responses:
+ *       200:
+ *         description: User updated successfully
+ */
+
+/**
+ * @openapi
+ * /api/v1/user/current-user:
+ *   get:
+ *     summary: Get current user
+ *     tags: [User]
+ *     security:
+ *       - cookieAuth: []
+ *     responses:
+ *       200:
+ *         description: User fetched successfully
+ */
+
+/**
+ * @openapi
+ * /api/v1/user/all:
+ *   get:
+ *     summary: Get all users (admin)
+ *     tags: [User]
+ *     security:
+ *       - cookieAuth: []
+ *     responses:
+ *       200:
+ *         description: Users fetched successfully
+ */
+
 class UserRouter {
   userController: UserController;
   router: Router;

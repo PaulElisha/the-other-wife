@@ -1,11 +1,11 @@
 /** @format */
 
 import mongoose from "mongoose";
-import Address from "../models/address.model";
-import { NotFoundException } from "../errors/not-found-exception.error";
-import { HttpStatus } from "../config/http.config";
-import { ErrorCode } from "../enums/error-code.enum";
-import Customer from "../models/customer.model";
+import Address from "../models/address.model.js";
+import { NotFoundException } from "../errors/not-found-exception.error.js";
+import { HttpStatus } from "../config/http.config.js";
+import { ErrorCode } from "../enums/error-code.enum.js";
+import Customer from "../models/customer.model.js";
 
 export class AddressService {
   constructor() {}
@@ -18,6 +18,9 @@ export class AddressService {
     postalCode: string,
     latitude: number,
     longitude: number,
+    label?: "home" | "work" | "other",
+    address?: string,
+    isDefault?: boolean,
   ) => {
     const userAddress = await Address.create({
       userId,
@@ -27,13 +30,18 @@ export class AddressService {
       postalCode,
       latitude,
       longitude,
+      label,
+      address,
+      isDefault,
     });
 
-    await Customer.findByIdAndUpdate(
-      userId,
-      { $set: { addressId: userAddress._id } },
-      { new: true },
-    );
+    if (userId) {
+      await Customer.findOneAndUpdate(
+        { userId },
+        { $set: { addressId: userAddress._id } },
+        { new: true },
+      );
+    }
 
     return { userAddress };
   };
@@ -46,6 +54,9 @@ export class AddressService {
     postalCode: string,
     latitude: number,
     longitude: number,
+    label?: "home" | "work" | "other",
+    address?: string,
+    isDefault?: boolean,
   ) => {
     const userAddress = await Address.findById(addressId);
 
@@ -63,6 +74,9 @@ export class AddressService {
     if (postalCode) userAddress.postalCode = postalCode;
     if (latitude) userAddress.latitude = latitude;
     if (longitude) userAddress.longitude = longitude;
+    if (label) userAddress.label = label;
+    if (address) userAddress.address = address;
+    if (typeof isDefault === "boolean") userAddress.isDefault = isDefault;
 
     await userAddress.save();
 
@@ -71,14 +85,6 @@ export class AddressService {
 
   toggleDefaultAddress = async (addressId: string) => {
     const userAddress = await Address.findById(addressId);
-
-    if (!userAddress) {
-      throw new NotFoundException(
-        "Address not found",
-        HttpStatus.NOT_FOUND,
-        ErrorCode.AUTH_USER_NOT_FOUND,
-      );
-    }
 
     if (!userAddress) {
       throw new NotFoundException(

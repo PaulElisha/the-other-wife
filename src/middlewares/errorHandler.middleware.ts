@@ -29,7 +29,7 @@ export const errorHandler = (
     return res.status(err.statusCode).json({
       message: err.message,
       error: err.errorCode,
-      status: err.statusCode,
+      status: "error",
     });
   }
 
