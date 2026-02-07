@@ -26,6 +26,7 @@ export class App {
 
   constructor() {
     this.app = express();
+    this.app.set("trust proxy", 1);
     this.db = new Db();
     this.initiializeMiddlewares();
     this.initializeRoutes();
