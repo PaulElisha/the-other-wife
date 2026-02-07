@@ -2,7 +2,7 @@
 
 import { Request, Response } from "express";
 import { HttpStatus } from "../config/http.config.js";
-import { handleAsyncControl } from "../middlewares/handleAsyncControl.middleware";
+import { handleAsyncControl } from "../middlewares/handleAsyncControl.middleware.js";
 import { CartService } from "../services/cart.service.js";
 
 export class CartController {

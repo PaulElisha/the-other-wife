@@ -2,12 +2,13 @@
 
 import Joi from "joi";
 import { NextFunction, Request, Response } from "express";
-import { BadRequestException } from "../errors/bad-request-exception.error";
-import { HttpStatus } from "../config/http.config";
-import { ErrorCode } from "../enums/error-code.enum";
+import { BadRequestException } from "../errors/bad-request-exception.error.js";
+import { HttpStatus } from "../config/http.config.js";
+import { ErrorCode } from "../enums/error-code.enum.js";
 
 const addToCartSchema = Joi.object({
-  newQuantity: Joi.number().optional(),
+  quantity: Joi.number().min(1).required(),
+  action: Joi.string().valid("increment", "decrement").optional(),
 });
 
 const updateCartSchema = Joi.object({

@@ -1,9 +1,9 @@
 /** @format */
 
 import type { Request, Response, NextFunction } from "express";
-import { handleAsyncControl } from "../middlewares/handleAsyncControl.middleware";
-import { AddressService } from "../services/address.service";
-import { HttpStatus } from "../config/http.config";
+import { handleAsyncControl } from "../middlewares/handleAsyncControl.middleware.js";
+import { AddressService } from "../services/address.service.js";
+import { HttpStatus } from "../config/http.config.js";
 
 export class AddressController {
   addressService: AddressService;
@@ -23,12 +23,15 @@ export class AddressController {
           postalCode: string;
           latitude: number;
           longitude: number;
+          label?: "home" | "work" | "other";
+          address?: string;
+          isDefault?: boolean;
         }
       >,
       res: Response,
       next: NextFunction,
     ): Promise<Response> => {
-      const userId = req.user?.id;
+      const userId = req.user?._id;
       try {
         const { userAddress } = await this.addressService.createUserAddress(
           userId,
@@ -38,6 +41,9 @@ export class AddressController {
           req.body.postalCode,
           req.body.latitude,
           req.body.longitude,
+          req.body.label,
+          req.body.address,
+          req.body.isDefault,
         );
 
         return res.status(HttpStatus.OK).json({
@@ -59,13 +65,16 @@ export class AddressController {
     ): Promise<Response> => {
       try {
         const { userAddress } = await this.addressService.editUserAddress(
-          req.body.addressId,
+          req.params.addressId,
           req.body.city,
           req.body.state,
           req.body.country,
           req.body.postalCode,
           req.body.latitude,
           req.body.longitude,
+          req.body.label,
+          req.body.address,
+          req.body.isDefault,
         );
 
         return res.status(HttpStatus.OK).json({

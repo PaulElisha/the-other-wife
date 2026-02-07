@@ -7,16 +7,13 @@ import { handleAsyncControl } from "../middlewares/handleAsyncControl.middleware
 import { NextFunction, Request, Response } from "express";
 import { HttpStatus } from "../config/http.config.js";
 
-import { Db } from "../config/db.config.js";
+import { nodeEnv } from "../constants/constants.js";
 
 export class AuthController {
   authService: AuthService;
-  db: Db;
 
   constructor() {
     this.authService = new AuthService();
-    this.db = new Db();
-    this.db.connect();
   }
 
   handleSignup = handleAsyncControl(
@@ -28,7 +25,7 @@ export class AuthController {
           firstName: string;
           lastName: string;
           email: string;
-          passwordHash: string;
+          password: string;
           userType: string;
           phoneNumber: string;
         }
@@ -39,7 +36,7 @@ export class AuthController {
         firstName,
         lastName,
         email,
-        passwordHash,
+        password,
         userType,
         phoneNumber,
       } = req.body;
@@ -49,7 +46,7 @@ export class AuthController {
           firstName,
           lastName,
           email,
-          passwordHash,
+          password,
           userType,
           phoneNumber,
         });
@@ -66,20 +63,29 @@ export class AuthController {
 
   handleLogin = handleAsyncControl(
     async (
-      req: Request<{}, {}, { phoneNumber: string; passwordHash: string }>,
+      req: Request<
+        {},
+        {},
+        { phoneNumber?: string; email?: string; password: string }
+      >,
       res: Response,
       next: NextFunction,
     ): Promise<any> => {
-      const { phoneNumber, passwordHash } = req.body;
+      const { phoneNumber, email, password } = req.body;
 
       try {
         const { token } = await this.authService.login({
           phoneNumber,
-          passwordHash,
+          email,
+          password,
         });
 
         return res
-          .cookie("token", token, { httpOnly: true, sameSite: "strict" })
+          .cookie("token", token, {
+            httpOnly: true,
+            sameSite: "strict",
+            secure: nodeEnv === "production",
+          })
           .status(HttpStatus.OK)
           .json({ status: "ok", message: "User login successful" });
       } catch (error) {

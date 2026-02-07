@@ -1,10 +1,10 @@
 /** @format */
 
 import mongoose from "mongoose";
-import Customer from "../models/customer.model";
-import { NotFoundException } from "../errors/not-found-exception.error";
-import { HttpStatus } from "../config/http.config";
-import { ErrorCode } from "../enums/error-code.enum";
+import Customer from "../models/customer.model.js";
+import { NotFoundException } from "../errors/not-found-exception.error.js";
+import { HttpStatus } from "../config/http.config.js";
+import { ErrorCode } from "../enums/error-code.enum.js";
 
 export class CustomerService {
   getCustomerProfile = async (customerId: string) => {

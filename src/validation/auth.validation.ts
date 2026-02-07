@@ -9,20 +9,21 @@ import { ErrorCode } from "../enums/error-code.enum.js";
 const registerUserSchema = Joi.object({
   firstName: Joi.string().trim().required(),
   lastName: Joi.string().trim().required(),
-  email: Joi.string().trim().email().max(255).required(),
-  passwordHash: Joi.string().trim().min(8).required(),
+  email: Joi.string().trim().email().max(255).optional(),
+  password: Joi.string().trim().min(8).required(),
   userType: Joi.string()
     .valid("customer", "vendor", "admin")
     .default("customer"),
-  phoneNumber: Joi.string().trim().required(),
+  phoneNumber: Joi.string().trim().optional(),
   profileImageUrl: Joi.string().trim().optional(),
   createdAt: Joi.date().default(null),
-});
+}).or("email", "phoneNumber");
 
 const loginUserSchema = Joi.object({
-  phoneNumber: Joi.string().trim().required(),
-  passwordHash: Joi.string().trim().min(8).required(),
-});
+  email: Joi.string().trim().email().max(255).optional(),
+  phoneNumber: Joi.string().trim().optional(),
+  password: Joi.string().trim().min(8).required(),
+}).or("email", "phoneNumber");
 
 export const validateSignupUser = (
   req: Request,

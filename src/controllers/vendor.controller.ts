@@ -2,7 +2,7 @@
 
 import { HttpStatus } from "../config/http.config.js";
 import { handleAsyncControl } from "../middlewares/handleAsyncControl.middleware.js";
-import { VendorService } from "../services/vendor.service";
+import { VendorService } from "../services/vendor.service.js";
 import { Request, Response } from "express";
 
 export class VendorController {

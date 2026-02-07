@@ -5,9 +5,9 @@ import mongoose from "mongoose";
 import { mongoUri } from "../constants/constants.js";
 
 class Db {
-  connect() {
+  async connect() {
     try {
-      mongoose.connect(mongoUri);
+      await mongoose.connect(mongoUri);
 
       mongoose.connection.on("connected", (): void => {
         console.log("MongoDB connected successfully");

@@ -9,6 +9,7 @@ type EnvConfig = {
   MONGODB_URI: string;
   NODE_ENV: string;
   JWT_SECRET: string;
+  CORS_ORIGIN?: string;
 };
 
 const getEnvConfig = (): EnvConfig => {
@@ -20,12 +21,18 @@ const getEnvConfig = (): EnvConfig => {
     return value;
   };
 
+  const getEnvOptional = (key: string): string | undefined => {
+    const value = process.env[key];
+    return value || undefined;
+  };
+
   return {
     PORT: getEnv("PORT"),
     HOST_NAME: getEnv("HOST_NAME"),
     MONGODB_URI: getEnv("MONGODB_URI"),
     NODE_ENV: getEnv("NODE_ENV"),
     JWT_SECRET: getEnv("JWT_SECRET"),
+    CORS_ORIGIN: getEnvOptional("CORS_ORIGIN"),
   };
 };
 
