@@ -183,3 +183,5 @@ const options = {
 };
 
 export const swaggerSpec = swaggerJSDoc(options);
+console.log("CWD:", process.cwd());
+console.log("Swagger Paths:", Object.keys(swaggerSpec.paths || {}));
