@@ -3,10 +3,13 @@
 import swaggerJSDoc from "swagger-jsdoc";
 import { hostName, port, nodeEnv } from "../constants/constants.js";
 
-const serverUrl =
+const protocol = hostName.includes("localhost") ? "http" : "https";
+const baseUrl =
   hostName.startsWith("http://") || hostName.startsWith("https://")
-    ? `${hostName}:${port}`
-    : `http://${hostName}:${port}`;
+    ? hostName
+    : `${protocol}://${hostName}`;
+
+const url = nodeEnv === "production" ? baseUrl : `${baseUrl}:${port}`;
 
 const swaggerDefinition = {
   openapi: "3.0.0",
@@ -17,7 +20,7 @@ const swaggerDefinition = {
   },
   servers: [
     {
-      url: nodeEnv === "production" ? hostName : serverUrl,
+      url,
       description: nodeEnv === "production" ? "Production" : "Local",
     },
   ],
@@ -169,7 +172,11 @@ const swaggerDefinition = {
 
 const options = {
   definition: swaggerDefinition,
-  apis: ["./src/routes/*.ts", "./src/controllers/*.ts", "./app.ts"],
+  apis: [
+    "./src/routes/*.{ts,js}",
+    "./src/controllers/*.{ts,js}",
+    "./app.{ts,js}",
+  ],
 };
 
 export const swaggerSpec = swaggerJSDoc(options);
