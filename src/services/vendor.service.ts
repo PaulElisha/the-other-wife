@@ -1,10 +1,11 @@
 /** @format */
 
-import { HttpStatus } from "../config/http.config";
-import { ErrorCode } from "../enums/error-code.enum";
-import { NotFoundException } from "../errors/not-found-exception.error";
-import Vendor from "../models/vendor.model";
-import User from "../models/user.model";
+import { HttpStatus } from "../config/http.config.js";
+import { ErrorCode } from "../enums/error-code.enum.js";
+import { NotFoundException } from "../errors/not-found-exception.error.js";
+import { UnauthorizedExceptionError } from "../errors/unauthorized-exception.error.js";
+import Vendor from "../models/vendor.model.js";
+import User from "../models/user.model.js";
 
 export class VendorService {
   constructor() {}
@@ -29,7 +30,7 @@ export class VendorService {
     const user = await User.findById(userId);
     const isAdmin = user?.userType === "admin";
     if (!isAdmin) {
-      throw new NotFoundException(
+      throw new UnauthorizedExceptionError(
         "User is not an admin",
         HttpStatus.FORBIDDEN,
         ErrorCode.ACCESS_UNAUTHORIZED,

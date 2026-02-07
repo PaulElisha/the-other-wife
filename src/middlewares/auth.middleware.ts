@@ -1,6 +1,6 @@
 /** @format */
 
-import { Request, Response, NextFunction, json } from "express";
+import { Request, Response, NextFunction } from "express";
 import { UnauthorizedExceptionError } from "../errors/unauthorized-exception.error.js";
 import { HttpStatus } from "../config/http.config.js";
 import { ErrorCode } from "../enums/error-code.enum.js";

@@ -3,31 +3,32 @@
 import Joi from "joi";
 
 import { Request, Response, NextFunction } from "express";
-import { BadRequestException } from "../errors/bad-request-exception.error";
-import { HttpStatus } from "../config/http.config";
-import { ErrorCode } from "../enums/error-code.enum";
+import { BadRequestException } from "../errors/bad-request-exception.error.js";
+import { HttpStatus } from "../config/http.config.js";
+import { ErrorCode } from "../enums/error-code.enum.js";
 
 const createAddressSchema = Joi.object({
-  addressLine1: Joi.string().required(),
-  addressLine2: Joi.string().required(),
+  address: Joi.string().required(),
+  label: Joi.string().valid("home", "work", "other").optional(),
   city: Joi.string().required(),
   state: Joi.string().required(),
   country: Joi.string().required(),
+  postalCode: Joi.string().required(),
   latitude: Joi.number().required(),
   longitude: Joi.number().required(),
-  deliveryInstructions: Joi.string().required(),
   isDefault: Joi.boolean().optional(),
 });
 
 const editAddressSchema = Joi.object({
-  addressLine1: Joi.string().required(),
-  addressLine2: Joi.string().required(),
-  city: Joi.string().required(),
-  state: Joi.string().required(),
-  country: Joi.string().required(),
-  latitude: Joi.number().required(),
-  longitude: Joi.number().required(),
-  deliveryInstructions: Joi.string().required(),
+  address: Joi.string().optional(),
+  label: Joi.string().valid("home", "work", "other").optional(),
+  city: Joi.string().optional(),
+  state: Joi.string().optional(),
+  country: Joi.string().optional(),
+  postalCode: Joi.string().optional(),
+  latitude: Joi.number().optional(),
+  longitude: Joi.number().optional(),
+  isDefault: Joi.boolean().optional(),
 });
 
 export const validateCreateAddress = (

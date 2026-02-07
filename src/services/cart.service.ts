@@ -31,14 +31,17 @@ export class CartService {
       );
 
       if (mealIndex !== -1 && mealIndex !== undefined) {
-        if (action === "increment") {
-          const existingMeal = existingCart?.meals[mealIndex];
-          existingMeal.quantity += quantity;
-          existingMeal.totalPrice += existingMeal.price * existingMeal.quantity;
-        } else {
-          const existingMeal = existingCart?.meals[mealIndex];
+        const existingMeal = existingCart.meals[mealIndex];
+        if (action === "decrement") {
           existingMeal.quantity -= quantity;
-          existingMeal.totalPrice -= existingMeal.price * existingMeal.quantity;
+          if (existingMeal.quantity <= 0) {
+            existingCart.meals.splice(mealIndex, 1);
+          } else {
+            existingMeal.totalPrice = existingMeal.price * existingMeal.quantity;
+          }
+        } else {
+          existingMeal.quantity += quantity;
+          existingMeal.totalPrice = existingMeal.price * existingMeal.quantity;
         }
       } else {
         const newMeal = {
@@ -50,7 +53,7 @@ export class CartService {
         existingCart.meals.push(newMeal);
       }
 
-      existingCart.totalAmount += existingCart.meals.reduce(
+      existingCart.totalAmount = existingCart.meals.reduce(
         (total, meal, index) =>
           total + existingCart.meals[index].quantity * meal.price,
         0,
@@ -90,9 +93,21 @@ export class CartService {
         (meal) => meal.mealId.toString() === mealId,
       );
 
-      const removedMeal = existingCart?.meals[mealIndex];
-      existingCart.totalAmount -= removedMeal.quantity * removedMeal.price;
+      if (mealIndex === -1 || mealIndex === undefined) {
+        throw new NotFoundException(
+          "Meal not found in cart",
+          HttpStatus.NOT_FOUND,
+          ErrorCode.RESOURCE_NOT_FOUND,
+        );
+      }
+
+      const removedMeal = existingCart.meals[mealIndex];
       existingCart.meals.splice(mealIndex, 1);
+      existingCart.totalAmount = existingCart.meals.reduce(
+        (total, meal, index) =>
+          total + existingCart.meals[index].quantity * meal.price,
+        0,
+      );
 
       await existingCart.save();
     }

@@ -10,9 +10,9 @@ export const roleGuardMiddleware = (roles: string[]) => {
     try {
       if (!roles.includes(req.user?.userType as string)) {
         throw new UnauthorizedExceptionError(
-          "Unauthorized. You do not have permission to access this resource.",
-          HttpStatus.UNAUTHORIZED,
-          ErrorCode.AUTH_UNAUTHORIZED_ACCESS,
+          "Forbidden. You do not have permission to access this resource.",
+          HttpStatus.FORBIDDEN,
+          ErrorCode.ACCESS_UNAUTHORIZED,
         );
       }
       next();

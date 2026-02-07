@@ -20,31 +20,52 @@ export class AuthService {
   signup = async (body: {
     firstName: string;
     lastName: string;
-    email: string;
-    passwordHash: string;
+    email?: string;
+    password: string;
     userType: string;
-    phoneNumber: string;
+    phoneNumber?: string;
   }): Promise<{
     userId: mongoose.Types.ObjectId;
   }> => {
-    const { firstName, lastName, passwordHash, userType, phoneNumber, email } =
+    const { firstName, lastName, password, userType, phoneNumber, email } =
       body;
 
     try {
-      const user = await User.findOne({ phoneNumber });
-      if (user) {
+      if (!email && !phoneNumber) {
         throw new BadRequestException(
-          "User already exists",
+          "Email or phone number is required",
           HttpStatus.BAD_REQUEST,
-          ErrorCode.AUTH_PHONE_NUMBER_ALREADY_EXISTS,
+          ErrorCode.VALIDATION_ERROR,
         );
+      }
+
+      if (phoneNumber) {
+        const userByPhone = await User.findOne({ phoneNumber });
+        if (userByPhone) {
+          throw new BadRequestException(
+            "Phone number already exists",
+            HttpStatus.BAD_REQUEST,
+            ErrorCode.AUTH_PHONE_NUMBER_ALREADY_EXISTS,
+          );
+        }
+      }
+
+      if (email) {
+        const userByEmail = await User.findOne({ email });
+        if (userByEmail) {
+          throw new BadRequestException(
+            "Email already exists",
+            HttpStatus.BAD_REQUEST,
+            ErrorCode.AUTH_EMAIL_ALREADY_EXISTS,
+          );
+        }
       }
 
       const newUser = await User.create({
         firstName,
         lastName,
         email,
-        passwordHash,
+        passwordHash: password,
         userType,
         phoneNumber,
       });
@@ -68,13 +89,24 @@ export class AuthService {
   };
 
   login = async (body: {
-    phoneNumber: string;
-    passwordHash: string;
+    phoneNumber?: string;
+    email?: string;
+    password: string;
   }): Promise<any> => {
-    const { phoneNumber, passwordHash } = body;
+    const { phoneNumber, email, password } = body;
 
     try {
-      const user = await User.findOne({ phoneNumber });
+      if (!email && !phoneNumber) {
+        throw new BadRequestException(
+          "Email or phone number is required",
+          HttpStatus.BAD_REQUEST,
+          ErrorCode.VALIDATION_ERROR,
+        );
+      }
+
+      const user = await User.findOne(
+        email ? { email } : { phoneNumber },
+      );
       if (!user) {
         throw new NotFoundException(
           "User not found",
@@ -83,7 +115,7 @@ export class AuthService {
         );
       }
 
-      const isValid = await user.comparePassword(passwordHash);
+      const isValid = await user.comparePassword(password);
       if (!isValid) {
         throw new UnauthorizedExceptionError(
           "Invalid phone number or password",
