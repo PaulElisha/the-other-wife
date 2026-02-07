@@ -176,6 +176,9 @@ const options = {
     "./src/routes/*.{ts,js}",
     "./src/controllers/*.{ts,js}",
     "./app.{ts,js}",
+    "./dist/src/routes/*.{ts,js}",
+    "./dist/src/controllers/*.{ts,js}",
+    "./dist/app.{ts,js}",
   ],
 };
 
