@@ -27,7 +27,7 @@ const getEnvConfig = (): EnvConfig => {
   };
 
   return {
-    PORT: getEnv("PORT"),
+    PORT: getEnvOptional("PORT") || "8000",
     HOST_NAME: getEnv("HOST_NAME"),
     MONGODB_URI: getEnv("MONGODB_URI"),
     NODE_ENV: getEnv("NODE_ENV"),
