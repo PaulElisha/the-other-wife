@@ -31,7 +31,7 @@ export class AuthService {
       body;
 
     try {
-      const user = await User.findOne({ phoneNumber });
+      const user = await User.findOne({ $or: [{ phoneNumber }, { email }] });
       if (user) {
         throw new BadRequestException(
           "User already exists",

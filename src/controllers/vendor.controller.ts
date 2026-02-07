@@ -1,7 +1,7 @@
 /** @format */
 
-import { HttpStatus } from "../config/http.config";
-import { handleAsyncControl } from "../middlewares/handleAsyncControl.middleware";
+import { HttpStatus } from "../config/http.config.js";
+import { handleAsyncControl } from "../middlewares/handleAsyncControl.middleware.js";
 import { VendorService } from "../services/vendor.service";
 import { Request, Response } from "express";
 
