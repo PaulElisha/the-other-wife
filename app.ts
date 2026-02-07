@@ -37,7 +37,7 @@ export class App {
     this.app.use(express.urlencoded({ extended: true }));
     this.app.use(
       cors({
-        origin: corsOrigin ?? true,
+        origin: "*",
         credentials: true,
       }),
     );
