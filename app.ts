@@ -49,6 +49,9 @@ export class App {
         max: 100,
         standardHeaders: true,
         legacyHeaders: false,
+        validate: {
+          xForwardedForHeader: false,
+        },
       }),
     );
   }

@@ -23,6 +23,10 @@ const swaggerDefinition = {
       url,
       description: nodeEnv === "production" ? "Production" : "Local",
     },
+    {
+      url: "https://the-other-wife.vercel.app",
+      description: "Vercel Production",
+    },
   ],
   components: {
     securitySchemes: {
@@ -184,4 +188,4 @@ const options = {
 
 export const swaggerSpec = swaggerJSDoc(options);
 console.log("CWD:", process.cwd());
-console.log("Swagger Paths:", Object.keys(swaggerSpec.paths || {}));
+console.log("Swagger Paths:", Object.keys((swaggerSpec as any).paths || {}));
