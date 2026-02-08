@@ -79,23 +79,7 @@ export class App {
     this.app.get("/api-docs.json", (req, res) => {
       res.json(swaggerSpec);
     });
-
-    this.app.get("/debug-files", (req, res) => {
-      const fs = require("fs");
-      const path = require("path");
-      const currentDir = fs.readdirSync(".");
-      const distDir = fs.existsSync("./dist")
-        ? fs.readdirSync("./dist")
-        : "dist not found";
-      const srcDir = fs.existsSync("./src")
-        ? fs.readdirSync("./src")
-        : "src not found";
-      const apiDir = fs.existsSync("./api")
-        ? fs.readdirSync("./api")
-        : "api not found";
-      res.json({ cwd: process.cwd(), currentDir, distDir, srcDir, apiDir });
-    });
-
+  
     this.app.use(errorHandler);
   }
 
