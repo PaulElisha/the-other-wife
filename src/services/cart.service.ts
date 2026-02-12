@@ -37,7 +37,8 @@ export class CartService {
           if (existingMeal.quantity <= 0) {
             existingCart.meals.splice(mealIndex, 1);
           } else {
-            existingMeal.totalPrice = existingMeal.price * existingMeal.quantity;
+            existingMeal.totalPrice =
+              existingMeal.price * existingMeal.quantity;
           }
         } else {
           existingMeal.quantity += quantity;
@@ -113,8 +114,13 @@ export class CartService {
     }
   };
 
-  getUserCart = async (customerId: string | undefined) => {
-    const existingCart = await Cart.findOne({ customerId });
-    return existingCart;
-  };
+  getUserCart = async (customerId: string | undefined) =>
+    (await Cart.findOne({ customerId })) ??
+    (() => {
+      throw new NotFoundException(
+        "Cart not found",
+        HttpStatus.NOT_FOUND,
+        ErrorCode.RESOURCE_NOT_FOUND,
+      );
+    })();
 }

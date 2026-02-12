@@ -35,6 +35,14 @@ export class AddressService {
       isDefault,
     });
 
+    if (!userAddress) {
+      throw new NotFoundException(
+        "Address not found",
+        HttpStatus.NOT_FOUND,
+        ErrorCode.RESOURCE_NOT_FOUND,
+      );
+    }
+
     if (userId) {
       await Customer.findOneAndUpdate(
         { userId },
@@ -101,7 +109,13 @@ export class AddressService {
     return { userAddress };
   };
 
-  deleteUserAddress = async (addressId: string) => {
-    await Address.findByIdAndDelete(addressId);
-  };
+  deleteUserAddress = async (addressId: string) =>
+    (await Address.findByIdAndDelete(addressId)) ??
+    (() => {
+      throw new NotFoundException(
+        "Address not found",
+        HttpStatus.NOT_FOUND,
+        ErrorCode.RESOURCE_NOT_FOUND,
+      );
+    })();
 }

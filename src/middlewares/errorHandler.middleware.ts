@@ -2,6 +2,7 @@
 
 import { NextFunction, Request, Response } from "express";
 import { AppError } from "../errors/app.error.js";
+import { HttpStatus } from "../config/http.config.js";
 
 export const errorHandler = (
   err: Error,
@@ -9,22 +10,6 @@ export const errorHandler = (
   res: Response,
   next: NextFunction
 ) => {
-  if (err instanceof SyntaxError) {
-    return res.status(400).json({
-      message: "Syntax Error",
-      error: err.message || "Unknown error occurred",
-      status: "error",
-    });
-  }
-
-  if (err instanceof TypeError) {
-    return res.status(400).json({
-      message: "Type Error",
-      error: err.message || "Unknown error occurred",
-      status: "error",
-    });
-  }
-
   if (err instanceof AppError) {
     return res.status(err.statusCode).json({
       message: err.message,
@@ -34,14 +19,14 @@ export const errorHandler = (
   }
 
   if (err instanceof Error) {
-    return res.status(500).json({
+    return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
       message: "Internal Server error",
       error: err.message || "Unknown error occurred",
       status: "error",
     });
   }
 
-  return res.status(500).json({
+  return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
     message: "Unknown error",
     error: "Unknown error occurred",
     status: "error",

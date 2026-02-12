@@ -132,13 +132,13 @@ export class AuthService {
     }
   };
 
-  logout = (): any => {
-    return {
-      httpOnly: true,
-      secure: nodeEnv === "production",
-      sameSite: "strict",
-    };
-  };
+  logout = (): any => ({
+    httpOnly: true,
+    secure: nodeEnv === "production",
+    sameSite: "strict",
+    path: "/",
+    expires: new Date(0),
+  });
 
   // passwordResetRequest = async (phoneNumber: string) => {
   //   const user = await User.findOne({ phoneNumber });

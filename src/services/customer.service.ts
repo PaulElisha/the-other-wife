@@ -23,9 +23,15 @@ export class CustomerService {
     return { customer };
   };
 
-  deleteCustomerProfile = async (customerId: string) => {
-    await Customer.findByIdAndDelete(customerId);
-  };
+  deleteCustomerProfile = async (customerId: string) =>
+    (await Customer.findByIdAndDelete(customerId)) ??
+    (() => {
+      throw new NotFoundException(
+        "Customer not found",
+        HttpStatus.NOT_FOUND,
+        ErrorCode.RESOURCE_NOT_FOUND,
+      );
+    })();
 
   updateCustomerProfile = async (
     customerId: string,

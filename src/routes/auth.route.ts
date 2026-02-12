@@ -6,6 +6,7 @@ import {
   validateLoginUser,
   validateSignupUser,
 } from "../validation/auth.validation.js";
+import { authMiddleware } from "../middlewares/auth.middleware.js";
 
 /**
  * @openapi
@@ -86,7 +87,7 @@ class AuthRouter {
       validateLoginUser,
       this.authController.handleLogin
     );
-    this.router.post("/logout", this.authController.handleLogout);
+    this.router.post("/logout", authMiddleware, this.authController.handleLogout);
   }
 }
 

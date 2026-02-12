@@ -13,27 +13,15 @@ type EnvConfig = {
 };
 
 const getEnvConfig = (): EnvConfig => {
-  const getEnv = (key: string): string => {
-    const value = process.env[key];
-    if (!value) {
-      throw new Error(`Missing required environment variable: ${key}`);
-    }
-    return value;
-  };
-
-  const getEnvOptional = (key: string): string | undefined => {
-    const value = process.env[key];
-    return value || undefined;
-  };
+  const getEnv = (key: string): string => process.env[key] ?? "";
 
   return {
-    PORT: getEnvOptional("PORT") || "8000",
-    HOST_NAME:
-      getEnvOptional("HOST_NAME") || "https://the-other-wife.vercel.app/",
-    MONGODB_URI: getEnv("MONGODB_URI"),
-    NODE_ENV: getEnv("NODE_ENV"),
-    JWT_SECRET: getEnv("JWT_SECRET"),
-    CORS_ORIGIN: getEnvOptional("CORS_ORIGIN"),
+    PORT: getEnv("PORT") || "8000",
+    HOST_NAME: getEnv("HOST_NAME") || "https://the-other-wife.vercel.app/",
+    MONGODB_URI: getEnv("MONGODB_URI") || "localhost:27017",
+    NODE_ENV: getEnv("NODE_ENV") || "development",
+    JWT_SECRET: getEnv("JWT_SECRET") || "secret",
+    CORS_ORIGIN: getEnv("CORS_ORIGIN") || "",
   };
 };
 

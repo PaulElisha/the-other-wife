@@ -5,7 +5,7 @@ import { jwtSecret } from "../constants/constants.js";
 
 export const generateToken = (user: any) => {
   const token = jwt.sign({ id: user._id }, jwtSecret, {
-    expiresIn: "1d",
+    expiresIn: "30m",
   });
   return { token };
 };

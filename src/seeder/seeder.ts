@@ -86,11 +86,5 @@ export class Seeder {
 
 new Seeder()
   .run()
-  .then(() => {
-    console.log("Seeding complete");
-    process.exit(0);
-  })
-  .catch((err) => {
-    console.error("Seeding failed", err);
-    process.exit(1);
-  });
+  .then(() => console.log("Seeding complete"))
+  .catch((err) => console.log("Seeding failed", err));
