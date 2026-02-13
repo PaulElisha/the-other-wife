@@ -4,7 +4,6 @@ import express, { Express } from "express";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import rateLimit from "express-rate-limit";
-import swaggerUi from "swagger-ui-express";
 import redoc from "redoc-express";
 
 import { errorHandler } from "./src/middlewares/errorHandler.middleware.js";
@@ -72,7 +71,38 @@ export class App {
     this.app.use("/api/v1/vendors", vendorRouter);
     this.app.use("/api/v1/carts", cartRouter);
 
-    this.app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+    // Serve Swagger UI with CDN assets (works better in serverless)
+    this.app.get("/api-docs", (req, res) => {
+      res.send(`
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>The Other Wife API Docs</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5/swagger-ui.css" />
+</head>
+<body>
+  <div id="swagger-ui"></div>
+  <script src="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5/swagger-ui-bundle.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5/swagger-ui-standalone-preset.js"></script>
+  <script>
+    window.onload = () => {
+      window.ui = SwaggerUIBundle({
+        url: '/api-docs.json',
+        dom_id: '#swagger-ui',
+        presets: [
+          SwaggerUIBundle.presets.apis,
+          SwaggerUIStandalonePreset
+        ],
+        layout: "StandaloneLayout"
+      });
+    };
+  </script>
+</body>
+</html>
+      `);
+    });
+
     this.app.get(
       "/redoc",
       redoc({

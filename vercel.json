@@ -1,18 +1,6 @@
 {
     "rewrites": [
         {
-            "source": "/api-docs/:path*",
-            "destination": "/api"
-        },
-        {
-            "source": "/redoc",
-            "destination": "/api"
-        },
-        {
-            "source": "/api-docs.json",
-            "destination": "/api"
-        },
-        {
             "source": "/(.*)",
             "destination": "/api"
         }
