@@ -57,6 +57,16 @@ export class App {
         },
       }),
     );
+
+    // Ensure DB connection before handling requests (crucial for serverless)
+    this.app.use(async (req, res, next) => {
+      try {
+        await this.db.connect();
+        next();
+      } catch (error) {
+        next(error);
+      }
+    });
   }
 
   async initializeDb() {
