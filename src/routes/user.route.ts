@@ -66,18 +66,10 @@ import { authMiddleware } from "../middlewares/auth.middleware.js";
 
 /**
  * @swagger
- * /api/v1/user/{userId}:
+ * /api/v1/user/
  *   get:
  *     summary: Get current user
  *     tags: [User]
- *     parameters:
- *       - in: path
- *         name: userId
- *         required: true
- *         schema:
- *           type: string
- *           required: true
- *           description: The user ID
  *     responses:
  *       "200":
  *         description: User fetched successfully
@@ -158,7 +150,7 @@ import { authMiddleware } from "../middlewares/auth.middleware.js";
 
 /**
  * @swagger
- * /api/v1/user/{userId}: 
+ * /api/v1/user/{userId}:
  *   delete:
  *     summary: Delete user
  *     tags: [User]
@@ -221,7 +213,7 @@ class UserRouter {
     );
 
     this.router.get(
-      "/:userId",
+      "/",
       authMiddleware,
       roleGuardMiddleware(["customer", "vendor"]),
       this.userController.getCurrentUser,
