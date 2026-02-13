@@ -46,7 +46,7 @@ export class AuthService {
       }
 
       if (phoneNumber) {
-        const userByPhone = await User.find({}, "phoneNumber");
+        const userByPhone = await User.findOne({ phoneNumber });
         if (userByPhone) {
           throw new BadRequestException(
             "Phone number already exists",
@@ -57,7 +57,7 @@ export class AuthService {
       }
 
       if (email) {
-        const userByEmail = await User.find({}, "email");
+        const userByEmail = await User.findOne({ email });
         if (userByEmail) {
           throw new BadRequestException(
             "Email already exists",
