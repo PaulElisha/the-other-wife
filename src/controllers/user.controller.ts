@@ -59,18 +59,4 @@ export class UserController {
       }
     },
   );
-
-  deleteUser = handleAsyncControl(
-    async (req: Request, res: Response): Promise<Response> => {
-      try {
-        await this.userService.deleteUser(req.user?._id);
-        return res.status(HttpStatus.NO_CONTENT).json({
-          status: "ok",
-          message: "User deleted successfully",
-        });
-      } catch (error) {
-        throw error;
-      }
-    },
-  );
 }

@@ -16,7 +16,7 @@ export const authMiddleware = async (
 ) => {
   let accessToken = req.cookies?.token;
 
-  accessToken ||
+  accessToken ??
     (() => {
       throw new UnauthorizedExceptionError(
         "Unauthorized. Please log in.",

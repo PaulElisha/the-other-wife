@@ -2,6 +2,7 @@
 
 import mongoose from "mongoose";
 import Customer from "../models/customer.model.js";
+import User from "../models/user.model.js";
 import { NotFoundException } from "../errors/not-found-exception.error.js";
 import { HttpStatus } from "../config/http.config.js";
 import { ErrorCode } from "../enums/error-code.enum.js";
@@ -46,13 +47,30 @@ export class CustomerService {
     return { customer };
   };
 
-  deleteCustomerProfile = async (customerId: string) =>
-    (await Customer.findByIdAndDelete(customerId)) ??
-    (() => {
+  deleteCustomerProfile = async (customerId: string) => {
+    const customer = await Customer.findOne({ customerId });
+
+    if (!customer) {
       throw new NotFoundException(
         "Customer not found",
         HttpStatus.NOT_FOUND,
         ErrorCode.RESOURCE_NOT_FOUND,
       );
-    })();
+    }
+
+    const user = await User.findById(customer.userId);
+
+    if (!user) {
+      throw new NotFoundException(
+        "User not found",
+        HttpStatus.NOT_FOUND,
+        ErrorCode.RESOURCE_NOT_FOUND,
+      );
+    }
+
+    await user.deleteOne();
+    await customer.deleteOne();
+
+    return { customer };
+  };
 }

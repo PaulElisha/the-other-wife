@@ -88,7 +88,7 @@ export class AuthService {
           });
           break;
         default:
-          throw new Error("User type cannot be created for admin");
+          throw new Error("Account for user type cannot be created.");
       }
 
       return { userId: newUser._id };

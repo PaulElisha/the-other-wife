@@ -73,14 +73,4 @@ export class UserService {
 
     return { user };
   };
-
-  deleteUser = async (userId: mongoose.Types.ObjectId | undefined) =>
-    (await User.findByIdAndDelete(userId)) ??
-    (() => {
-      throw new NotFoundException(
-        "User not found",
-        HttpStatus.NOT_FOUND,
-        ErrorCode.AUTH_USER_NOT_FOUND,
-      );
-    })();
 }

@@ -148,51 +148,6 @@ import { authMiddleware } from "../middlewares/auth.middleware.js";
  *                  $ref: "#/components/responses/500"
  */
 
-/**
- * @swagger
- * /api/v1/user/{userId}:
- *   delete:
- *     summary: Delete user
- *     tags: [User]
- *     parameters:
- *       - in: path
- *         name: userId
- *         required: true
- *         schema:
- *           type: string
- *           required: true
- *           description: The user ID
- *     responses:
- *       "204":
- *         description: User deleted successfully
- *         content:
- *           application/json
- *       "401":
- *         description: Unauthorized
- *         content:
- *           application/json:
- *             schema:
- *               $ref: "#/components/responses/401"
- *       "403":
- *         description: Forbidden
- *         content:
- *           application/json:
- *             schema:
- *               $ref: "#/components/responses/403"
- *       "404":
- *         description: Not found
- *         content:
- *           application/json:
- *             schema:
- *               $ref: "#/components/responses/404"
- *       "500":
- *         description: Internal server error
- *         content:
- *           application/json:
- *             schema:
- *               $ref: "#/components/responses/500"
- */
-
 class UserRouter {
   userController: UserController;
   router: Router;
@@ -224,14 +179,7 @@ class UserRouter {
       authMiddleware,
       roleGuardMiddleware(["admin"]),
       this.userController.getAllUsers,
-    );
-
-    this.router.delete(
-      "/:userId",
-      authMiddleware,
-      roleGuardMiddleware(["admin"]),
-      this.userController.deleteUser,
-    );
+    )
   }
 }
 

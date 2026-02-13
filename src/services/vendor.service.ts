@@ -99,13 +99,29 @@ export class VendorService {
   };
 
   deleteVendorProfile = async (vendorId: string) => {
-    (await Vendor.findByIdAndDelete(vendorId)) ??
-      (() => {
-        throw new NotFoundException(
-          "Vendor not found",
-          HttpStatus.NOT_FOUND,
-          ErrorCode.RESOURCE_NOT_FOUND,
-        );
-      })();
+    const vendor = await Vendor.findOne({ vendorId });
+
+    if (!vendor) {
+      throw new NotFoundException(
+        "Vendor not found",
+        HttpStatus.NOT_FOUND,
+        ErrorCode.RESOURCE_NOT_FOUND,
+      );
+    }
+
+    const user = await User.findById(vendor.userId);
+
+    if (!user) {
+      throw new NotFoundException(
+        "User not found",
+        HttpStatus.NOT_FOUND,
+        ErrorCode.RESOURCE_NOT_FOUND,
+      );
+    }
+
+    await user.deleteOne();
+    await vendor.deleteOne();
+
+    return { vendor };
   };
 }
