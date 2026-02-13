@@ -7,7 +7,6 @@ import {
   validateSignupUser,
 } from "../validation/auth.validation.js";
 import { authMiddleware } from "../middlewares/auth.middleware.js";
-import { roleGuardMiddleware } from "../middlewares/role-guard.middleware.js";
 
 /**
  * @openapi
@@ -164,7 +163,6 @@ class AuthRouter {
   initializeRoutes() {
     this.router.post(
       "/signup",
-      roleGuardMiddleware(["customer", "vendor"]),
       validateSignupUser,
       this.authController.handleSignup,
     );
