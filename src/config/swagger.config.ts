@@ -1,15 +1,7 @@
 /** @format */
 
 import swaggerJSDoc from "swagger-jsdoc";
-import { hostName, port, nodeEnv } from "../constants/constants.js";
-
-const protocol = hostName.includes("localhost") ? "http" : "https";
-const baseUrl =
-  hostName.startsWith("http://") || hostName.startsWith("https://")
-    ? hostName
-    : `${protocol}://${hostName}`;
-
-const url = nodeEnv === "production" ? baseUrl : `${baseUrl}:${port}`;
+import { hostName } from "../constants/constants.js";
 
 const swaggerDefinition = {
   openapi: "3.0.0",
@@ -19,13 +11,6 @@ const swaggerDefinition = {
     description: "The Other Wife backend API documentation",
   },
   servers: [
-    {
-      url: url,
-      description:
-        nodeEnv === "production"
-          ? "Production Server"
-          : "Local Development Server",
-    },
     {
       url: "https://the-other-wife.vercel.app",
       description: "Vercel Production",
