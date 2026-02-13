@@ -67,7 +67,7 @@ import {
 
 /**
  * @swagger
- * /api/v1/addresses/{addressId}:
+ * /api/v1/addresses/edit/{addressId}:
  *   put:
  *     summary: Edit address
  *     tags: [Address]
@@ -129,7 +129,7 @@ import {
 
 /**
  * @swagger
- * /api/v1/addresses/{addressId}:
+ * /api/v1/addresses/toggle/{addressId}:
  *   put:
  *     summary: Toggle default address
  *     tags: [Address]
@@ -175,7 +175,7 @@ import {
  */
 
 /**
- * @openapi
+ * @swagger
  * /api/v1/addresses/{addressId}:
  *   delete:
  *     summary: Delete address
@@ -219,7 +219,7 @@ import {
  */
 
 /**
- * @openapi
+ * @swagger
  * /api/v1/addresses/{userId}:
  *   get:
  *     summary: Get user addresses
@@ -285,7 +285,7 @@ class AddressRouter {
     );
 
     this.router.put(
-      "/:addressId",
+      "/edit/:addressId",
       authMiddleware,
       roleGuardMiddleware(["customer", "vendor"]),
       validateEditAddress,
@@ -293,7 +293,7 @@ class AddressRouter {
     );
 
     this.router.put(
-      "/:addressId",
+      "/toggle/:addressId",
       authMiddleware,
       roleGuardMiddleware(["customer", "vendor"]),
       this.addressController.toggleDefaultAddress,

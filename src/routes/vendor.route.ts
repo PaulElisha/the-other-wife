@@ -54,7 +54,7 @@ import { roleGuardMiddleware } from "../middlewares/role-guard.middleware.js";
 
 /**
  * @swagger
- * /api/v1/vendors/{vendorId}:
+ * /api/v1/vendors/approve/{vendorId}:
  *   put:
  *     summary: Approve vendor
  *     tags: [Vendor]
@@ -100,7 +100,7 @@ import { roleGuardMiddleware } from "../middlewares/role-guard.middleware.js";
 
 /**
  * @swagger
- * /api/v1/vendors/{vendorId}:
+ * /api/v1/vendors/reject/{vendorId}:
  *   put:
  *     summary: Reject vendor
  *     tags: [Vendor]
@@ -153,7 +153,7 @@ import { roleGuardMiddleware } from "../middlewares/role-guard.middleware.js";
 
 /**
  * @swagger
- * /api/v1/vendors/{vendorId}:
+ * /api/v1/vendors/suspend/{vendorId}:
  *   put:
  *     summary: Suspend vendor
  *     tags: [Vendor]
@@ -259,19 +259,19 @@ class VendorRouter {
       this.vendorController.getVendorProfile,
     );
     this.router.put(
-      "/:vendorId",
+      "/approve/:vendorId",
       authMiddleware,
       roleGuardMiddleware(["admin"]),
       this.vendorController.approveVendor,
     );
     this.router.put(
-      "/:vendorId",
+      "/reject/:vendorId",
       authMiddleware,
       roleGuardMiddleware(["admin"]),
       this.vendorController.rejectVendor,
     );
     this.router.put(
-      "/:vendorId",
+      "/suspend/:vendorId",
       authMiddleware,
       roleGuardMiddleware(["admin"]),
       this.vendorController.suspendVendor,
