@@ -20,8 +20,11 @@ const swaggerDefinition = {
   },
   servers: [
     {
-      url: "http://localhost:8000",
-      description: "Local Production",
+      url: url,
+      description:
+        nodeEnv === "production"
+          ? "Production Server"
+          : "Local Development Server",
     },
     {
       url: "https://the-other-wife.vercel.app",

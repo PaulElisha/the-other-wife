@@ -18,7 +18,7 @@ const getEnvConfig = (): EnvConfig => {
   return {
     PORT: getEnv("PORT") || "8000",
     HOST_NAME: getEnv("HOST_NAME") || "https://the-other-wife.vercel.app/",
-    MONGODB_URI: getEnv("MONGODB_URI") || "localhost:27017",
+    MONGODB_URI: getEnv("MONGODB_URI") || "mongodb://localhost:27017",
     NODE_ENV: getEnv("NODE_ENV") || "development",
     JWT_SECRET: getEnv("JWT_SECRET") || "secret",
     CORS_ORIGIN: getEnv("CORS_ORIGIN") || "",

@@ -39,7 +39,7 @@ export class Seeder {
   run = async (): Promise<void> => {
     let session: ClientSession | undefined;
     try {
-      this.db?.connect();
+      await this.db?.connect();
       session = await this.startSession();
       session.startTransaction();
 

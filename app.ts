@@ -8,7 +8,12 @@ import redoc from "redoc-express";
 
 import { errorHandler } from "./src/middlewares/errorHandler.middleware.js";
 
-import { hostName, port, corsOrigin } from "./src/constants/constants.js";
+import {
+  hostName,
+  port,
+  corsOrigin,
+  mongoUri,
+} from "./src/constants/constants.js";
 import { Db } from "./src/config/db.config.js";
 import { swaggerSpec } from "./src/config/swagger.config.js";
 
@@ -29,7 +34,6 @@ export class App {
     this.db = new Db();
     this.initiializeMiddlewares();
     this.initializeRoutes();
-    this.initializeDb();
   }
 
   initiializeMiddlewares() {
@@ -37,7 +41,7 @@ export class App {
     this.app.use(express.urlencoded({ extended: true }));
     this.app.use(
       cors({
-        origin: "*",
+        origin: corsOrigin || true,
         credentials: true,
       }),
     );
@@ -55,8 +59,8 @@ export class App {
     );
   }
 
-  initializeDb() {
-    void this.db.connect();
+  async initializeDb() {
+    await this.db.connect();
   }
 
   initializeRoutes() {
@@ -116,7 +120,8 @@ export class App {
     this.app.use(errorHandler);
   }
 
-  startServer() {
+  async startServer() {
+    await this.initializeDb();
     this.app.listen(port, () => {
       console.log(`Server is running on ${hostName}:${port}`);
     });
