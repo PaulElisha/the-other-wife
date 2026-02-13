@@ -32,7 +32,7 @@ export class App {
     this.initializeRoutes();
     this.initializeDb();
   }
- 
+
   initiializeMiddlewares() {
     this.app.use(express.json());
     this.app.use(express.urlencoded({ extended: true }));
@@ -61,6 +61,10 @@ export class App {
   }
 
   initializeRoutes() {
+    this.app.get("/", (req, res) => {
+      res.status(200).send("Welcome to The Other Wife API");
+    });
+
     this.app.use("/api/v1/auth", authRouter);
     this.app.use("/api/v1/user", userRouter);
     this.app.use("/api/v1/address", addressRouter);
@@ -79,7 +83,7 @@ export class App {
     this.app.get("/api-docs.json", (req, res) => {
       res.json(swaggerSpec);
     });
-  
+
     this.app.use(errorHandler);
   }
 

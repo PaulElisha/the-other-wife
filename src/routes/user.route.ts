@@ -66,7 +66,7 @@ import { authMiddleware } from "../middlewares/auth.middleware.js";
 
 /**
  * @swagger
- * /api/v1/user/
+ * /api/v1/user/me
  *   get:
  *     summary: Get current user
  *     tags: [User]
@@ -213,7 +213,7 @@ class UserRouter {
     );
 
     this.router.get(
-      "/",
+      "/me",
       authMiddleware,
       roleGuardMiddleware(["customer", "vendor"]),
       this.userController.getCurrentUser,
