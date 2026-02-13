@@ -30,8 +30,34 @@ import { roleGuardMiddleware } from "../middlewares/role-guard.middleware.js";
  *               userType: { type: string, enum: [customer, vendor, admin] }
  *               phoneNumber: { type: string }
  *     responses:
- *       200:
+ *       "200":
  *         description: User registered successfully
+ *         content:
+ *           application/json:
+ *       "401":
+ *         description: Unauthorized
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/responses/401"
+ *       "403":
+ *         description: Forbidden
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/responses/403"
+ *       "404":
+ *         description: Not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/responses/404"
+ *       "500":
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/responses/500"
  */
 
 /**
@@ -52,8 +78,34 @@ import { roleGuardMiddleware } from "../middlewares/role-guard.middleware.js";
  *               email: { type: string, format: email }
  *               password: { type: string, format: password }
  *     responses:
- *       200:
+ *       "200":
  *         description: User login successful
+ *         content:
+ *           application/json:
+ *       "401":
+ *         description: Unauthorized
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/responses/401"
+ *       "403":
+ *         description: Forbidden
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/responses/403"
+ *       "404":
+ *         description: Not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/responses/404"
+ *       "500":
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/responses/500"
  */
 
 /**
@@ -63,8 +115,34 @@ import { roleGuardMiddleware } from "../middlewares/role-guard.middleware.js";
  *     summary: Logout user
  *     tags: [Auth]
  *     responses:
- *       200:
+ *       "200":
  *         description: User logged out successfully
+ *         content:
+ *           application/json:
+ *       "401":
+ *         description: Unauthorized
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/responses/401"
+ *       "403":
+ *         description: Forbidden
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/responses/403"
+ *       "404":
+ *         description: Not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/responses/404"
+ *       "500":
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/responses/500"
  */
 
 class AuthRouter {

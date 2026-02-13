@@ -7,7 +7,7 @@ import { roleGuardMiddleware } from "../middlewares/role-guard.middleware.js";
 
 /**
  * @swagger
- * /api/v1/vendor/{vendorId}:
+ * /api/v1/vendors/{vendorId}:
  *   get:
  *     summary: Get vendor profile
  *     tags: [Vendor]
@@ -55,7 +55,7 @@ import { roleGuardMiddleware } from "../middlewares/role-guard.middleware.js";
 
 /**
  * @swagger
- * /api/v1/vendor/{vendorId}:
+ * /api/v1/vendors/{vendorId}:
  *   put:
  *     summary: Approve vendor
  *     tags: [Vendor]
@@ -101,7 +101,7 @@ import { roleGuardMiddleware } from "../middlewares/role-guard.middleware.js";
 
 /**
  * @swagger
- * /api/v1/vendor/{vendorId}:
+ * /api/v1/vendors/{vendorId}:
  *   put:
  *     summary: Reject vendor
  *     tags: [Vendor]
@@ -109,7 +109,7 @@ import { roleGuardMiddleware } from "../middlewares/role-guard.middleware.js";
  *       - in: path
  *         name: vendorId
  *         required: true
- *         schema: 
+ *         schema:
  *           type: string
  *           required: true
  *           description: The vendor ID
@@ -154,7 +154,7 @@ import { roleGuardMiddleware } from "../middlewares/role-guard.middleware.js";
 
 /**
  * @swagger
- * /api/v1/vendor/{vendorId}:
+ * /api/v1/vendors/{vendorId}:
  *   put:
  *     summary: Suspend vendor
  *     tags: [Vendor]
@@ -162,11 +162,11 @@ import { roleGuardMiddleware } from "../middlewares/role-guard.middleware.js";
  *       - in: path
  *         name: vendorId
  *         required: true
- *         schema: 
+ *         schema:
  *           type: string
  *           required: true
  *           description: The vendor ID
-     responses:
+ *     responses:
  *       "204":
  *         description: Vendor suspended successfully
  *         content:
@@ -199,7 +199,7 @@ import { roleGuardMiddleware } from "../middlewares/role-guard.middleware.js";
 
 /**
  * @swagger
- * /api/v1/vendor/{vendorId}:
+ * /api/v1/vendors/{vendorId}:
  *   delete:
  *     summary: Delete vendor profile
  *     tags: [Vendor]
@@ -207,7 +207,7 @@ import { roleGuardMiddleware } from "../middlewares/role-guard.middleware.js";
  *       - in: path
  *         name: vendorId
  *         required: true
- *         schema: 
+ *         schema:
  *           type: string
  *           required: true
  *           description: The vendor ID

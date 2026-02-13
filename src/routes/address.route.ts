@@ -11,7 +11,7 @@ import {
 
 /**
  * @swagger
- * /api/v1/address/
+ * /api/v1/addresses/
  *   post:
  *     summary: Create address
  *     tags: [Address]
@@ -67,7 +67,7 @@ import {
 
 /**
  * @swagger
- * /api/v1/address/{addressId}:
+ * /api/v1/addresses/{addressId}:
  *   put:
  *     summary: Edit address
  *     tags: [Address]
@@ -129,7 +129,7 @@ import {
 
 /**
  * @swagger
- * /api/v1/address/{addressId}:
+ * /api/v1/addresses/{addressId}:
  *   put:
  *     summary: Toggle default address
  *     tags: [Address]
@@ -176,7 +176,7 @@ import {
 
 /**
  * @openapi
- * /api/v1/address/{addressId}:
+ * /api/v1/addresses/{addressId}:
  *   delete:
  *     summary: Delete address
  *     tags: [Address]
@@ -220,7 +220,7 @@ import {
 
 /**
  * @openapi
- * /api/v1/address/{userId}:
+ * /api/v1/addresses/{userId}:
  *   get:
  *     summary: Get user addresses
  *     tags: [Address]
@@ -230,7 +230,7 @@ import {
  *         required: true
  *         schema:
  *            type: string
- *            required: true  
+ *            required: true
  *            description: Get User Addresses ID
  *     responses:
  *       "200":

@@ -9,7 +9,7 @@ import { authMiddleware } from "../middlewares/auth.middleware.js";
 
 /**
  * @swagger
- * /api/v1/user/{userId}
+ * /api/v1/users/{userId}
  *   put:
  *     summary: Update user
  *     tags: [User]
@@ -66,7 +66,7 @@ import { authMiddleware } from "../middlewares/auth.middleware.js";
 
 /**
  * @swagger
- * /api/v1/user/me
+ * /api/v1/users/me
  *   get:
  *     summary: Get current user
  *     tags: [User]
@@ -105,44 +105,44 @@ import { authMiddleware } from "../middlewares/auth.middleware.js";
 
 /**
  * @swagger
- *  /api/v1/user/:
+ *  /api/v1/users/:
  *    get:
  *      summary: Get all users (admin)
  *      tags: [User]
  *      responses:
  *        "200":
  *          description: Users fetched successfully
- *            contents:
+ *          content:
  *              application/json:
  *                schema:
  *                  $ref: "#/components/schemas/User"
  *        "400":
  *          description: Bad request
- *            contents:
+ *          content:
  *              application/json:
  *                schema:
  *                  $ref: "#/components/responses/400"
  *        "401":
  *          description: Unauthorized
- *            contents:
+ *          content:
  *              application/json:
  *                schema:
  *                  $ref: "#/components/responses/401"
  *        "403":
  *          description: Forbidden
- *            contents:
+ *          content:
  *              application/json:
  *                schema:
  *                  $ref: "#/components/responses/403"
  *        "404":
  *          description: Not found
- *            contents:
+ *          content:
  *              application/json:
  *                schema:
  *                  $ref: "#/components/responses/404"
  *        "500":
  *          description: Internal server error
- *            contents:
+ *          content:
  *              application/json:
  *                schema:
  *                  $ref: "#/components/responses/500"
@@ -179,7 +179,7 @@ class UserRouter {
       authMiddleware,
       roleGuardMiddleware(["admin"]),
       this.userController.getAllUsers,
-    )
+    );
   }
 }
 

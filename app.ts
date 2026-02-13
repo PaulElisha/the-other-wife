@@ -66,11 +66,11 @@ export class App {
     });
 
     this.app.use("/api/v1/auth", authRouter);
-    this.app.use("/api/v1/user", userRouter);
-    this.app.use("/api/v1/address", addressRouter);
-    this.app.use("/api/v1/customer", customerRouter);
-    this.app.use("/api/v1/vendor", vendorRouter);
-    this.app.use("/api/v1/cart", cartRouter);
+    this.app.use("/api/v1/users", userRouter);
+    this.app.use("/api/v1/addresses", addressRouter);
+    this.app.use("/api/v1/customers", customerRouter);
+    this.app.use("/api/v1/vendors", vendorRouter);
+    this.app.use("/api/v1/carts", cartRouter);
 
     this.app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
     this.app.get(

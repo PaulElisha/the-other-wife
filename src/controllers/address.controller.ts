@@ -119,7 +119,7 @@ export class AddressController {
       const { addressId } = req.params;
       try {
         await this.addressService.deleteUserAddress(addressId);
-        return res.status(HttpStatus.OK).json({
+        return res.status(HttpStatus.NO_CONTENT).json({
           status: "ok",
           message: "Address deleted successfully",
         });
@@ -131,13 +131,14 @@ export class AddressController {
 
   getUserAddresses = handleAsyncControl(
     async (
-      req: Request<{ userId: string }>, 
+      req: Request<{ userId: string }>,
       res: Response,
       next: NextFunction,
     ): Promise<Response> => {
       const { userId } = req.params;
       try {
-        const userAddresses = await this.addressService.getUserAddresses(userId);
+        const userAddresses =
+          await this.addressService.getUserAddresses(userId);
         return res.status(HttpStatus.OK).json({
           status: "ok",
           message: "User addresses fetched successfully",

@@ -8,7 +8,7 @@ import { validateAddToCart } from "../validation/cart.validation.js";
 
 /**
  * @openapi
- * /api/v1/cart/{mealId}:
+ * /api/v1/carts/{mealId}:
  *   post:
  *     summary: Add meal to cart
  *     tags: [Cart]
@@ -74,7 +74,7 @@ import { validateAddToCart } from "../validation/cart.validation.js";
 
 /**
  * @openapi
- * /api/v1/cart/{mealId}:
+ * /api/v1/carts/{mealId}:
  *   delete:
  *     summary: Delete meal from cart
  *     tags: [Cart]
@@ -119,7 +119,7 @@ import { validateAddToCart } from "../validation/cart.validation.js";
 
 /**
  * @openapi
- * /api/v1/cart/{userId}:
+ * /api/v1/carts/{userId}:
  *   get:
  *     summary: Get current user cart
  *     tags: [Cart]
@@ -131,7 +131,7 @@ import { validateAddToCart } from "../validation/cart.validation.js";
  *           type: string
  *           required: true
  *           description: The user ID
-responses:
+ *     responses:
  *       "200":
  *         description: Cart fetched successfully
  *         content:

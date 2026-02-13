@@ -7,7 +7,7 @@ import { roleGuardMiddleware } from "../middlewares/role-guard.middleware.js";
 
 /**
  * @swagger
- * /api/v1/customer/{customerId}:
+ * /api/v1/customers/{customerId}:
  *   get:
  *     summary: Get customer profile
  *     tags: [Customer]
@@ -54,7 +54,7 @@ import { roleGuardMiddleware } from "../middlewares/role-guard.middleware.js";
 
 /**
  * @swagger
- * /api/v1/customer/{customerId}:
+ * /api/v1/customers/{customerId}:
  *   put:
  *     summary: Update customer profile
  *     tags: [Customer]
@@ -108,7 +108,7 @@ import { roleGuardMiddleware } from "../middlewares/role-guard.middleware.js";
 
 /**
  * @swagger
- * /api/v1/customer/{customerId}:
+ * /api/v1/customers/{customerId}:
  *   delete:
  *     summary: Delete customer profile
  *     tags: [Customer]
