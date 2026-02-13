@@ -135,7 +135,7 @@ export class AuthService {
       await user.save();
 
       const { token } = generateToken(user._id);
-      return { token };
+      return { token, userId: user._id };
     } catch (error) {
       throw error;
     }
