@@ -44,7 +44,7 @@ import { validateAddToCart } from "../validation/cart.validation.js";
  *         content:
  *           application/json:
  *             schema:
- *               $ref: "#/components/schemas/Cart"
+ *               $ref: "#/components/schemas/ApiResponse"
  *       "401":
  *         description: Unauthorized
  *         content:
@@ -89,7 +89,9 @@ import { validateAddToCart } from "../validation/cart.validation.js";
  *       "204":
  *         description: Meal deleted from cart successfully
  *         content:
- *           application/json
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/schemas/ApiResponse"
  *       "401":
  *         description: Unauthorized
  *         content:
@@ -136,7 +138,7 @@ import { validateAddToCart } from "../validation/cart.validation.js";
  *         content:
  *           application/json:
  *             schema:
- *               $ref: "#/components/schemas/Cart"
+ *               $ref: "#/components/schemas/ApiResponse"
  *       "401":
  *         description: Unauthorized
  *         content:

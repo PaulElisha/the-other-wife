@@ -71,7 +71,9 @@ import { roleGuardMiddleware } from "../middlewares/role-guard.middleware.js";
  *       "200":
  *         description: Vendor approved successfully
  *         content:
- *           application/json
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/schemas/ApiResponse"
  *       "401":
  *         description: Unauthorized
  *         content:
@@ -124,7 +126,9 @@ import { roleGuardMiddleware } from "../middlewares/role-guard.middleware.js";
  *       "200":
  *         description: Vendor rejected successfully
  *         content:
- *           application/json
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/schemas/ApiResponse"
  *       "401":
  *         description: Unauthorized
  *         content:
@@ -169,7 +173,9 @@ import { roleGuardMiddleware } from "../middlewares/role-guard.middleware.js";
  *       "200":
  *         description: Vendor suspended successfully
  *         content:
- *           application/json
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/schemas/ApiResponse"
  *       "401":
  *         description: Unauthorized
  *         content:
@@ -214,7 +220,9 @@ import { roleGuardMiddleware } from "../middlewares/role-guard.middleware.js";
  *       "204":
  *         description: Vendor profile deleted successfully
  *         content:
- *           application/json
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/schemas/ApiResponse"
  *       "401":
  *         description: Unauthorized
  *         content:

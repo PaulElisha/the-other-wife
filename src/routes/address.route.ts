@@ -38,7 +38,7 @@ import {
  *         content:
  *           application/json:
  *             schema:
- *               $ref: "#/components/schemas/Address"
+ *               $ref: "#/components/schemas/ApiResponse"
  *       "401":
  *         description: Unauthorized
  *         content:
@@ -100,7 +100,7 @@ import {
  *         content:
  *           application/json:
  *             schema:
- *               $ref: "#/components/schemas/Address"
+ *               $ref: "#/components/schemas/ApiResponse"
  *       "401":
  *         description: Unauthorized
  *         content:
@@ -147,7 +147,7 @@ import {
  *         content:
  *           application/json:
  *             schema:
- *               $ref: "#/components/schemas/Address"
+ *               $ref: "#/components/schemas/ApiResponse"
  *       "401":
  *         description: Unauthorized
  *         content:
@@ -191,7 +191,9 @@ import {
  *       "204":
  *         description: Address deleted successfully
  *         content:
- *           application/json
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/schemas/ApiResponse"
  *       "401":
  *         description: Unauthorized
  *         content:
@@ -238,7 +240,7 @@ import {
  *         content:
  *           application/json:
  *             schema:
- *               $ref: "#/components/schemas/Address"
+ *               $ref: "#/components/schemas/ApiResponse"
  *       "401":
  *         description: Unauthorized
  *         content:

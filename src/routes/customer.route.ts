@@ -20,12 +20,12 @@ import { roleGuardMiddleware } from "../middlewares/role-guard.middleware.js";
  *           required: true
  *           description: The customer ID
  *     responses:
- *       200:
+ *       "200":
  *         description: Customer profile fetched
  *         content:
  *           application/json:
  *             schema:
- *               $ref: "#/components/schemas/Customer"
+ *               $ref: "#/components/schemas/ApiResponse"
  *       "401":
  *         description: Unauthorized
  *         content:
@@ -62,7 +62,7 @@ import { roleGuardMiddleware } from "../middlewares/role-guard.middleware.js";
  *       - in: path
  *         name: customerId
  *         required: true
- *         schema: 
+ *         schema:
  *           type: string
  *           required: true
  *           description: The customer ID
@@ -79,7 +79,9 @@ import { roleGuardMiddleware } from "../middlewares/role-guard.middleware.js";
  *       "200":
  *         description: Customer updated
  *         content:
- *           application/json
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/schemas/ApiResponse"
  *       "401":
  *         description: Unauthorized
  *         content:
@@ -125,6 +127,8 @@ import { roleGuardMiddleware } from "../middlewares/role-guard.middleware.js";
  *         description: Customer deleted
  *         content:
  *           application/json:
+ *             schema:
+ *               $ref: "#/components/schemas/ApiResponse"
  *       "401":
  *         description: Unauthorized
  *         content:

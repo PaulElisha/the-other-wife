@@ -37,7 +37,9 @@ import { authMiddleware } from "../middlewares/auth.middleware.js";
  *       "200":
  *         description: User updated successfully
  *         content:
- *           application/json
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/schemas/ApiResponse"
  *       "401":
  *         description: Unauthorized
  *         content:
@@ -76,7 +78,7 @@ import { authMiddleware } from "../middlewares/auth.middleware.js";
  *         content:
  *           application/json:
  *             schema:
- *               $ref: "#/components/schemas/User"
+ *               $ref: "#/components/schemas/ApiResponse"
  *       "401":
  *         description: Unauthorized
  *         content:
@@ -115,7 +117,7 @@ import { authMiddleware } from "../middlewares/auth.middleware.js";
  *          content:
  *              application/json:
  *                schema:
- *                  $ref: "#/components/schemas/User"
+ *                  $ref: "#/components/schemas/ApiResponse"
  *        "400":
  *          description: Bad request
  *          content:

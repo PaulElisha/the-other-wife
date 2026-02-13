@@ -34,6 +34,8 @@ import { roleGuardMiddleware } from "../middlewares/role-guard.middleware.js";
  *         description: User registered successfully
  *         content:
  *           application/json:
+ *             schema:
+ *               $ref: "#/components/schemas/ApiResponse"
  *       "401":
  *         description: Unauthorized
  *         content:
@@ -82,6 +84,8 @@ import { roleGuardMiddleware } from "../middlewares/role-guard.middleware.js";
  *         description: User login successful
  *         content:
  *           application/json:
+ *             schema:
+ *               $ref: "#/components/schemas/ApiResponse"
  *       "401":
  *         description: Unauthorized
  *         content:
@@ -119,6 +123,8 @@ import { roleGuardMiddleware } from "../middlewares/role-guard.middleware.js";
  *         description: User logged out successfully
  *         content:
  *           application/json:
+ *             schema:
+ *               $ref: "#/components/schemas/ApiResponse"
  *       "401":
  *         description: Unauthorized
  *         content:

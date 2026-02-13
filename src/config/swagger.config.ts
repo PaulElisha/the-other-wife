@@ -37,26 +37,6 @@ const swaggerDefinition = {
       },
     },
     schemas: {
-      ErrorResponse: {
-        type: "object",
-        properties: {
-          message: { type: "string" },
-          error: { type: "string" },
-          status: { type: "string", example: "error" },
-        },
-      },
-      UserType: {
-        type: "string",
-        enum: ["customer", "vendor", "admin"],
-      },
-      AddressLabel: {
-        type: "string",
-        enum: ["home", "work", "other"],
-      },
-      VendorApprovalStatus: {
-        type: "string",
-        enum: ["pending", "approved", "suspended", "rejected"],
-      },
       User: {
         type: "object",
         required: ["firstName", "lastName", "email", "phoneNumber"],
@@ -88,41 +68,25 @@ const swaggerDefinition = {
           },
         },
       },
-      Address: {
+      Customer: {
         type: "object",
         properties: {
-          _id: { type: "string" },
-          userId: { type: "string" },
-          label: { $ref: "#/components/schemas/AddressLabel" },
-          address: { type: "string" },
-          city: { type: "string" },
-          state: { type: "string" },
-          country: { type: "string" },
-          postalCode: { type: "string" },
-          latitude: { type: "number" },
-          longitude: { type: "number" },
-          isDefault: { type: "boolean" },
-        },
-      },
-      CartItem: {
-        type: "object",
-        properties: {
-          mealId: { type: "string" },
-          price: { type: "number" },
-          quantity: { type: "number" },
-          totalPrice: { type: "number" },
-        },
-      },
-      Cart: {
-        type: "object",
-        properties: {
-          _id: { type: "string" },
-          customerId: { type: "string" },
-          meals: {
-            type: "array",
-            items: { $ref: "#/components/schemas/CartItem" },
+          _id: {
+            type: "string",
+            description: "The customer unique identifier",
           },
-          totalAmount: { type: "number" },
+          userId: {
+            type: "string",
+            description: "The customer user identifier",
+          },
+          addressId: {
+            type: "string",
+            description: "The customer address identifier",
+          },
+          profileImageUrl: {
+            type: "string",
+            description: "The customer profile image url",
+          },
         },
       },
       Vendor: {
@@ -170,48 +134,112 @@ const swaggerDefinition = {
           },
         },
       },
-      Customer: {
+      Address: {
         type: "object",
         properties: {
-          _id: {
-            type: "string",
-            description: "The customer unique identifier",
+          _id: { type: "string" },
+          userId: { type: "string" },
+          label: { $ref: "#/components/schemas/AddressLabel" },
+          address: { type: "string" },
+          city: { type: "string" },
+          state: { type: "string" },
+          country: { type: "string" },
+          postalCode: { type: "string" },
+          latitude: { type: "number" },
+          longitude: { type: "number" },
+          isDefault: { type: "boolean" },
+        },
+      },
+      Cart: {
+        type: "object",
+        properties: {
+          _id: { type: "string" },
+          customerId: { type: "string" },
+          meals: {
+            type: "array",
+            items: { $ref: "#/components/schemas/CartItem" },
           },
-          userId: {
-            type: "string",
-            description: "The customer user identifier",
-          },
-          addressId: {
-            type: "string",
-            description: "The customer address identifier",
-          },
-          profileImageUrl: {
-            type: "string",
-            description: "The customer profile image url",
-          },
+          totalAmount: { type: "number" },
+        },
+      },
+      CartItem: {
+        type: "object",
+        properties: {
+          mealId: { type: "string" },
+          price: { type: "number" },
+          quantity: { type: "number" },
+          totalPrice: { type: "number" },
+        },
+      },
+      UserType: {
+        type: "string",
+        enum: ["customer", "vendor", "admin"],
+      },
+      AddressLabel: {
+        type: "string",
+        enum: ["home", "work", "other"],
+      },
+      VendorApprovalStatus: {
+        type: "string",
+        enum: ["pending", "approved", "suspended", "rejected"],
+      },
+      ErrorResponse: {
+        type: "object",
+        properties: {
+          message: { type: "string" },
+          error: { type: "string" },
+          status: { type: "string", example: "error" },
+        },
+      },
+      ApiResponse: {
+        type: "object",
+        properties: {
+          status: { type: "string", example: "ok" },
+          message: { type: "string" },
+          data: { type: "object" },
         },
       },
     },
     responses: {
-      400: {
+      "400": {
         description: "Bad request",
-        content: "application/json",
+        content: {
+          "application/json": {
+            schema: { $ref: "#/components/schemas/ErrorResponse" },
+          },
+        },
       },
-      401: {
+      "401": {
         description: "Unauthorized",
-        content: "application/json",
+        content: {
+          "application/json": {
+            schema: { $ref: "#/components/schemas/ErrorResponse" },
+          },
+        },
       },
-      403: {
+      "403": {
         description: "Forbidden",
-        content: "application/json",
+        content: {
+          "application/json": {
+            schema: { $ref: "#/components/schemas/ErrorResponse" },
+          },
+        },
       },
-      404: {
+      "404": {
         description: "Not found",
-        content: "application/json",
+        content: {
+          "application/json": {
+            schema: { $ref: "#/components/schemas/ErrorResponse" },
+          },
+        },
       },
-      500: {
+      "500": {
         description: "Internal server error",
-        content: "application/json",
+        content: {
+          "application/json": {
+            schema: { $ref: "#/components/schemas/ErrorResponse" },
+          },
+        },
       },
     },
   },
