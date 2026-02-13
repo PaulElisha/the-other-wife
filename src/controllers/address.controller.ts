@@ -33,7 +33,7 @@ export class AddressController {
     ): Promise<Response> => {
       const userId = req.user?._id;
       try {
-        const { userAddress } = await this.addressService.createUserAddress(
+        const userAddress = await this.addressService.createUserAddress(
           userId,
           req.body.city,
           req.body.state,
@@ -46,7 +46,7 @@ export class AddressController {
           req.body.isDefault,
         );
 
-        return res.status(HttpStatus.OK).json({
+        return res.status(HttpStatus.CREATED).json({
           status: "ok",
           message: "Address created successfully",
           userAddress,
@@ -64,7 +64,7 @@ export class AddressController {
       next: NextFunction,
     ): Promise<Response> => {
       try {
-        const { userAddress } = await this.addressService.editUserAddress(
+        const userAddress = await this.addressService.editUserAddress(
           req.params.addressId,
           req.body.city,
           req.body.state,
@@ -77,7 +77,7 @@ export class AddressController {
           req.body.isDefault,
         );
 
-        return res.status(HttpStatus.OK).json({
+        return res.status(HttpStatus.NO_CONTENT).json({
           status: "ok",
           message: "Address updated successfully",
           userAddress,
@@ -96,11 +96,13 @@ export class AddressController {
     ): Promise<Response> => {
       const { addressId } = req.params;
       try {
-        await this.addressService.toggleDefaultAddress(addressId);
+        const defaultAddress =
+          await this.addressService.toggleDefaultAddress(addressId);
 
         return res.status(HttpStatus.OK).json({
           status: "ok",
           message: "Default address set successfully",
+          defaultAddress,
         });
       } catch (error) {
         throw error;
@@ -120,6 +122,26 @@ export class AddressController {
         return res.status(HttpStatus.OK).json({
           status: "ok",
           message: "Address deleted successfully",
+        });
+      } catch (error) {
+        throw error;
+      }
+    },
+  );
+
+  getUserAddresses = handleAsyncControl(
+    async (
+      req: Request<{ userId: string }>, 
+      res: Response,
+      next: NextFunction,
+    ): Promise<Response> => {
+      const { userId } = req.params;
+      try {
+        const userAddresses = await this.addressService.getUserAddresses(userId);
+        return res.status(HttpStatus.OK).json({
+          status: "ok",
+          message: "User addresses fetched successfully",
+          userAddresses,
         });
       } catch (error) {
         throw error;

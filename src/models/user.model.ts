@@ -69,9 +69,7 @@ const UserSchema = new Schema(
     },
     userType: {
       type: String,
-      required: false,
       enum: ["customer", "vendor", "admin"],
-      default: "customer",
     },
     authType: {
       type: String,

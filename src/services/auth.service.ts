@@ -22,13 +22,19 @@ export class AuthService {
     lastName: string;
     email?: string;
     password: string;
-    userType: string;
+    userType?: string;
     phoneNumber?: string;
   }): Promise<{
     userId: mongoose.Types.ObjectId;
   }> => {
-    const { firstName, lastName, password, userType, phoneNumber, email } =
-      body;
+    const {
+      firstName,
+      lastName,
+      password,
+      userType = "customer",
+      phoneNumber,
+      email,
+    } = body;
 
     try {
       if (!phoneNumber && !email) {
@@ -40,7 +46,7 @@ export class AuthService {
       }
 
       if (phoneNumber) {
-        const userByPhone = await User.findOne({ phoneNumber });
+        const userByPhone = await User.find({}, "phoneNumber");
         if (userByPhone) {
           throw new BadRequestException(
             "Phone number already exists",
@@ -51,7 +57,7 @@ export class AuthService {
       }
 
       if (email) {
-        const userByEmail = await User.findOne({ email });
+        const userByEmail = await User.find({}, "email");
         if (userByEmail) {
           throw new BadRequestException(
             "Email already exists",
@@ -70,16 +76,19 @@ export class AuthService {
         phoneNumber,
       });
 
-      if (userType === "customer" || userType === undefined) {
-        await Customer.create({
-          userId: newUser._id,
-        });
-      }
-
-      if (userType === "vendor") {
-        await Vendor.create({
-          userId: newUser._id,
-        });
+      switch (userType) {
+        case "customer":
+          await Customer.create({
+            userId: newUser._id,
+          });
+          break;
+        case "vendor":
+          await Vendor.create({
+            userId: newUser._id,
+          });
+          break;
+        default:
+          throw new Error("User type cannot be created for admin");
       }
 
       return { userId: newUser._id };

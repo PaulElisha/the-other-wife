@@ -49,7 +49,7 @@ export class UserController {
           req.user?._id,
           req.body,
         );
-        return res.status(HttpStatus.OK).json({
+        return res.status(HttpStatus.NO_CONTENT).json({
           data: user,
           status: "ok",
           message: "User updated successfully",
@@ -64,7 +64,7 @@ export class UserController {
     async (req: Request, res: Response): Promise<Response> => {
       try {
         await this.userService.deleteUser(req.user?._id);
-        return res.status(HttpStatus.OK).json({
+        return res.status(HttpStatus.NO_CONTENT).json({
           status: "ok",
           message: "User deleted successfully",
         });

@@ -40,7 +40,7 @@ export class VendorController {
 
       try {
         const vendor = await this.vendorService.approveVendor(vendorId, userId);
-        return res.status(HttpStatus.OK).json({
+        return res.status(HttpStatus.NO_CONTENT).json({
           status: "ok",
           message: "Vendor approved successfully",
           vendor,
@@ -70,7 +70,7 @@ export class VendorController {
           vendorId,
           rejectionReason,
         );
-        return res.status(HttpStatus.OK).json({
+        return res.status(HttpStatus.NO_CONTENT).json({
           status: "ok",
           message: "Vendor rejected successfully",
           vendor,
@@ -90,7 +90,7 @@ export class VendorController {
 
       try {
         const vendor = await this.vendorService.suspendVendor(vendorId);
-        return res.status(HttpStatus.OK).json({
+        return res.status(HttpStatus.NO_CONTENT).json({
           status: "ok",
           message: "Vendor suspended successfully",
           vendor,
@@ -110,7 +110,7 @@ export class VendorController {
 
       try {
         const vendor = await this.vendorService.deleteVendorProfile(vendorId);
-        return res.status(HttpStatus.OK).json({
+        return res.status(HttpStatus.NO_CONTENT).json({
           status: "ok",
           message: "Vendor profile deleted successfully",
           vendor,

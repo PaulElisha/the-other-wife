@@ -50,7 +50,7 @@ export class CartController {
 
       try {
         await this.cartService.deleteFromCart(userId, mealId);
-        return res.status(HttpStatus.OK).json({
+        return res.status(HttpStatus.NO_CONTENT).json({
           success: true,
           message: "Meal deleted from cart successfully",
         });

@@ -20,13 +20,11 @@ export class CustomerController {
         const { customerId } = req.params;
         const { customer } =
           await this.customerService.getCustomerProfile(customerId);
-        return res
-          .status(HttpStatus.OK)
-          .json({
-            status: "ok",
-            message: "Customer profile fetched",
-            customer,
-          });
+        return res.status(HttpStatus.OK).json({
+          status: "ok",
+          message: "Customer profile fetched",
+          customer,
+        });
       } catch (error) {
         throw error;
       }
@@ -46,7 +44,7 @@ export class CustomerController {
           profileImageUrl,
         );
         return res
-          .status(HttpStatus.OK)
+          .status(HttpStatus.NO_CONTENT)
           .json({ status: "ok", message: "Customer updated", customer });
       } catch (error) {
         throw error;
@@ -63,7 +61,7 @@ export class CustomerController {
         const { customerId } = req.params;
         await this.customerService.deleteCustomerProfile(customerId);
         return res
-          .status(HttpStatus.OK)
+          .status(HttpStatus.NO_CONTENT)
           .json({ status: "ok", message: "Customer deleted" });
       } catch (error) {
         throw error;

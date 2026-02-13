@@ -8,61 +8,160 @@ import { validateAddToCart } from "../validation/cart.validation.js";
 
 /**
  * @openapi
- * /api/v1/cart/add-to-cart/meals/{mealId}:
+ * /api/v1/cart/{mealId}:
  *   post:
  *     summary: Add meal to cart
  *     tags: [Cart]
- *     security:
- *       - cookieAuth: []
  *     parameters:
  *       - in: path
  *         name: mealId
  *         required: true
- *         schema: { type: string }
+ *         schema:
+ *           type: string
+ *           required: true
+ *           description: The meal ID
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
  *             type: object
- *             required: [quantity]
+ *             required: ["quantity", "action"]
  *             properties:
- *               quantity: { type: number }
- *               action: { type: string, enum: [increment, decrement] }
+ *               quantity: {
+ *                 type: number,
+ *                 required: true,
+ *                 description: The quantity of the meal to add to the cart
+ *               },
+ *               action: {
+ *                 type: string,
+ *                 required: true,
+ *                 enum: ["increment", "decrement"],
+ *                 description: The action to perform on the meal in the cart
+ *               }
  *     responses:
- *       200:
+ *       "200":
  *         description: Meal added to cart successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/schemas/Cart"
+ *       "401":
+ *         description: Unauthorized
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/responses/401"
+ *       "403":
+ *         description: Forbidden
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/responses/403"
+ *       "404":
+ *         description: Not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/responses/404"
+ *       "500":
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/responses/500"
  */
 
 /**
  * @openapi
- * /api/v1/cart/delete-from-cart/meals/{mealId}:
+ * /api/v1/cart/{mealId}:
  *   delete:
  *     summary: Delete meal from cart
  *     tags: [Cart]
- *     security:
- *       - cookieAuth: []
  *     parameters:
  *       - in: path
  *         name: mealId
  *         required: true
- *         schema: { type: string }
+ *         schema:
+ *           type: string
+ *           required: true
+ *           description: The meal ID
  *     responses:
- *       200:
+ *       "204":
  *         description: Meal deleted from cart successfully
+ *         content:
+ *           application/json
+ *       "401":
+ *         description: Unauthorized
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/responses/401"
+ *       "403":
+ *         description: Forbidden
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/responses/403"
+ *       "404":
+ *         description: Not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/responses/404"
+ *       "500":
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/responses/500"
  */
 
 /**
  * @openapi
- * /api/v1/cart/get-user-cart:
+ * /api/v1/cart/{userId}:
  *   get:
  *     summary: Get current user cart
  *     tags: [Cart]
- *     security:
- *       - cookieAuth: []
- *     responses:
- *       200:
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         required: true
+ *         schema:
+ *           type: string
+ *           required: true
+ *           description: The user ID
+responses:
+ *       "200":
  *         description: Cart fetched successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/schemas/Cart"
+ *       "401":
+ *         description: Unauthorized
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/responses/401"
+ *       "403":
+ *         description: Forbidden
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/responses/403"
+ *       "404":
+ *         description: Not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/responses/404"
+ *       "500":
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/responses/500"
  */
 
 export class CartRouter {
@@ -76,20 +175,20 @@ export class CartRouter {
 
   initializeRoutes() {
     this.router.post(
-      "/add-to-cart/meals/:mealId",
+      "/:mealId",
       authMiddleware,
       roleGuardMiddleware(["customer"]),
       validateAddToCart,
       this.cartController.addToCart,
     );
     this.router.delete(
-      "/delete-from-cart/meals/:mealId",
+      "/:mealId",
       authMiddleware,
       roleGuardMiddleware(["customer"]),
       this.cartController.deleteFromCart,
     );
     this.router.get(
-      "/get-user-cart",
+      "/:userId",
       authMiddleware,
       roleGuardMiddleware(["customer"]),
       this.cartController.getUserCart,

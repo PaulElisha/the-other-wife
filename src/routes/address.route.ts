@@ -10,48 +10,74 @@ import {
 } from "../validation/address.validation.js";
 
 /**
- * @openapi
- * /api/v1/address/create-address:
+ * @swagger
+ * /api/v1/address/
  *   post:
  *     summary: Create address
  *     tags: [Address]
- *     security:
- *       - cookieAuth: []
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
  *             type: object
- *             required: [address, city, state, country, postalCode, latitude, longitude]
+ *             required: ["city", "state", "country", "postalCode", "latitude", "longitude"]
  *             properties:
- *               address: { type: string }
- *               label: { type: string, enum: [home, work, other] }
  *               city: { type: string }
  *               state: { type: string }
  *               country: { type: string }
  *               postalCode: { type: string }
  *               latitude: { type: number }
  *               longitude: { type: number }
+ *               address: { type: string }
+ *               label: { type: string, enum: [home, work, other] }
  *               isDefault: { type: boolean }
  *     responses:
- *       200:
+ *       "201":
  *         description: Address created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/schemas/Address"
+ *       "401":
+ *         description: Unauthorized
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/responses/401"
+ *       "403":
+ *         description: Forbidden
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/responses/403"
+ *       "404":
+ *         description: Not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/responses/404"
+ *       "500":
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/responses/500"
  */
 
 /**
- * @openapi
- * /api/v1/address/edit-address/{addressId}:
+ * @swagger
+ * /api/v1/address/{addressId}:
  *   put:
  *     summary: Edit address
  *     tags: [Address]
- *     security:
- *       - cookieAuth: []
  *     parameters:
  *       - in: path
  *         name: addressId
  *         required: true
- *         schema: { type: string }
+ *         schema:
+ *            type: string
+ *            description: Edit Address ID
  *     requestBody:
  *       required: true
  *       content:
@@ -69,44 +95,174 @@ import {
  *               longitude: { type: number }
  *               isDefault: { type: boolean }
  *     responses:
- *       200:
+ *       "204":
  *         description: Address updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/schemas/Address"
+ *       "401":
+ *         description: Unauthorized
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/responses/401"
+ *       "403":
+ *         description: Forbidden
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/responses/403"
+ *       "404":
+ *         description: Not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/responses/404"
+ *       "500":
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/responses/500"
  */
 
 /**
- * @openapi
- * /api/v1/address/toggle-default-address/{addressId}:
+ * @swagger
+ * /api/v1/address/{addressId}:
  *   put:
  *     summary: Toggle default address
  *     tags: [Address]
- *     security:
- *       - cookieAuth: []
  *     parameters:
  *       - in: path
  *         name: addressId
  *         required: true
- *         schema: { type: string }
+ *         schema:
+ *            type: string
+ *            required: true
+ *            description: Toggle Address ID
  *     responses:
- *       200:
+ *       "200":
  *         description: Default address set successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/schemas/Address"
+ *       "401":
+ *         description: Unauthorized
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/responses/401"
+ *       "403":
+ *         description: Forbidden
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/responses/403"
+ *       "404":
+ *         description: Not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/responses/404"
+ *       "500":
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/responses/500"
  */
 
 /**
  * @openapi
- * /api/v1/address/delete-address/{addressId}:
+ * /api/v1/address/{addressId}:
  *   delete:
  *     summary: Delete address
  *     tags: [Address]
- *     security:
- *       - cookieAuth: []
  *     parameters:
  *       - in: path
  *         name: addressId
  *         required: true
- *         schema: { type: string }
+ *         schema:
+ *            type: string
+ *            description: Delete Address ID
  *     responses:
- *       200:
+ *       "204":
  *         description: Address deleted successfully
+ *         content:
+ *           application/json
+ *       "401":
+ *         description: Unauthorized
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/responses/401"
+ *       "403":
+ *         description: Forbidden
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/responses/403"
+ *       "404":
+ *         description: Not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/responses/404"
+ *       "500":
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/responses/500"
+ */
+
+/**
+ * @openapi
+ * /api/v1/address/{userId}:
+ *   get:
+ *     summary: Get user addresses
+ *     tags: [Address]
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         required: true
+ *         schema:
+ *            type: string
+ *            required: true  
+ *            description: Get User Addresses ID
+ *     responses:
+ *       "200":
+ *         description: User addresses fetched successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/schemas/Address"
+ *       "401":
+ *         description: Unauthorized
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/responses/401"
+ *       "403":
+ *         description: Forbidden
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/responses/403"
+ *       "404":
+ *         description: Not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/responses/404"
+ *       "500":
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/responses/500"
  */
 
 class AddressRouter {
@@ -121,7 +277,7 @@ class AddressRouter {
 
   initializeRoutes() {
     this.router.post(
-      "/create-address",
+      "/",
       authMiddleware,
       roleGuardMiddleware(["customer", "vendor"]),
       validateCreateAddress,
@@ -129,7 +285,7 @@ class AddressRouter {
     );
 
     this.router.put(
-      "/edit-address/:addressId",
+      "/:addressId",
       authMiddleware,
       roleGuardMiddleware(["customer", "vendor"]),
       validateEditAddress,
@@ -137,17 +293,24 @@ class AddressRouter {
     );
 
     this.router.put(
-      "/toggle-default-address/:addressId",
+      "/:addressId",
       authMiddleware,
       roleGuardMiddleware(["customer", "vendor"]),
       this.addressController.toggleDefaultAddress,
     );
 
     this.router.delete(
-      "/delete-address/:addressId",
+      "/:addressId",
       authMiddleware,
       roleGuardMiddleware(["customer", "vendor", "admin"]),
       this.addressController.deleteUserAddress,
+    );
+
+    this.router.get(
+      "/:userId",
+      authMiddleware,
+      roleGuardMiddleware(["customer", "vendor"]),
+      this.addressController.getUserAddresses,
     );
   }
 }

@@ -32,7 +32,7 @@ export class App {
     this.initializeRoutes();
     this.initializeDb();
   }
-
+ 
   initiializeMiddlewares() {
     this.app.use(express.json());
     this.app.use(express.urlencoded({ extended: true }));

@@ -118,4 +118,19 @@ export class AddressService {
         ErrorCode.RESOURCE_NOT_FOUND,
       );
     })();
+
+  getUserAddresses = async (userId: string) => {
+    const userAddresses = await Address.findOne(
+      { userId },
+      "isDefault",
+    ).populate("userId", "firstName lastName");
+    if (!userAddresses) {
+      throw new NotFoundException(
+        "Address not found",
+        HttpStatus.NOT_FOUND,
+        ErrorCode.RESOURCE_NOT_FOUND,
+      );
+    }
+    return { userAddresses };
+  };
 }

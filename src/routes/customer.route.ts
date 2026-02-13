@@ -6,36 +6,66 @@ import { authMiddleware } from "../middlewares/auth.middleware.js";
 import { roleGuardMiddleware } from "../middlewares/role-guard.middleware.js";
 
 /**
- * @openapi
- * /api/v1/customer/customer-profile/{customerId}:
+ * @swagger
+ * /api/v1/customer/{customerId}:
  *   get:
  *     summary: Get customer profile
  *     tags: [Customer]
- *     security:
- *       - cookieAuth: []
  *     parameters:
  *       - in: path
  *         name: customerId
  *         required: true
- *         schema: { type: string }
+ *         schema:
+ *           type: string
+ *           required: true
+ *           description: The customer ID
  *     responses:
  *       200:
  *         description: Customer profile fetched
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/schemas/Customer"
+ *       "401":
+ *         description: Unauthorized
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/responses/401"
+ *       "403":
+ *         description: Forbidden
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/responses/403"
+ *       "404":
+ *         description: Not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/responses/404"
+ *       "500":
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/responses/500"
  */
 
 /**
- * @openapi
- * /api/v1/customer/customer-profile/{customerId}:
+ * @swagger
+ * /api/v1/customer/{customerId}:
  *   put:
  *     summary: Update customer profile
  *     tags: [Customer]
- *     security:
- *       - cookieAuth: []
  *     parameters:
  *       - in: path
  *         name: customerId
  *         required: true
- *         schema: { type: string }
+ *         schema: 
+ *           type: string
+ *           required: true
+ *           description: The customer ID
  *     requestBody:
  *       required: true
  *       content:
@@ -46,26 +76,79 @@ import { roleGuardMiddleware } from "../middlewares/role-guard.middleware.js";
  *             properties:
  *               profileImageUrl: { type: string }
  *     responses:
- *       200:
+ *       "204":
  *         description: Customer updated
+ *         content:
+ *           application/json
+ *       "401":
+ *         description: Unauthorized
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/responses/401"
+ *       "403":
+ *         description: Forbidden
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/responses/403"
+ *       "404":
+ *         description: Not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/responses/404"
+ *       "500":
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/responses/500"
  */
 
 /**
- * @openapi
- * /api/v1/customer/customer-profile/{customerId}:
+ * @swagger
+ * /api/v1/customer/{customerId}:
  *   delete:
  *     summary: Delete customer profile
  *     tags: [Customer]
- *     security:
- *       - cookieAuth: []
  *     parameters:
  *       - in: path
  *         name: customerId
  *         required: true
- *         schema: { type: string }
+ *         schema:
+ *           type: string
+ *           required: true
+ *           description: The customer ID
  *     responses:
- *       200:
+ *       "204":
  *         description: Customer deleted
+ *         content:
+ *           application/json:
+ *       "401":
+ *         description: Unauthorized
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/responses/401"
+ *       "403":
+ *         description: Forbidden
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/responses/403"
+ *       "404":
+ *         description: Not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/responses/404"
+ *       "500":
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/responses/500"
  */
 
 class CustomerRouter {
@@ -79,19 +162,19 @@ class CustomerRouter {
 
   initializeRoutes() {
     this.router.get(
-      "/customer-profile/:customerId",
+      "/:customerId",
       authMiddleware,
       roleGuardMiddleware(["customer", "admin"]),
       this.customerController.getCustomerProfile,
     );
     this.router.put(
-      "/customer-profile/:customerId",
+      "/:customerId",
       authMiddleware,
       roleGuardMiddleware(["customer"]),
       this.customerController.updateCustomerProfile,
     );
     this.router.delete(
-      "/customer-profile/:customerId",
+      "/:customerId",
       authMiddleware,
       roleGuardMiddleware(["customer", "admin"]),
       this.customerController.deleteCustomerProfile,

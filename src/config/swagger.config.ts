@@ -16,13 +16,9 @@ const swaggerDefinition = {
   info: {
     title: "The Other Wife API",
     version: "1.0.0",
-    description: "Backend API documentation",
+    description: "The Other Wife backend API documentation",
   },
   servers: [
-    {
-      url,
-      description: nodeEnv === "production" ? "Production" : "Local",
-    },
     {
       url: "https://the-other-wife.vercel.app",
       description: "Vercel Production",
@@ -59,18 +55,32 @@ const swaggerDefinition = {
       },
       User: {
         type: "object",
+        required: ["firstName", "lastName", "email", "phoneNumber"],
         properties: {
-          _id: { type: "string" },
-          firstName: { type: "string" },
-          lastName: { type: "string" },
-          email: { type: "string", format: "email" },
-          phoneNumber: { type: "string" },
-          userType: { $ref: "#/components/schemas/UserType" },
-          isEmailVerified: { type: "boolean" },
-          isPhoneVerified: { type: "boolean" },
-          createdAt: { type: "string", format: "date-time" },
-          updatedAt: { type: "string", format: "date-time" },
-          lastLogin: { type: "string", format: "date-time" },
+          _id: {
+            type: "string",
+            description: "The user unique identifier",
+          },
+          firstName: {
+            type: "string",
+            description: "The user first name",
+          },
+          lastName: {
+            type: "string",
+            description: "The user last name",
+          },
+          email: {
+            type: "string",
+            description: "The user email address",
+          },
+          phoneNumber: {
+            type: "string",
+            description: "The user phone number",
+          },
+          userType: {
+            type: "string",
+            description: "The user type",
+          },
         },
       },
       Address: {
@@ -113,65 +123,98 @@ const swaggerDefinition = {
       Vendor: {
         type: "object",
         properties: {
-          _id: { type: "string" },
-          userId: { type: "string" },
-          addressId: { type: "string" },
-          businessName: { type: "string" },
-          businessDescription: { type: "string" },
-          businessLogoUrl: { type: "string" },
+          _id: {
+            type: "string",
+            description: "The vendor unique identifier",
+          },
+          userId: {
+            type: "string",
+            description: "The vendor user identifier",
+          },
+          addressId: {
+            type: "string",
+            description: "The vendor address identifier",
+          },
+          businessName: {
+            type: "string",
+            description: "The vendor business name",
+          },
+          businessDescription: {
+            type: "string",
+            description: "The vendor business description",
+          },
+          businessLogoUrl: {
+            type: "string",
+            description: "The vendor business logo url",
+          },
           approvalStatus: {
             $ref: "#/components/schemas/VendorApprovalStatus",
           },
-          approvedBy: { type: "string" },
-          approvedAt: { type: "string", format: "date-time" },
-          rejectionReason: { type: "string" },
+          approvedBy: {
+            type: "string",
+            description: "The vendor approved by",
+          },
+          approvedAt: {
+            type: "string",
+            format: "date-time",
+            description: "The vendor approved at",
+          },
+          rejectionReason: {
+            type: "string",
+            description: "The vendor rejection reason",
+          },
         },
       },
       Customer: {
         type: "object",
         properties: {
-          _id: { type: "string" },
-          userId: { type: "string" },
-          addressId: { type: "string" },
-          profileImageUrl: { type: "string" },
+          _id: {
+            type: "string",
+            description: "The customer unique identifier",
+          },
+          userId: {
+            type: "string",
+            description: "The customer user identifier",
+          },
+          addressId: {
+            type: "string",
+            description: "The customer address identifier",
+          },
+          profileImageUrl: {
+            type: "string",
+            description: "The customer profile image url",
+          },
         },
       },
     },
     responses: {
-      BadRequest: {
+      400: {
         description: "Bad request",
-        content: {
-          "application/json": {
-            schema: { $ref: "#/components/schemas/ErrorResponse" },
-          },
-        },
+        content: "application/json",
       },
-      Unauthorized: {
+      401: {
         description: "Unauthorized",
-        content: {
-          "application/json": {
-            schema: { $ref: "#/components/schemas/ErrorResponse" },
-          },
-        },
+        content: "application/json",
       },
-      Forbidden: {
+      403: {
         description: "Forbidden",
-        content: {
-          "application/json": {
-            schema: { $ref: "#/components/schemas/ErrorResponse" },
-          },
-        },
+        content: "application/json",
       },
-      NotFound: {
+      404: {
         description: "Not found",
-        content: {
-          "application/json": {
-            schema: { $ref: "#/components/schemas/ErrorResponse" },
-          },
-        },
+        content: "application/json",
+      },
+      500: {
+        description: "Internal server error",
+        content: "application/json",
       },
     },
   },
+  security: [
+    {
+      cookieAuth: [],
+    },
+  ],
 };
 
 const options = {

@@ -6,54 +6,113 @@ import { authMiddleware } from "../middlewares/auth.middleware.js";
 import { roleGuardMiddleware } from "../middlewares/role-guard.middleware.js";
 
 /**
- * @openapi
- * /api/v1/vendor/get-vendor-profile/{vendorId}:
+ * @swagger
+ * /api/v1/vendor/{vendorId}:
  *   get:
  *     summary: Get vendor profile
  *     tags: [Vendor]
- *     security:
- *       - cookieAuth: []
  *     parameters:
  *       - in: path
  *         name: vendorId
  *         required: true
- *         schema: { type: string }
+ *         schema: {
+ *           type: string
+ *           required: true
+ *           description: The vendor ID
+ *         }
  *     responses:
- *       200:
+ *       "200":
  *         description: Vendor profile retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/schemas/Vendor"
+ *       "401":
+ *         description: Unauthorized
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/responses/401"
+ *       "403":
+ *         description: Forbidden
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/responses/403"
+ *       "404":
+ *         description: Not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/responses/404"
+ *       "500":
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/responses/500"
  */
 
 /**
- * @openapi
- * /api/v1/vendor/approve-vendor/{vendorId}:
+ * @swagger
+ * /api/v1/vendor/{vendorId}:
  *   put:
  *     summary: Approve vendor
  *     tags: [Vendor]
- *     security:
- *       - cookieAuth: []
  *     parameters:
  *       - in: path
  *         name: vendorId
  *         required: true
- *         schema: { type: string }
+ *         schema: {
+ *           type: string
+ *           required: true
+ *           description: The vendor ID
+ *         }
  *     responses:
- *       200:
+ *       "204":
  *         description: Vendor approved successfully
+ *         content:
+ *           application/json
+ *       "401":
+ *         description: Unauthorized
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/responses/401"
+ *       "403":
+ *         description: Forbidden
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/responses/403"
+ *       "404":
+ *         description: Not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/responses/404"
+ *       "500":
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/responses/500"
  */
 
 /**
- * @openapi
- * /api/v1/vendor/reject-vendor/{vendorId}:
+ * @swagger
+ * /api/v1/vendor/{vendorId}:
  *   put:
  *     summary: Reject vendor
  *     tags: [Vendor]
- *     security:
- *       - cookieAuth: []
  *     parameters:
  *       - in: path
  *         name: vendorId
  *         required: true
- *         schema: { type: string }
+ *         schema: 
+ *           type: string
+ *           required: true
+ *           description: The vendor ID
  *     requestBody:
  *       required: true
  *       content:
@@ -63,44 +122,124 @@ import { roleGuardMiddleware } from "../middlewares/role-guard.middleware.js";
  *             properties:
  *               rejectionReason: { type: string }
  *     responses:
- *       200:
+ *       "204":
  *         description: Vendor rejected successfully
+ *         content:
+ *           application/json
+ *       "401":
+ *         description: Unauthorized
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/responses/401"
+ *       "403":
+ *         description: Forbidden
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/responses/403"
+ *       "404":
+ *         description: Not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/responses/404"
+ *       "500":
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/responses/500"
  */
 
 /**
- * @openapi
- * /api/v1/vendor/suspend-vendor/{vendorId}:
+ * @swagger
+ * /api/v1/vendor/{vendorId}:
  *   put:
  *     summary: Suspend vendor
  *     tags: [Vendor]
- *     security:
- *       - cookieAuth: []
  *     parameters:
  *       - in: path
  *         name: vendorId
  *         required: true
- *         schema: { type: string }
- *     responses:
- *       200:
+ *         schema: 
+ *           type: string
+ *           required: true
+ *           description: The vendor ID
+     responses:
+ *       "204":
  *         description: Vendor suspended successfully
+ *         content:
+ *           application/json
+ *       "401":
+ *         description: Unauthorized
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/responses/401"
+ *       "403":
+ *         description: Forbidden
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/responses/403"
+ *       "404":
+ *         description: Not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/responses/404"
+ *       "500":
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/responses/500"
  */
 
 /**
- * @openapi
- * /api/v1/vendor/delete-vendor-profile/{vendorId}:
+ * @swagger
+ * /api/v1/vendor/{vendorId}:
  *   delete:
  *     summary: Delete vendor profile
  *     tags: [Vendor]
- *     security:
- *       - cookieAuth: []
  *     parameters:
  *       - in: path
  *         name: vendorId
  *         required: true
- *         schema: { type: string }
+ *         schema: 
+ *           type: string
+ *           required: true
+ *           description: The vendor ID
  *     responses:
- *       200:
+ *       "204":
  *         description: Vendor profile deleted successfully
+ *         content:
+ *           application/json
+ *       "401":
+ *         description: Unauthorized
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/responses/401"
+ *       "403":
+ *         description: Forbidden
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/responses/403"
+ *       "404":
+ *         description: Not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/responses/404"
+ *       "500":
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/responses/500"
  */
 
 class VendorRouter {
@@ -115,31 +254,31 @@ class VendorRouter {
 
   initializeRoutes() {
     this.router.get(
-      "/get-vendor-profile/:vendorId",
+      "/:vendorId",
       authMiddleware,
       roleGuardMiddleware(["vendor", "admin"]),
       this.vendorController.getVendorProfile,
     );
     this.router.put(
-      "/approve-vendor/:vendorId",
+      "/:vendorId",
       authMiddleware,
       roleGuardMiddleware(["admin"]),
       this.vendorController.approveVendor,
     );
     this.router.put(
-      "/reject-vendor/:vendorId",
+      "/:vendorId",
       authMiddleware,
       roleGuardMiddleware(["admin"]),
       this.vendorController.rejectVendor,
     );
     this.router.put(
-      "/suspend-vendor/:vendorId",
+      "/:vendorId",
       authMiddleware,
       roleGuardMiddleware(["admin"]),
       this.vendorController.suspendVendor,
     );
     this.router.delete(
-      "/delete-vendor-profile/:vendorId",
+      "/:vendorId",
       authMiddleware,
       roleGuardMiddleware(["vendor", "admin"]),
       this.vendorController.deleteVendorProfile,

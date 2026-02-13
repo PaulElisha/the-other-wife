@@ -8,54 +8,197 @@ import { roleGuardMiddleware } from "../middlewares/role-guard.middleware.js";
 import { authMiddleware } from "../middlewares/auth.middleware.js";
 
 /**
- * @openapi
- * /api/v1/user/update:
+ * @swagger
+ * /api/v1/user/{userId}
  *   put:
- *     summary: Update current user
+ *     summary: Update user
  *     tags: [User]
- *     security:
- *       - cookieAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         required: true
+ *         schema:
+ *           type: string
+ *           required: true
+ *           description: The user ID
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
  *             type: object
- *             required: [firstName, lastName, email, phoneNumber]
+ *             required: ["firstName", "lastName", "email", "phoneNumber"]
  *             properties:
  *               firstName: { type: string }
  *               lastName: { type: string }
  *               email: { type: string, format: email }
  *               phoneNumber: { type: string }
  *     responses:
- *       200:
+ *       "204":
  *         description: User updated successfully
+ *         content:
+ *           application/json
+ *       "401":
+ *         description: Unauthorized
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/responses/401"
+ *       "403":
+ *         description: Forbidden
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/responses/403"
+ *       "404":
+ *         description: Not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/responses/404"
+ *       "500":
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/responses/500"
  */
 
 /**
- * @openapi
- * /api/v1/user/current-user:
+ * @swagger
+ * /api/v1/user/{userId}:
  *   get:
  *     summary: Get current user
  *     tags: [User]
- *     security:
- *       - cookieAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         required: true
+ *         schema:
+ *           type: string
+ *           required: true
+ *           description: The user ID
  *     responses:
- *       200:
+ *       "200":
  *         description: User fetched successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/schemas/User"
+ *       "401":
+ *         description: Unauthorized
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/responses/401"
+ *       "403":
+ *         description: Forbidden
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/responses/403"
+ *       "404":
+ *         description: Not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/responses/404"
+ *       "500":
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/responses/500"
  */
 
 /**
- * @openapi
- * /api/v1/user/all:
- *   get:
- *     summary: Get all users (admin)
+ * @swagger
+ *  /api/v1/user/:
+ *    get:
+ *      summary: Get all users (admin)
+ *      tags: [User]
+ *      responses:
+ *        "200":
+ *          description: Users fetched successfully
+ *            contents:
+ *              application/json:
+ *                schema:
+ *                  $ref: "#/components/schemas/User"
+ *        "400":
+ *          description: Bad request
+ *            contents:
+ *              application/json:
+ *                schema:
+ *                  $ref: "#/components/responses/400"
+ *        "401":
+ *          description: Unauthorized
+ *            contents:
+ *              application/json:
+ *                schema:
+ *                  $ref: "#/components/responses/401"
+ *        "403":
+ *          description: Forbidden
+ *            contents:
+ *              application/json:
+ *                schema:
+ *                  $ref: "#/components/responses/403"
+ *        "404":
+ *          description: Not found
+ *            contents:
+ *              application/json:
+ *                schema:
+ *                  $ref: "#/components/responses/404"
+ *        "500":
+ *          description: Internal server error
+ *            contents:
+ *              application/json:
+ *                schema:
+ *                  $ref: "#/components/responses/500"
+ */
+
+/**
+ * @swagger
+ * /api/v1/user/{userId}: 
+ *   delete:
+ *     summary: Delete user
  *     tags: [User]
- *     security:
- *       - cookieAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         required: true
+ *         schema:
+ *           type: string
+ *           required: true
+ *           description: The user ID
  *     responses:
- *       200:
- *         description: Users fetched successfully
+ *       "204":
+ *         description: User deleted successfully
+ *         content:
+ *           application/json
+ *       "401":
+ *         description: Unauthorized
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/responses/401"
+ *       "403":
+ *         description: Forbidden
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/responses/403"
+ *       "404":
+ *         description: Not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/responses/404"
+ *       "500":
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/responses/500"
  */
 
 class UserRouter {
@@ -70,7 +213,7 @@ class UserRouter {
 
   initializeRoutes() {
     this.router.put(
-      "/update",
+      "/:userId",
       authMiddleware,
       roleGuardMiddleware(["customer", "vendor"]),
       validateEditUser,
@@ -78,17 +221,24 @@ class UserRouter {
     );
 
     this.router.get(
-      "/current-user",
+      "/:userId",
       authMiddleware,
       roleGuardMiddleware(["customer", "vendor"]),
       this.userController.getCurrentUser,
     );
 
     this.router.get(
-      "/all",
+      "/",
       authMiddleware,
       roleGuardMiddleware(["admin"]),
       this.userController.getAllUsers,
+    );
+
+    this.router.delete(
+      "/:userId",
+      authMiddleware,
+      roleGuardMiddleware(["admin"]),
+      this.userController.deleteUser,
     );
   }
 }

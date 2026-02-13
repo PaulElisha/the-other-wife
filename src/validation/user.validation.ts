@@ -8,10 +8,10 @@ import { HttpStatus } from "../config/http.config.js";
 import { ErrorCode } from "../enums/error-code.enum.js";
 
 const editUserSchema = Joi.object({
-  firstName: Joi.string().trim().required(),
-  lastName: Joi.string().trim().required(),
-  email: Joi.string().trim().email().max(255).required(),
-  phoneNumber: Joi.string().trim().required(),
+  firstName: Joi.string().trim().optional(),
+  lastName: Joi.string().trim().optional(),
+  email: Joi.string().trim().email().max(255).optional(),
+  phoneNumber: Joi.string().trim().optional(),
 });
 
 export const validateEditUser = (
