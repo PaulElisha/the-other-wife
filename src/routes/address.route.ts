@@ -11,7 +11,7 @@ import {
 
 /**
  * @swagger
- * /api/v1/addresses/
+ * /api/v1/addresses/create:
  *   post:
  *     summary: Create address
  *     tags: [Address]
@@ -277,7 +277,7 @@ class AddressRouter {
 
   initializeRoutes() {
     this.router.post(
-      "/",
+      "/create",
       authMiddleware,
       roleGuardMiddleware(["customer", "vendor"]),
       validateCreateAddress,
