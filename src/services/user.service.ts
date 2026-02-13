@@ -1,14 +1,12 @@
 /** @format */
 
-import mongoose from "mongoose";
-
 import User from "../models/user.model.js";
 import { NotFoundException } from "../errors/not-found-exception.error.js";
 import { HttpStatus } from "../config/http.config.js";
 import { ErrorCode } from "../enums/error-code.enum.js";
 
 export class UserService {
-  getCurrentUser = async (userId: mongoose.Types.ObjectId | undefined) => {
+  getCurrentUser = async (userId: string) => {
     if (!userId) {
       throw new NotFoundException(
         "User not logged in",
@@ -40,17 +38,17 @@ export class UserService {
       );
     }
 
-    return { users };
+    return users;
   };
 
   editUser = async (
-    userId: mongoose.Types.ObjectId | undefined,
-    body: {
+    userId: string,
+    body: Partial<{
       firstName: string;
       lastName: string;
       email: string;
       phoneNumber: string;
-    },
+    }>,
   ) => {
     const { firstName, lastName, email, phoneNumber } = body;
 

@@ -4,6 +4,7 @@ import type { Request, Response, NextFunction } from "express";
 import { handleAsyncControl } from "../middlewares/handleAsyncControl.middleware.js";
 import { AddressService } from "../services/address.service.js";
 import { HttpStatus } from "../config/http.config.js";
+import { ApiResponse } from "../utils/response.util.js";
 
 export class AddressController {
   addressService: AddressService;
@@ -29,9 +30,8 @@ export class AddressController {
         }
       >,
       res: Response,
-      next: NextFunction,
     ): Promise<Response> => {
-      const userId = req.user?._id;
+      const userId = req.user?._id as unknown as string;
       try {
         const userAddress = await this.addressService.createUserAddress(
           userId,
@@ -49,8 +49,8 @@ export class AddressController {
         return res.status(HttpStatus.CREATED).json({
           status: "ok",
           message: "Address created successfully",
-          userAddress,
-        });
+          data: userAddress,
+        } as ApiResponse);
       } catch (error) {
         throw error;
       }
@@ -61,7 +61,6 @@ export class AddressController {
     async (
       req: Request<{ addressId: string }>,
       res: Response,
-      next: NextFunction,
     ): Promise<Response> => {
       try {
         const userAddress = await this.addressService.editUserAddress(
@@ -77,11 +76,11 @@ export class AddressController {
           req.body.isDefault,
         );
 
-        return res.status(HttpStatus.NO_CONTENT).json({
+        return res.status(HttpStatus.OK).json({
           status: "ok",
           message: "Address updated successfully",
-          userAddress,
-        });
+          data: userAddress,
+        } as ApiResponse);
       } catch (error) {
         throw error;
       }
@@ -92,7 +91,6 @@ export class AddressController {
     async (
       req: Request<{ addressId: string }>,
       res: Response,
-      next: NextFunction,
     ): Promise<Response> => {
       const { addressId } = req.params;
       try {
@@ -102,8 +100,8 @@ export class AddressController {
         return res.status(HttpStatus.OK).json({
           status: "ok",
           message: "Default address set successfully",
-          defaultAddress,
-        });
+          data: defaultAddress,
+        } as ApiResponse);
       } catch (error) {
         throw error;
       }
@@ -114,15 +112,11 @@ export class AddressController {
     async (
       req: Request<{ addressId: string }>,
       res: Response,
-      next: NextFunction,
     ): Promise<Response> => {
       const { addressId } = req.params;
       try {
         await this.addressService.deleteUserAddress(addressId);
-        return res.status(HttpStatus.NO_CONTENT).json({
-          status: "ok",
-          message: "Address deleted successfully",
-        });
+        return res.status(HttpStatus.NO_CONTENT).send();
       } catch (error) {
         throw error;
       }
@@ -130,20 +124,17 @@ export class AddressController {
   );
 
   getUserAddresses = handleAsyncControl(
-    async (
-      req: Request<{ userId: string }>,
-      res: Response,
-      next: NextFunction,
-    ): Promise<Response> => {
-      const { userId } = req.params;
+    async (req: Request<{}>, res: Response): Promise<Response> => {
+      const userId = req.user?._id as unknown as string;
+
       try {
         const userAddresses =
           await this.addressService.getUserAddresses(userId);
         return res.status(HttpStatus.OK).json({
           status: "ok",
           message: "User addresses fetched successfully",
-          userAddresses,
-        });
+          data: userAddresses,
+        } as ApiResponse);
       } catch (error) {
         throw error;
       }

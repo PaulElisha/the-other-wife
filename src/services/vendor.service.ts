@@ -26,7 +26,7 @@ export class VendorService {
     return { vendor };
   };
 
-  approveVendor = async (vendorId: string, userId: string | undefined) => {
+  approveVendor = async (vendorId: string, userId: string) => {
     const user = await User.findById(userId);
     const isAdmin = user?.userType === "admin";
     if (!isAdmin) {
@@ -121,7 +121,5 @@ export class VendorService {
 
     await user.deleteOne();
     await vendor.deleteOne();
-
-    return { vendor };
   };
 }

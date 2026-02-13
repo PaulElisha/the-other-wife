@@ -8,6 +8,7 @@ import { NextFunction, Request, Response } from "express";
 import { HttpStatus } from "../config/http.config.js";
 
 import { nodeEnv } from "../constants/constants.js";
+import { ApiResponse } from "../utils/response.util.js";
 
 export class AuthController {
   authService: AuthService;
@@ -32,14 +33,8 @@ export class AuthController {
       >,
       res: Response,
     ): Promise<Response> => {
-      const {
-        firstName,
-        lastName,
-        email,
-        password,
-        userType,
-        phoneNumber,
-      } = req.body;
+      const { firstName, lastName, email, password, userType, phoneNumber } =
+        req.body;
 
       try {
         const { userId } = await this.authService.signup({
@@ -53,8 +48,8 @@ export class AuthController {
         return res.status(HttpStatus.OK).json({
           status: "ok",
           message: "User registered successfully",
-          userId,
-        });
+          data: { userId },
+        } as ApiResponse);
       } catch (error) {
         throw error;
       }
@@ -69,7 +64,6 @@ export class AuthController {
         { phoneNumber?: string; email?: string; password: string }
       >,
       res: Response,
-      next: NextFunction,
     ): Promise<any> => {
       const { phoneNumber, email, password } = req.body;
 
@@ -87,7 +81,10 @@ export class AuthController {
             secure: nodeEnv === "production",
           })
           .status(HttpStatus.OK)
-          .json({ status: "ok", message: "User login successful" });
+          .json({
+            status: "ok",
+            message: "User login successful",
+          } as ApiResponse);
       } catch (error) {
         throw error;
       }
@@ -99,9 +96,7 @@ export class AuthController {
       try {
         const { cookieOptions } = this.authService.logout();
         res.clearCookie("token", cookieOptions);
-        return res
-          .status(HttpStatus.OK)
-          .json({ status: "ok", message: "User logged out successfully" });
+        return res.status(HttpStatus.NO_CONTENT).send();
       } catch (error) {
         throw error;
       }

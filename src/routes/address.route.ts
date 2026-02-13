@@ -11,7 +11,7 @@ import {
 
 /**
  * @swagger
- * /api/v1/addresses/create:
+ * /api/v1/addresses/:
  *   post:
  *     summary: Create address
  *     tags: [Address]
@@ -95,7 +95,7 @@ import {
  *               longitude: { type: number }
  *               isDefault: { type: boolean }
  *     responses:
- *       "204":
+ *       "200":
  *         description: Address updated successfully
  *         content:
  *           application/json:
@@ -220,7 +220,7 @@ import {
 
 /**
  * @swagger
- * /api/v1/addresses/{userId}:
+ * /api/v1/addresses/me:
  *   get:
  *     summary: Get user addresses
  *     tags: [Address]
@@ -277,7 +277,7 @@ class AddressRouter {
 
   initializeRoutes() {
     this.router.post(
-      "/create",
+      "/",
       authMiddleware,
       roleGuardMiddleware(["customer", "vendor"]),
       validateCreateAddress,
@@ -307,7 +307,7 @@ class AddressRouter {
     );
 
     this.router.get(
-      "/:userId",
+      "/me",
       authMiddleware,
       roleGuardMiddleware(["customer", "vendor"]),
       this.addressController.getUserAddresses,

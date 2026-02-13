@@ -11,7 +11,7 @@ export class AddressService {
   constructor() {}
 
   createUserAddress = async (
-    userId: mongoose.Types.ObjectId | undefined,
+    userId: string,
     city: string,
     state: string,
     country: string,
@@ -22,6 +22,15 @@ export class AddressService {
     address?: string,
     isDefault?: boolean,
   ) => {
+    userId &&
+      (() => {
+        throw new NotFoundException(
+          "User not found",
+          HttpStatus.NOT_FOUND,
+          ErrorCode.RESOURCE_NOT_FOUND,
+        );
+      })();
+
     const userAddress = await Address.create({
       userId,
       city,
@@ -120,10 +129,19 @@ export class AddressService {
     })();
 
   getUserAddresses = async (userId: string) => {
-    const userAddresses = await Address.findOne(
-      { userId },
-      "isDefault",
-    ).populate("userId", "firstName lastName");
+    userId &&
+      (() => {
+        throw new NotFoundException(
+          "User not found",
+          HttpStatus.NOT_FOUND,
+          ErrorCode.RESOURCE_NOT_FOUND,
+        );
+      })();
+
+    const userAddresses = await Address.find({ userId }).populate(
+      "userId",
+      "firstName lastName",
+    );
     if (!userAddresses) {
       throw new NotFoundException(
         "Address not found",

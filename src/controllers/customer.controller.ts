@@ -4,6 +4,7 @@ import { HttpStatus } from "../config/http.config.js";
 import { handleAsyncControl } from "../middlewares/handleAsyncControl.middleware.js";
 import { CustomerService } from "../services/customer.service.js";
 import { Request, Response } from "express";
+import { ApiResponse } from "../utils/response.util.js";
 
 export class CustomerController {
   customerService: CustomerService;
@@ -23,8 +24,8 @@ export class CustomerController {
         return res.status(HttpStatus.OK).json({
           status: "ok",
           message: "Customer profile fetched",
-          customer,
-        });
+          data: customer,
+        } as ApiResponse);
       } catch (error) {
         throw error;
       }
@@ -44,8 +45,12 @@ export class CustomerController {
           profileImageUrl,
         );
         return res
-          .status(HttpStatus.NO_CONTENT)
-          .json({ status: "ok", message: "Customer updated", customer });
+          .status(HttpStatus.OK)
+          .json({
+            status: "ok",
+            message: "Customer updated",
+            data: customer,
+          } as ApiResponse);
       } catch (error) {
         throw error;
       }
@@ -60,9 +65,7 @@ export class CustomerController {
       try {
         const { customerId } = req.params;
         await this.customerService.deleteCustomerProfile(customerId);
-        return res
-          .status(HttpStatus.NO_CONTENT)
-          .json({ status: "ok", message: "Customer deleted" });
+        return res.status(HttpStatus.NO_CONTENT).send();
       } catch (error) {
         throw error;
       }

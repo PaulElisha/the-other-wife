@@ -68,7 +68,7 @@ import { roleGuardMiddleware } from "../middlewares/role-guard.middleware.js";
  *           description: The vendor ID
  *
  *     responses:
- *       "204":
+ *       "200":
  *         description: Vendor approved successfully
  *         content:
  *           application/json
@@ -121,7 +121,7 @@ import { roleGuardMiddleware } from "../middlewares/role-guard.middleware.js";
  *             properties:
  *               rejectionReason: { type: string }
  *     responses:
- *       "204":
+ *       "200":
  *         description: Vendor rejected successfully
  *         content:
  *           application/json
@@ -166,7 +166,7 @@ import { roleGuardMiddleware } from "../middlewares/role-guard.middleware.js";
  *           required: true
  *           description: The vendor ID
  *     responses:
- *       "204":
+ *       "200":
  *         description: Vendor suspended successfully
  *         content:
  *           application/json

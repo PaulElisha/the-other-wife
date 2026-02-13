@@ -32,7 +32,7 @@ import { validateAddToCart } from "../validation/cart.validation.js";
  *                 type: number
  *                 required: true
  *                 description: The quantity of the meal to add to the cart
- *               
+ *
  *               action:
  *                 type: string
  *                 required: true
@@ -118,7 +118,7 @@ import { validateAddToCart } from "../validation/cart.validation.js";
 
 /**
  * @openapi
- * /api/v1/carts/{userId}:
+ * /api/v1/carts/me:
  *   get:
  *     summary: Get current user cart
  *     tags: [Cart]
@@ -187,7 +187,7 @@ export class CartRouter {
       this.cartController.deleteFromCart,
     );
     this.router.get(
-      "/:userId",
+      "/me",
       authMiddleware,
       roleGuardMiddleware(["customer"]),
       this.cartController.getUserCart,

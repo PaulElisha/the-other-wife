@@ -84,6 +84,7 @@ const swaggerDefinition = {
           userType: {
             type: "string",
             description: "The user type",
+            $ref: "#/components/schemas/UserType",
           },
         },
       },

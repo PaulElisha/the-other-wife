@@ -70,7 +70,5 @@ export class CustomerService {
 
     await user.deleteOne();
     await customer.deleteOne();
-
-    return { customer };
   };
 }

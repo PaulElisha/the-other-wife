@@ -4,6 +4,7 @@ import { HttpStatus } from "../config/http.config.js";
 import { handleAsyncControl } from "../middlewares/handleAsyncControl.middleware.js";
 import { VendorService } from "../services/vendor.service.js";
 import { Request, Response } from "express";
+import { ApiResponse } from "../utils/response.util.js";
 
 export class VendorController {
   vendorService: VendorService;
@@ -22,8 +23,8 @@ export class VendorController {
         return res.status(HttpStatus.OK).json({
           status: "ok",
           message: "Vendor profile retrieved successfully",
-          vendor,
-        });
+          data: vendor,
+        } as ApiResponse);
       } catch (error) {
         throw error;
       }
@@ -36,15 +37,15 @@ export class VendorController {
       res: Response,
     ): Promise<Response> => {
       const vendorId = req.params.vendorId;
-      const userId = req.user?._id?.toString();
+      const userId = req.user?._id as unknown as string;
 
       try {
         const vendor = await this.vendorService.approveVendor(vendorId, userId);
-        return res.status(HttpStatus.NO_CONTENT).json({
+        return res.status(HttpStatus.OK).json({
           status: "ok",
           message: "Vendor approved successfully",
-          vendor,
-        });
+          data: vendor,
+        } as ApiResponse);
       } catch (error) {
         throw error;
       }
@@ -70,11 +71,11 @@ export class VendorController {
           vendorId,
           rejectionReason,
         );
-        return res.status(HttpStatus.NO_CONTENT).json({
+        return res.status(HttpStatus.OK).json({
           status: "ok",
           message: "Vendor rejected successfully",
-          vendor,
-        });
+          data: vendor,
+        } as ApiResponse);
       } catch (error) {
         throw error;
       }
@@ -90,11 +91,11 @@ export class VendorController {
 
       try {
         const vendor = await this.vendorService.suspendVendor(vendorId);
-        return res.status(HttpStatus.NO_CONTENT).json({
+        return res.status(HttpStatus.OK).json({
           status: "ok",
           message: "Vendor suspended successfully",
-          vendor,
-        });
+          data: vendor,
+        } as ApiResponse);
       } catch (error) {
         throw error;
       }
@@ -109,12 +110,8 @@ export class VendorController {
       const vendorId = req.params.vendorId;
 
       try {
-        const vendor = await this.vendorService.deleteVendorProfile(vendorId);
-        return res.status(HttpStatus.NO_CONTENT).json({
-          status: "ok",
-          message: "Vendor profile deleted successfully",
-          vendor,
-        });
+        await this.vendorService.deleteVendorProfile(vendorId);
+        return res.status(HttpStatus.NO_CONTENT).send();
       } catch (error) {
         throw error;
       }

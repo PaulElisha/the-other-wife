@@ -115,7 +115,7 @@ import { roleGuardMiddleware } from "../middlewares/role-guard.middleware.js";
  *     summary: Logout user
  *     tags: [Auth]
  *     responses:
- *       "200":
+ *       "204":
  *         description: User logged out successfully
  *         content:
  *           application/json:

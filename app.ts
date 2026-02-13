@@ -71,7 +71,6 @@ export class App {
     this.app.use("/api/v1/vendors", vendorRouter);
     this.app.use("/api/v1/carts", cartRouter);
 
-    // Serve Swagger UI with CDN assets (works better in serverless)
     this.app.get("/api-docs", (req, res) => {
       res.send(`
 <!DOCTYPE html>
@@ -124,14 +123,9 @@ export class App {
   }
 }
 
-// const app = new App();
-// app.startServer();
-
 const appInstance = new App();
 const app = appInstance.app;
 
-// Only start the server if this file is the main entry point (not imported by Vercel)
-// In Vercel, we export the app to be used as a serverless function
 if (import.meta.url === `file://${process.argv[1]}`) {
   appInstance.startServer();
 }

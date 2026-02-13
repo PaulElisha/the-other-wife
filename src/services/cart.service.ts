@@ -9,7 +9,7 @@ import Meal from "../models/meal.model.js";
 
 export class CartService {
   addToCart = async (
-    customerId: string | undefined,
+    customerId: string,
     mealId: string,
     quantity: number,
     action: "increment" | "decrement" | undefined,
@@ -61,8 +61,9 @@ export class CartService {
       );
 
       await existingCart.save();
+      return existingCart;
     } else {
-      await Cart.create({
+      const cart = await Cart.create({
         customerId,
         meals: [
           {
@@ -74,10 +75,11 @@ export class CartService {
         ],
         totalAmount: meal.price * quantity,
       });
+      return cart;
     }
   };
 
-  deleteFromCart = async (customerId: string | undefined, mealId: string) => {
+  deleteFromCart = async (customerId: string, mealId: string) => {
     const meal = await Meal.findById(mealId);
     const existingCart = await Cart.findOne({ customerId });
 
@@ -102,7 +104,6 @@ export class CartService {
         );
       }
 
-      const removedMeal = existingCart.meals[mealIndex];
       existingCart.meals.splice(mealIndex, 1);
       existingCart.totalAmount = existingCart.meals.reduce(
         (total, meal, index) =>
@@ -114,7 +115,7 @@ export class CartService {
     }
   };
 
-  getUserCart = async (customerId: string | undefined) =>
+  getUserCart = async (customerId: string) =>
     (await Cart.findOne({ customerId })) ??
     (() => {
       throw new NotFoundException(

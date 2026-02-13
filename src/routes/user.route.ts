@@ -9,7 +9,7 @@ import { authMiddleware } from "../middlewares/auth.middleware.js";
 
 /**
  * @swagger
- * /api/v1/users/{userId}:
+ * /api/v1/users/edit:
  *   put:
  *     summary: Update user
  *     tags: [User]
@@ -34,7 +34,7 @@ import { authMiddleware } from "../middlewares/auth.middleware.js";
  *               email: { type: string, format: email }
  *               phoneNumber: { type: string }
  *     responses:
- *       "204":
+ *       "200":
  *         description: User updated successfully
  *         content:
  *           application/json
@@ -160,7 +160,7 @@ class UserRouter {
 
   initializeRoutes() {
     this.router.put(
-      "/:userId",
+      "/edit",
       authMiddleware,
       roleGuardMiddleware(["customer", "vendor"]),
       validateEditUser,

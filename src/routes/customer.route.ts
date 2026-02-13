@@ -76,7 +76,7 @@ import { roleGuardMiddleware } from "../middlewares/role-guard.middleware.js";
  *             properties:
  *               profileImageUrl: { type: string }
  *     responses:
- *       "204":
+ *       "200":
  *         description: Customer updated
  *         content:
  *           application/json

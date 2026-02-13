@@ -4,6 +4,7 @@ import { Request, Response } from "express";
 import { handleAsyncControl } from "../middlewares/handleAsyncControl.middleware.js";
 import { UserService } from "../services/user.service.js";
 import { HttpStatus } from "../config/http.config.js";
+import { ApiResponse } from "../utils/response.util.js";
 
 export class UserController {
   userService: UserService;
@@ -14,13 +15,14 @@ export class UserController {
 
   getCurrentUser = handleAsyncControl(
     async (req: Request, res: Response): Promise<Response> => {
+      const userId = req?.user?._id as unknown as string;
       try {
-        const { user } = await this.userService.getCurrentUser(req.user?._id);
+        const { user } = await this.userService.getCurrentUser(userId);
         return res.status(HttpStatus.OK).json({
           data: user,
           status: "ok",
           message: "User fetched successfully",
-        });
+        } as ApiResponse);
       } catch (error) {
         throw error;
       }
@@ -30,12 +32,12 @@ export class UserController {
   getAllUsers = handleAsyncControl(
     async (req: Request, res: Response): Promise<Response> => {
       try {
-        const { users } = await this.userService.getAllUsers();
+        const users = await this.userService.getAllUsers();
         return res.status(HttpStatus.OK).json({
           data: users,
           status: "ok",
           message: "Users fetched successfully",
-        });
+        } as ApiResponse);
       } catch (error) {
         throw error;
       }
@@ -44,16 +46,14 @@ export class UserController {
 
   editUser = handleAsyncControl(
     async (req: Request, res: Response): Promise<Response> => {
+      const userId = req?.user?._id as unknown as string;
       try {
-        const { user } = await this.userService.editUser(
-          req.user?._id,
-          req.body,
-        );
-        return res.status(HttpStatus.NO_CONTENT).json({
+        const { user } = await this.userService.editUser(userId, req.body);
+        return res.status(HttpStatus.OK).json({
           data: user,
           status: "ok",
           message: "User updated successfully",
-        });
+        } as ApiResponse);
       } catch (error) {
         throw error;
       }
