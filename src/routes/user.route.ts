@@ -9,7 +9,7 @@ import { authMiddleware } from "../middlewares/auth.middleware.js";
 
 /**
  * @swagger
- * /api/v1/users/{userId}
+ * /api/v1/users/{userId}:
  *   put:
  *     summary: Update user
  *     tags: [User]
@@ -66,7 +66,7 @@ import { authMiddleware } from "../middlewares/auth.middleware.js";
 
 /**
  * @swagger
- * /api/v1/users/me
+ * /api/v1/users/me:
  *   get:
  *     summary: Get current user
  *     tags: [User]
@@ -105,7 +105,7 @@ import { authMiddleware } from "../middlewares/auth.middleware.js";
 
 /**
  * @swagger
- *  /api/v1/users/:
+ *  /api/v1/users:
  *    get:
  *      summary: Get all users (admin)
  *      tags: [User]

@@ -15,11 +15,10 @@ import { roleGuardMiddleware } from "../middlewares/role-guard.middleware.js";
  *       - in: path
  *         name: vendorId
  *         required: true
- *         schema: {
+ *         schema:
  *           type: string
  *           required: true
  *           description: The vendor ID
- *         }
  *     responses:
  *       "200":
  *         description: Vendor profile retrieved successfully
@@ -63,11 +62,11 @@ import { roleGuardMiddleware } from "../middlewares/role-guard.middleware.js";
  *       - in: path
  *         name: vendorId
  *         required: true
- *         schema: {
+ *         schema:
  *           type: string
  *           required: true
  *           description: The vendor ID
- *         }
+ *
  *     responses:
  *       "204":
  *         description: Vendor approved successfully

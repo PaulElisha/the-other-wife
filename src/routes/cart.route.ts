@@ -28,17 +28,16 @@ import { validateAddToCart } from "../validation/cart.validation.js";
  *             type: object
  *             required: ["quantity", "action"]
  *             properties:
- *               quantity: {
- *                 type: number,
- *                 required: true,
+ *               quantity:
+ *                 type: number
+ *                 required: true
  *                 description: The quantity of the meal to add to the cart
- *               },
- *               action: {
- *                 type: string,
- *                 required: true,
- *                 enum: ["increment", "decrement"],
+ *               
+ *               action:
+ *                 type: string
+ *                 required: true
+ *                 enum: ["increment", "decrement"]
  *                 description: The action to perform on the meal in the cart
- *               }
  *     responses:
  *       "200":
  *         description: Meal added to cart successfully
