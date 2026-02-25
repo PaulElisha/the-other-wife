@@ -14,6 +14,7 @@ export class UserService {
         ErrorCode.AUTH_USER_NOT_FOUND,
       );
     }
+
     const user = await User.findById(userId).select("-passwordHash");
 
     if (!user) {
@@ -39,36 +40,5 @@ export class UserService {
     }
 
     return users;
-  };
-
-  editUser = async (
-    userId: string,
-    body: Partial<{
-      firstName: string;
-      lastName: string;
-      email: string;
-      phoneNumber: string;
-    }>,
-  ) => {
-    const { firstName, lastName, email, phoneNumber } = body;
-
-    const user = await User.findById(userId);
-
-    if (!user) {
-      throw new NotFoundException(
-        "User not found",
-        HttpStatus.NOT_FOUND,
-        ErrorCode.AUTH_USER_NOT_FOUND,
-      );
-    }
-
-    if (firstName) user.firstName = firstName;
-    if (lastName) user.lastName = lastName;
-    if (email) user.email = email;
-    if (phoneNumber) user.phoneNumber = phoneNumber;
-
-    await user.save();
-
-    return { user };
   };
 }

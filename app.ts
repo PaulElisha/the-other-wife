@@ -5,15 +5,15 @@ import cookieParser from "cookie-parser";
 import cors from "cors";
 import rateLimit from "express-rate-limit";
 import redoc from "redoc-express";
+import helmet from "helmet";
 
-import { errorHandler } from "./src/middlewares/errorHandler.middleware.js";
+import { fileURLToPath } from "node:url";
+import path, { dirname } from "node:path";
+import fs from "node:fs/promises";
 
-import {
-  hostName,
-  port,
-  corsOrigin,
-  mongoUri,
-} from "./src/constants/constants.js";
+import { errorHandler } from "./src/middlewares/error-handler.middleware.js";
+
+import { hostName, port, corsOrigin } from "./src/constants/constants.js";
 import { Db } from "./src/config/db.config.js";
 import { swaggerSpec } from "./src/config/swagger.config.js";
 
@@ -23,6 +23,7 @@ import { addressRouter } from "./src/routes/address.route.js";
 import { customerRouter } from "./src/routes/customer.route.js";
 import { vendorRouter } from "./src/routes/vendor.route.js";
 import { cartRouter } from "./src/routes/cart.route.js";
+import { HttpStatus } from "./src/config/http.config.js";
 
 export class App {
   app: Express;
@@ -37,6 +38,7 @@ export class App {
   }
 
   initiializeMiddlewares() {
+    this.app.use(helmet());
     this.app.use(express.json());
     this.app.use(express.urlencoded({ extended: true }));
     this.app.use(
@@ -58,8 +60,7 @@ export class App {
       }),
     );
 
-    // Ensure DB connection before handling requests (crucial for serverless)
-    this.app.use(async (req, res, next) => {
+    this.app.use(async (_req, _res, next) => {
       try {
         await this.db.connect();
         next();
@@ -74,8 +75,8 @@ export class App {
   }
 
   initializeRoutes() {
-    this.app.get("/", (req, res) => {
-      res.status(200).send("Welcome to The Other Wife API");
+    this.app.get("/", (_req, res) => {
+      res.status(HttpStatus.OK).send("Welcome to The Other Wife API");
     });
 
     this.app.use("/api/v1/auth", authRouter);
@@ -85,35 +86,19 @@ export class App {
     this.app.use("/api/v1/vendors", vendorRouter);
     this.app.use("/api/v1/carts", cartRouter);
 
-    this.app.get("/api-docs", (req, res) => {
-      res.send(`
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>The Other Wife API Docs</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5/swagger-ui.css" />
-</head>
-<body>
-  <div id="swagger-ui"></div>
-  <script src="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5/swagger-ui-bundle.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5/swagger-ui-standalone-preset.js"></script>
-  <script>
-    window.onload = () => {
-      window.ui = SwaggerUIBundle({
-        url: '/api-docs.json',
-        dom_id: '#swagger-ui',
-        presets: [
-          SwaggerUIBundle.presets.apis,
-          SwaggerUIStandalonePreset
-        ],
-        layout: "StandaloneLayout"
-      });
-    };
-  </script>
-</body>
-</html>
-      `);
+    this.app.get("/api-docs", async (_req, res) => {
+      const filePath = fileURLToPath(import.meta.url);
+      const _dirname = dirname(filePath);
+      const templatePath = path.join(_dirname, "src/utils/", "template.html");
+
+      try {
+        const template = await fs.readFile(templatePath, "utf-8");
+        res.send(`${template}`);
+      } catch (error: any) {
+        res
+          .status(HttpStatus.NOT_FOUND)
+          .send(`Error reading template ${error.message}`);
+      }
     });
 
     this.app.get(
@@ -123,7 +108,7 @@ export class App {
         specUrl: "/api-docs.json",
       }),
     );
-    this.app.get("/api-docs.json", (req, res) => {
+    this.app.get("/api-docs.json", (_req, res) => {
       res.json(swaggerSpec);
     });
 

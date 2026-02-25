@@ -3,10 +3,7 @@
 import mongoose from "mongoose";
 
 import { Db } from "../config/db.config.js";
-import MealCategory, {
-  CategoryValueType,
-  CategoryType,
-} from "../models/mealCategory.model.js";
+import MealCategory, { CategoryType } from "../models/mealCategory.model.js";
 
 import type { ClientSession } from "mongoose";
 
@@ -38,9 +35,10 @@ export class Seeder {
 
   run = async (): Promise<void> => {
     let session: ClientSession | undefined;
+    session = await this.startSession();
+
     try {
       await this.db?.connect();
-      session = await this.startSession();
       session.startTransaction();
 
       await this.clearExistingCategories(session);
@@ -84,7 +82,9 @@ export class Seeder {
   };
 }
 
-new Seeder()
-  .run()
-  .then(() => console.log("Seeding complete"))
-  .catch((err) => console.log("Seeding failed", err));
+if (import.meta.url === `file://${process.argv[1]}`) {
+  new Seeder()
+    .run()
+    .then(() => console.log("Seeding complete"))
+    .catch((err) => console.log("Seeding failed", err));
+}

@@ -7,6 +7,7 @@ export const hostName: string = envconfig.HOST_NAME;
 export const mongoUri: string = envconfig.MONGODB_URI;
 export const nodeEnv: string = envconfig.NODE_ENV;
 export const jwtSecret: string = envconfig.JWT_SECRET;
+export const jwtRefreshSecret: string = envconfig.JWT_REFRESH_SECRET;
 export const corsOrigin: string | string[] | undefined = envconfig.CORS_ORIGIN
   ? envconfig.CORS_ORIGIN.split(",").map((origin) => origin.trim())
   : undefined;
@@ -16,3 +17,4 @@ console.log("hostName", !!hostName);
 console.log("mongoUri", !!mongoUri);
 console.log("nodeEnv", !!nodeEnv);
 console.log("jwtSecret", !!jwtSecret);
+console.log("jwtRefreshSecret", !!jwtRefreshSecret);

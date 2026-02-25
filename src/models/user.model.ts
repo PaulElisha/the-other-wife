@@ -2,6 +2,7 @@
 
 import mongoose, { Document, Schema, model } from "mongoose";
 import bcrypt from "bcrypt";
+import { lowercase, trim } from "zod";
 
 export interface UserDocument extends Document {
   firstName: string;
@@ -10,8 +11,8 @@ export interface UserDocument extends Document {
   passwordHash: string;
   phoneNumber: string;
   pushToken: string;
-  resetToken: string | null;
-  resetTokenExpiry: number | null;
+  refreshToken: string;
+  refreshTokenExpiry: Date;
   status: string;
   userType: string;
   authType: string;
@@ -29,10 +30,12 @@ const UserSchema = new Schema(
     firstName: {
       type: String,
       required: true,
+      trim: true,
     },
     lastName: {
       type: String,
       required: true,
+      trim: true,
     },
     email: {
       type: String,
@@ -54,13 +57,14 @@ const UserSchema = new Schema(
       type: String,
       required: false,
     },
-    resetToken: {
+    refreshToken: {
       type: String,
       required: false,
     },
-    resetTokenExpiry: {
+    refreshTokenExpiry: {
       type: Date,
       required: false,
+      default: new Date(Date.now() + 1000 * 60 * 60 * 24 * 30),
     },
     status: {
       type: String,
@@ -74,8 +78,8 @@ const UserSchema = new Schema(
     },
     authType: {
       type: String,
-      enum: ["email", "google", "phone"],
-      default: "phone",
+      enum: ["email", "google", "phoneNumber"],
+      default: "phoneNumber",
     },
     isEmailVerified: {
       type: Boolean,

@@ -1,10 +1,10 @@
 /** @format */
 
 import { HttpStatus } from "../config/http.config.js";
-import { handleAsyncControl } from "../middlewares/handleAsyncControl.middleware.js";
+import { handleAsyncControl } from "../middlewares/handle-async-control.middleware.js";
 import { VendorService } from "../services/vendor.service.js";
-import { Request, Response } from "express";
-import { ApiResponse } from "../utils/response.util.js";
+import type { Request, Response } from "express";
+import { ApiResponse } from "../util/response.util.js";
 
 export class VendorController {
   vendorService: VendorService;
@@ -38,9 +38,14 @@ export class VendorController {
     ): Promise<Response> => {
       const vendorId = req.params.vendorId;
       const userId = req.user?._id as unknown as string;
+      const userType = req.user?.userType as unknown as string;
 
       try {
-        const vendor = await this.vendorService.approveVendor(vendorId, userId);
+        const vendor = await this.vendorService.approveVendor(
+          vendorId,
+          userId,
+          userType,
+        );
         return res.status(HttpStatus.OK).json({
           status: "ok",
           message: "Vendor approved successfully",

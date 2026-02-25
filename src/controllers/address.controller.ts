@@ -1,10 +1,10 @@
 /** @format */
 
 import type { Request, Response, NextFunction } from "express";
-import { handleAsyncControl } from "../middlewares/handleAsyncControl.middleware.js";
+import { handleAsyncControl } from "../middlewares/handle-async-control.middleware.js";
 import { AddressService } from "../services/address.service.js";
 import { HttpStatus } from "../config/http.config.js";
-import { ApiResponse } from "../utils/response.util.js";
+import { ApiResponse } from "../util/response.util.js";
 
 export class AddressController {
   addressService: AddressService;
@@ -58,13 +58,11 @@ export class AddressController {
   );
 
   editUserAddress = handleAsyncControl(
-    async (
-      req: Request<{ addressId: string }>,
-      res: Response,
-    ): Promise<Response> => {
+    async (req: Request<{ id: string }>, res: Response): Promise<Response> => {
+      const { id: addressId } = req.params;
       try {
         const userAddress = await this.addressService.editUserAddress(
-          req.params.addressId,
+          addressId,
           req.body.city,
           req.body.state,
           req.body.country,
@@ -88,11 +86,8 @@ export class AddressController {
   );
 
   toggleDefaultAddress = handleAsyncControl(
-    async (
-      req: Request<{ addressId: string }>,
-      res: Response,
-    ): Promise<Response> => {
-      const { addressId } = req.params;
+    async (req: Request<{ id: string }>, res: Response): Promise<Response> => {
+      const { id: addressId } = req.params;
       try {
         const defaultAddress =
           await this.addressService.toggleDefaultAddress(addressId);
@@ -109,11 +104,8 @@ export class AddressController {
   );
 
   deleteUserAddress = handleAsyncControl(
-    async (
-      req: Request<{ addressId: string }>,
-      res: Response,
-    ): Promise<Response> => {
-      const { addressId } = req.params;
+    async (req: Request<{ id: string }>, res: Response): Promise<Response> => {
+      const { id: addressId } = req.params;
       try {
         await this.addressService.deleteUserAddress(addressId);
         return res.status(HttpStatus.NO_CONTENT).send();

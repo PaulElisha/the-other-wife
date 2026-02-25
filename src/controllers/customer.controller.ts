@@ -1,10 +1,10 @@
 /** @format */
 
 import { HttpStatus } from "../config/http.config.js";
-import { handleAsyncControl } from "../middlewares/handleAsyncControl.middleware.js";
+import { handleAsyncControl } from "../middlewares/handle-async-control.middleware.js";
 import { CustomerService } from "../services/customer.service.js";
-import { Request, Response } from "express";
-import { ApiResponse } from "../utils/response.util.js";
+import type { Request, Response } from "express";
+import { ApiResponse } from "../util/response.util.js";
 
 export class CustomerController {
   customerService: CustomerService;
@@ -14,13 +14,13 @@ export class CustomerController {
 
   getCustomerProfile = handleAsyncControl(
     async (
-      req: Request<{ customerId: string }>,
+      req: Request<{ userId: string }>,
       res: Response,
     ): Promise<Response> => {
       try {
-        const { customerId } = req.params;
+        const { userId } = req.params;
         const { customer } =
-          await this.customerService.getCustomerProfile(customerId);
+          await this.customerService.getCustomerProfile(userId);
         return res.status(HttpStatus.OK).json({
           status: "ok",
           message: "Customer profile fetched",
@@ -34,23 +34,21 @@ export class CustomerController {
 
   updateCustomerProfile = handleAsyncControl(
     async (
-      req: Request<{ customerId: string }>,
+      req: Request<{ userId: string }>,
       res: Response,
     ): Promise<Response> => {
       try {
-        const { customerId } = req.params;
+        const { userId } = req.params;
         const { profileImageUrl } = req.body;
         const { customer } = await this.customerService.updateCustomerProfile(
-          customerId,
+          userId,
           profileImageUrl,
         );
-        return res
-          .status(HttpStatus.OK)
-          .json({
-            status: "ok",
-            message: "Customer updated",
-            data: customer,
-          } as ApiResponse);
+        return res.status(HttpStatus.OK).json({
+          status: "ok",
+          message: "Customer updated",
+          data: customer,
+        } as ApiResponse);
       } catch (error) {
         throw error;
       }
@@ -59,12 +57,12 @@ export class CustomerController {
 
   deleteCustomerProfile = handleAsyncControl(
     async (
-      req: Request<{ customerId: string }>,
+      req: Request<{ userId: string }>,
       res: Response,
     ): Promise<Response> => {
       try {
-        const { customerId } = req.params;
-        await this.customerService.deleteCustomerProfile(customerId);
+        const { userId } = req.params;
+        await this.customerService.deleteCustomerProfile(userId);
         return res.status(HttpStatus.NO_CONTENT).send();
       } catch (error) {
         throw error;

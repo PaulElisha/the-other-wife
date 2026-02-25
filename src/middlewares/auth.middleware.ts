@@ -1,20 +1,23 @@
 /** @format */
 
-import { Request, Response, NextFunction } from "express";
+import type { Request, Response, NextFunction } from "express";
 import { UnauthorizedExceptionError } from "../errors/unauthorized-exception.error.js";
 import { HttpStatus } from "../config/http.config.js";
 import { ErrorCode } from "../enums/error-code.enum.js";
 
-import jwt from "jsonwebtoken";
-import User from "../models/user.model.js";
 import { jwtSecret } from "../constants/constants.js";
+
+import User from "../models/user.model.js";
+import { verifyToken } from "../util/generate-token.util.js";
+
+import fs from "node:fs/promises";
 
 export const authMiddleware = async (
   req: Request,
   res: Response,
   next: NextFunction,
 ) => {
-  let accessToken = req.cookies?.token;
+  const accessToken = req.cookies.token;
 
   accessToken ??
     (() => {
@@ -26,21 +29,24 @@ export const authMiddleware = async (
     })();
 
   try {
-    const decoded = jwt.verify(accessToken, jwtSecret);
+    const decoded = verifyToken(accessToken, jwtSecret);
 
     if (!decoded || typeof decoded === "string") {
       throw new UnauthorizedExceptionError(
-        "Unauthorized. Please log in.",
+        `Unauthorized
+        Reason: ${decoded}`,
         HttpStatus.UNAUTHORIZED,
         ErrorCode.AUTH_UNAUTHORIZED_ACCESS,
       );
     }
 
     req.user = await User.findById(decoded.id).select("-passwordHash");
+    console.log("User: ", req.user);
 
     if (!req.user)
       throw new UnauthorizedExceptionError(
-        "Unauthorized. Please log in.",
+        `Unauthorized
+        Reason: User not found ${req.user}`,
         HttpStatus.UNAUTHORIZED,
         ErrorCode.AUTH_UNAUTHORIZED_ACCESS,
       );

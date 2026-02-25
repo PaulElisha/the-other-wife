@@ -257,36 +257,32 @@ class VendorRouter {
     this.vendorController = new VendorController();
     this.router = Router();
     this.initializeRoutes();
+    this.router.use(authMiddleware);
   }
 
   initializeRoutes() {
     this.router.get(
       "/:vendorId",
-      authMiddleware,
       roleGuardMiddleware(["vendor", "admin"]),
       this.vendorController.getVendorProfile,
     );
     this.router.put(
       "/approve/:vendorId",
-      authMiddleware,
       roleGuardMiddleware(["admin"]),
       this.vendorController.approveVendor,
     );
     this.router.put(
       "/reject/:vendorId",
-      authMiddleware,
       roleGuardMiddleware(["admin"]),
       this.vendorController.rejectVendor,
     );
     this.router.put(
       "/suspend/:vendorId",
-      authMiddleware,
       roleGuardMiddleware(["admin"]),
       this.vendorController.suspendVendor,
     );
     this.router.delete(
       "/:vendorId",
-      authMiddleware,
       roleGuardMiddleware(["vendor", "admin"]),
       this.vendorController.deleteVendorProfile,
     );

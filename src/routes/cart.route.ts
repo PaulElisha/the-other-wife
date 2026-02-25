@@ -4,7 +4,8 @@ import { Router } from "express";
 import { CartController } from "../controllers/cart.controller.js";
 import { authMiddleware } from "../middlewares/auth.middleware.js";
 import { roleGuardMiddleware } from "../middlewares/role-guard.middleware.js";
-import { validateAddToCart } from "../validation/cart.validation.js";
+import { addToCartSchema } from "../zod-schema/cart.schema.js";
+import { zodValidation } from "../middlewares/zod-validation.js";
 
 /**
  * @openapi
@@ -172,28 +173,18 @@ export class CartRouter {
     this.cartController = new CartController();
     this.router = Router();
     this.initializeRoutes();
+    this.router.use(authMiddleware);
+    this.router.use(roleGuardMiddleware(["customer"]));
   }
 
   initializeRoutes() {
     this.router.post(
       "/:mealId",
-      authMiddleware,
-      roleGuardMiddleware(["customer"]),
-      validateAddToCart,
+      zodValidation(addToCartSchema),
       this.cartController.addToCart,
     );
-    this.router.delete(
-      "/:mealId",
-      authMiddleware,
-      roleGuardMiddleware(["customer"]),
-      this.cartController.deleteFromCart,
-    );
-    this.router.get(
-      "/me",
-      authMiddleware,
-      roleGuardMiddleware(["customer"]),
-      this.cartController.getUserCart,
-    );
+    this.router.delete("/:mealId", this.cartController.deleteFromCart);
+    this.router.get("/me", this.cartController.getUserCart);
   }
 }
 

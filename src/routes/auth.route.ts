@@ -3,10 +3,11 @@
 import { Router } from "express";
 import { AuthController } from "../controllers/auth.controller.js";
 import {
-  validateLoginUser,
-  validateSignupUser,
-} from "../validation/auth.validation.js";
+  loginUserSchema,
+  registerUserSchema,
+} from "../zod-schema/auth.schema.js";
 import { authMiddleware } from "../middlewares/auth.middleware.js";
+import { zodValidation } from "../middlewares/zod-validation.js";
 
 /**
  * @openapi
@@ -113,6 +114,54 @@ import { authMiddleware } from "../middlewares/auth.middleware.js";
 
 /**
  * @openapi
+ * /api/v1/auth/refresh:
+ *   post:
+ *     summary: Refresh user login
+ *     tags: [Auth]
+ *     requestCookie:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [refreshToken]
+ *             properties:
+ *               refreshToken: { type: string }
+ *     responses:
+ *       "200":
+ *         description: User login refreshed successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/schemas/ApiResponse"
+ *       "401":
+ *         description: Unauthorized
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/responses/401"
+ *       "403":
+ *         description: Forbidden
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/responses/403"
+ *       "404":
+ *         description: Not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/responses/404"
+ *       "500":
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/responses/500"
+ */
+
+/**
+ * @openapi
  * /api/v1/auth/logout:
  *   post:
  *     summary: Logout user
@@ -163,18 +212,23 @@ class AuthRouter {
   initializeRoutes() {
     this.router.post(
       "/signup",
-      validateSignupUser,
+      zodValidation(registerUserSchema),
       this.authController.handleSignup,
     );
     this.router.post(
       "/login",
-      validateLoginUser,
+      zodValidation(loginUserSchema),
       this.authController.handleLogin,
     );
     this.router.post(
       "/logout",
       authMiddleware,
       this.authController.handleLogout,
+    );
+    this.router.post(
+      "/refresh",
+      authMiddleware,
+      this.authController.handleRefreshLogin,
     );
   }
 }

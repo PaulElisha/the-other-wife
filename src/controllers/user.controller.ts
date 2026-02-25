@@ -1,10 +1,12 @@
 /** @format */
 
-import { Request, Response } from "express";
-import { handleAsyncControl } from "../middlewares/handleAsyncControl.middleware.js";
+import type { Request, Response } from "express";
+import { handleAsyncControl } from "../middlewares/handle-async-control.middleware.js";
 import { UserService } from "../services/user.service.js";
 import { HttpStatus } from "../config/http.config.js";
-import { ApiResponse } from "../utils/response.util.js";
+import { ApiResponse } from "../util/response.util.js";
+
+import fs from "node:fs/promises";
 
 export class UserController {
   userService: UserService;
@@ -17,7 +19,7 @@ export class UserController {
     async (req: Request, res: Response): Promise<Response> => {
       const userId = req?.user?._id as unknown as string;
       try {
-        const { user } = await this.userService.getCurrentUser(userId);
+        const user = await this.userService.getCurrentUser(userId);
         return res.status(HttpStatus.OK).json({
           data: user,
           status: "ok",
@@ -37,22 +39,6 @@ export class UserController {
           data: users,
           status: "ok",
           message: "Users fetched successfully",
-        } as ApiResponse);
-      } catch (error) {
-        throw error;
-      }
-    },
-  );
-
-  editUser = handleAsyncControl(
-    async (req: Request, res: Response): Promise<Response> => {
-      const userId = req?.user?._id as unknown as string;
-      try {
-        const { user } = await this.userService.editUser(userId, req.body);
-        return res.status(HttpStatus.OK).json({
-          data: user,
-          status: "ok",
-          message: "User updated successfully",
         } as ApiResponse);
       } catch (error) {
         throw error;

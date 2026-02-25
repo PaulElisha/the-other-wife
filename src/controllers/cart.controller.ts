@@ -1,10 +1,10 @@
 /** @format */
 
-import { Request, Response } from "express";
+import type { Request, Response } from "express";
 import { HttpStatus } from "../config/http.config.js";
-import { handleAsyncControl } from "../middlewares/handleAsyncControl.middleware.js";
+import { handleAsyncControl } from "../middlewares/handle-async-control.middleware.js";
 import { CartService } from "../services/cart.service.js";
-import { ApiResponse } from "../utils/response.util.js";
+import { ApiResponse } from "../util/response.util.js";
 
 export class CartController {
   cartService: CartService;

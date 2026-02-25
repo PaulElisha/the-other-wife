@@ -4,10 +4,11 @@ import { AddressController } from "../controllers/address.controller.js";
 import { roleGuardMiddleware } from "../middlewares/role-guard.middleware.js";
 import { Router } from "express";
 import { authMiddleware } from "../middlewares/auth.middleware.js";
+import { zodValidation } from "../middlewares/zod-validation.js";
 import {
-  validateCreateAddress,
-  validateEditAddress,
-} from "../validation/address.validation.js";
+  createAddressSchema,
+  editAddressSchema,
+} from "../zod-schema/address.schema.js";
 
 /**
  * @swagger
@@ -73,7 +74,7 @@ import {
  *     tags: [Address]
  *     parameters:
  *       - in: path
- *         name: addressId
+ *         name: id
  *         required: true
  *         schema:
  *            type: string
@@ -135,7 +136,7 @@ import {
  *     tags: [Address]
  *     parameters:
  *       - in: path
- *         name: addressId
+ *         name: id
  *         required: true
  *         schema:
  *            type: string
@@ -182,7 +183,7 @@ import {
  *     tags: [Address]
  *     parameters:
  *       - in: path
- *         name: addressId
+ *         name: id
  *         required: true
  *         schema:
  *            type: string
@@ -226,14 +227,6 @@ import {
  *   get:
  *     summary: Get user addresses
  *     tags: [Address]
- *     parameters:
- *       - in: path
- *         name: userId
- *         required: true
- *         schema:
- *            type: string
- *            required: true
- *            description: Get User Addresses ID
  *     responses:
  *       "200":
  *         description: User addresses fetched successfully
@@ -275,42 +268,38 @@ class AddressRouter {
     this.addressController = new AddressController();
     this.router = Router();
     this.initializeRoutes();
+    this.router.use(authMiddleware);
   }
 
   initializeRoutes() {
     this.router.post(
       "/",
-      authMiddleware,
       roleGuardMiddleware(["customer", "vendor"]),
-      validateCreateAddress,
+      zodValidation(createAddressSchema),
       this.addressController.createUserAddress,
     );
 
     this.router.put(
-      "/edit/:addressId",
-      authMiddleware,
+      "/edit/:id",
       roleGuardMiddleware(["customer", "vendor"]),
-      validateEditAddress,
+      zodValidation(editAddressSchema),
       this.addressController.editUserAddress,
     );
 
     this.router.put(
-      "/toggle/:addressId",
-      authMiddleware,
+      "/toggle/:id",
       roleGuardMiddleware(["customer", "vendor"]),
       this.addressController.toggleDefaultAddress,
     );
 
     this.router.delete(
-      "/:addressId",
-      authMiddleware,
+      "/:id",
       roleGuardMiddleware(["customer", "vendor", "admin"]),
       this.addressController.deleteUserAddress,
     );
 
     this.router.get(
       "/me",
-      authMiddleware,
       roleGuardMiddleware(["customer", "vendor"]),
       this.addressController.getUserAddresses,
     );

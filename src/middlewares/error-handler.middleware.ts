@@ -1,6 +1,8 @@
 /** @format */
 
-import { NextFunction, Request, Response } from "express";
+import z from "zod";
+
+import type { NextFunction, Request, Response } from "express";
 import { AppError } from "../errors/app.error.js";
 import { HttpStatus } from "../config/http.config.js";
 
@@ -8,12 +10,20 @@ export const errorHandler = (
   err: Error,
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   if (err instanceof AppError) {
     return res.status(err.statusCode).json({
       message: err.message,
       error: err.errorCode,
+      status: "error",
+    });
+  }
+
+  if (err instanceof z.ZodError) {
+    return res.status(HttpStatus.BAD_REQUEST).json({
+      message: "Validation error",
+      error: z.treeifyError(err),
       status: "error",
     });
   }

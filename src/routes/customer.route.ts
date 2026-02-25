@@ -13,12 +13,12 @@ import { roleGuardMiddleware } from "../middlewares/role-guard.middleware.js";
  *     tags: [Customer]
  *     parameters:
  *       - in: path
- *         name: customerId
+ *         name: userId
  *         required: true
  *         schema:
  *           type: string
  *           required: true
- *           description: The customer ID
+ *           description: The user ID to get the customer profile
  *     responses:
  *       "200":
  *         description: Customer profile fetched
@@ -60,12 +60,12 @@ import { roleGuardMiddleware } from "../middlewares/role-guard.middleware.js";
  *     tags: [Customer]
  *     parameters:
  *       - in: path
- *         name: customerId
+ *         name: userId
  *         required: true
  *         schema:
  *           type: string
  *           required: true
- *           description: The customer ID
+ *           description: The user ID to update the customer profile
  *     requestBody:
  *       required: true
  *       content:
@@ -116,12 +116,12 @@ import { roleGuardMiddleware } from "../middlewares/role-guard.middleware.js";
  *     tags: [Customer]
  *     parameters:
  *       - in: path
- *         name: customerId
+ *         name: userId
  *         required: true
  *         schema:
  *           type: string
  *           required: true
- *           description: The customer ID
+ *           description: The user ID to delete the customer profile
  *     responses:
  *       "204":
  *         description: Customer deleted
@@ -162,24 +162,22 @@ class CustomerRouter {
     this.customerController = new CustomerController();
     this.router = Router();
     this.initializeRoutes();
+    this.router.use(authMiddleware);
   }
 
   initializeRoutes() {
     this.router.get(
-      "/:customerId",
-      authMiddleware,
+      "/:userId",
       roleGuardMiddleware(["customer", "admin"]),
       this.customerController.getCustomerProfile,
     );
     this.router.put(
-      "/:customerId",
-      authMiddleware,
+      "/:userId",
       roleGuardMiddleware(["customer"]),
       this.customerController.updateCustomerProfile,
     );
     this.router.delete(
-      "/:customerId",
-      authMiddleware,
+      "/:userId",
       roleGuardMiddleware(["customer", "admin"]),
       this.customerController.deleteCustomerProfile,
     );

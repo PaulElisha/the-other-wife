@@ -9,6 +9,7 @@ type EnvConfig = {
   MONGODB_URI: string;
   NODE_ENV: string;
   JWT_SECRET: string;
+  JWT_REFRESH_SECRET: string;
   CORS_ORIGIN?: string;
 };
 
@@ -21,6 +22,7 @@ const getEnvConfig = (): EnvConfig => {
     MONGODB_URI: getEnv("MONGODB_URI") || "mongodb://localhost:27017",
     NODE_ENV: getEnv("NODE_ENV") || "development",
     JWT_SECRET: getEnv("JWT_SECRET") || "secret",
+    JWT_REFRESH_SECRET: getEnv("JWT_REFRESH_SECRET") || "refresh_secret",
     CORS_ORIGIN: getEnv("CORS_ORIGIN") || "",
   };
 };

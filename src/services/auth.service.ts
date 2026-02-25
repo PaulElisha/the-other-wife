@@ -13,30 +13,38 @@ import User, { UserDocument } from "../models/user.model.js";
 import Customer from "../models/customer.model.js";
 import Vendor from "../models/vendor.model.js";
 
-import { generateToken } from "../utils/generate-token.js";
-import { nodeEnv } from "../constants/constants.js";
+import {
+  generateToken,
+  generateRefreshToken,
+  verifyToken,
+} from "../util/generate-token.util.js";
+import { jwtRefreshSecret, nodeEnv } from "../constants/constants.js";
+import { Db } from "../config/db.config.js";
+import { CreateTransaction } from "../util/transaction.util.js";
 
 export class AuthService {
+  private db: Db;
+  private tx: CreateTransaction;
+
+  constructor() {
+    this.db = new Db();
+    this.tx = new CreateTransaction();
+  }
+
   signup = async (body: {
     firstName: string;
     lastName: string;
-    email?: string;
+    email: string;
     password: string;
-    userType?: string;
-    phoneNumber?: string;
-  }): Promise<{
-    userId: mongoose.Types.ObjectId;
-  }> => {
-    const {
-      firstName,
-      lastName,
-      password,
-      userType = "customer",
-      phoneNumber,
-      email,
-    } = body;
+    userType: string;
+    phoneNumber: string;
+  }): Promise<any> => {
+    const { firstName, lastName, password, userType, phoneNumber, email } =
+      body;
 
     try {
+      const session = await this.tx.startTransaction();
+
       if (!phoneNumber && !email) {
         throw new BadRequestException(
           "Email or phone number is required",
@@ -45,54 +53,93 @@ export class AuthService {
         );
       }
 
-      if (phoneNumber) {
-        const userByPhone = await User.findOne({ phoneNumber });
-        if (userByPhone) {
-          throw new BadRequestException(
-            "Phone number already exists",
-            HttpStatus.BAD_REQUEST,
-            ErrorCode.AUTH_PHONE_NUMBER_ALREADY_EXISTS,
-          );
-        }
+      const existingUser = await User.findOne({
+        $or: [
+          { ...(email && { email }) },
+          { ...(phoneNumber && { phoneNumber }) },
+        ],
+      }).session(session);
+
+      if (existingUser) {
+        const authType =
+          existingUser.email === email
+            ? "email"
+            : existingUser.phoneNumber === phoneNumber
+              ? "phone number"
+              : "";
+        throw new BadRequestException(
+          `${authType} already exists`,
+          HttpStatus.BAD_REQUEST,
+          authType === "email"
+            ? ErrorCode.AUTH_EMAIL_ALREADY_EXISTS
+            : ErrorCode.AUTH_PHONE_NUMBER_ALREADY_EXISTS,
+        );
       }
 
-      if (email) {
-        const userByEmail = await User.findOne({ email });
-        if (userByEmail) {
-          throw new BadRequestException(
-            "Email already exists",
-            HttpStatus.BAD_REQUEST,
-            ErrorCode.AUTH_EMAIL_ALREADY_EXISTS,
-          );
-        }
-      }
-
-      const newUser = await User.create({
-        firstName,
-        lastName,
-        email,
-        passwordHash: password,
-        userType,
-        phoneNumber,
-      });
+      const [newUser] = await User.create(
+        [
+          {
+            firstName,
+            lastName,
+            email,
+            passwordHash: password,
+            userType,
+            phoneNumber,
+          },
+        ],
+        { session },
+      );
 
       switch (userType) {
         case "customer":
-          await Customer.create({
-            userId: newUser._id,
-          });
+          await Customer.create(
+            [
+              {
+                userId: newUser._id,
+              },
+            ],
+            { session },
+          );
           break;
         case "vendor":
-          await Vendor.create({
-            userId: newUser._id,
-          });
+          await Vendor.create(
+            [
+              {
+                userId: newUser._id,
+              },
+            ],
+            { session },
+          );
           break;
+        case "admin":
+          throw new BadRequestException(
+            "Admin user cannot be created.",
+            HttpStatus.BAD_REQUEST,
+            ErrorCode.ACCESS_UNAUTHORIZED,
+          );
         default:
-          throw new Error("Account for user type cannot be created.");
+          throw new Error("User type not specified.");
       }
 
-      return { userId: newUser._id };
+      const { token: accessToken } = generateToken(newUser._id);
+      const { refreshToken } = generateRefreshToken(newUser._id);
+
+      await User.findByIdAndUpdate(newUser._id, {
+        $set: {
+          refreshToken,
+          refreshTokenExpiry: new Date(Date.now() + 7 * 24 * 60 * 1000),
+        },
+      }).session(session);
+
+      await this.tx.commitTransaction();
+
+      return {
+        accessToken,
+        refreshToken,
+        ...(newUser.omitPassword() as any),
+      };
     } catch (error) {
+      await this.tx.end();
       throw error;
     }
   };
@@ -103,8 +150,8 @@ export class AuthService {
     password: string;
   }): Promise<any> => {
     const { phoneNumber, email, password } = body;
-
     try {
+      const session = await this.tx.startTransaction();
       if (!email && !phoneNumber) {
         throw new BadRequestException(
           "Email or phone number is required",
@@ -113,10 +160,13 @@ export class AuthService {
         );
       }
 
-      const user = await User.findOne(email ? { email } : { phoneNumber });
+      let user = await User.findOne(
+        email ? { email } : { phoneNumber },
+      ).session(session);
+
       if (!user) {
         throw new NotFoundException(
-          "User not found",
+          `Incorrect ${email ? "email" : "phone number"}`,
           HttpStatus.NOT_FOUND,
           ErrorCode.AUTH_USER_NOT_FOUND,
         );
@@ -125,65 +175,163 @@ export class AuthService {
       const isValid = await user.comparePassword(password);
       if (!isValid) {
         throw new UnauthorizedExceptionError(
-          "Invalid phone number or password",
+          `Incorrect password`,
           HttpStatus.UNAUTHORIZED,
           ErrorCode.AUTH_UNAUTHORIZED_ACCESS,
         );
       }
 
-      user.lastLogin = new Date();
-      await user.save();
+      const { token: accessToken } = generateToken(user._id);
+      const { refreshToken } = generateRefreshToken(user._id);
 
-      const { token } = generateToken(user._id);
-      return { token, userId: user._id };
+      console.log("Old Access Token:", accessToken);
+
+      user = await User.findByIdAndUpdate(
+        user._id,
+        {
+          $set: {
+            lastLogin: new Date(),
+            refreshToken,
+            refreshTokenExpiry: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+          },
+        },
+        { new: true },
+      ).session(session);
+
+      const userWithoutPassword = user?.omitPassword();
+
+      await this.tx.commitTransaction();
+
+      return {
+        accessToken,
+        refreshToken,
+        ...userWithoutPassword,
+      };
     } catch (error) {
+      await this.tx.end();
       throw error;
     }
   };
 
-  logout = (): any => ({
-    httpOnly: true,
-    secure: nodeEnv === "production",
-    sameSite: "strict",
-    path: "/",
-    expires: new Date(0),
-  });
+  refreshLogin = async (refreshToken: string) => {
+    try {
+      const session = await this.tx.startTransaction();
+      if (!refreshToken) {
+        throw new BadRequestException(
+          "Refresh token is required",
+          HttpStatus.BAD_REQUEST,
+          ErrorCode.VALIDATION_ERROR,
+        );
+      }
 
-  // passwordResetRequest = async (phoneNumber: string) => {
-  //   const user = await User.findOne({ phoneNumber });
+      const decoded = verifyToken(refreshToken, jwtRefreshSecret);
 
-  //   if (!user) {
-  //     throw new NotFoundException(
-  //       "User not found",
-  //       HttpStatus.NOT_FOUND,
-  //       ErrorCode.AUTH_USER_NOT_FOUND,
-  //     );
-  //   }
+      if (!decoded || typeof decoded === "string") {
+        throw new UnauthorizedExceptionError(
+          "Invalid token",
+          HttpStatus.UNAUTHORIZED,
+          ErrorCode.AUTH_UNAUTHORIZED_ACCESS,
+        );
+      }
 
-  //   const token = Crypto.randomBytes(20).toString("hex");
-  //   user.resetToken = token;
-  //   user.resetTokenExpiry = Date.now() + 20 * 60 * 1000;
-  //   await user.save();
+      let user = await User.findOne({
+        _id: decoded.id,
+        refreshToken,
+        refreshTokenExpiry: { $gt: new Date() },
+      }).session(session);
 
-  //   return { token };
-  // };
+      if (!user) {
+        throw new NotFoundException(
+          "Session expired",
+          HttpStatus.NOT_FOUND,
+          ErrorCode.AUTH_INVALID_TOKEN,
+        );
+      }
 
-  // passwordReset = async (newPassword: string, token: string) => {
-  //   const user = await User.findOne({
-  //     resetToken: token,
-  //     resetTokenExpiry: { $gt: Date.now(), $lt: Date.now() + 20 * 60 * 1000 },
-  //   });
-  //   if (!user) {
-  //     throw new NotFoundException(
-  //       "User not found",
-  //       HttpStatus.NOT_FOUND,
-  //       ErrorCode.AUTH_USER_NOT_FOUND,
-  //     );
-  //   }
+      const { token: newAccessToken } = generateToken(user._id);
+      const { refreshToken: newRefreshToken } = generateRefreshToken(user._id);
+      user = await User.findByIdAndUpdate(
+        user._id,
+        {
+          $set: {
+            refreshToken: newRefreshToken,
+            refreshTokenExpiry: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+          },
+        },
+        { new: true },
+      ).session(session);
 
-  //   user.passwordHash = await bcrypt.hash(newPassword, 10);
-  //   user.resetToken = null;
-  //   user.resetTokenExpiry = null;
-  //   await user.save();
-  // };
+      console.log("New Access Token:", newAccessToken);
+      await this.tx.commitTransaction();
+
+      return {
+        accessToken: newAccessToken,
+        refreshToken: newRefreshToken,
+        ...user?.omitPassword(),
+      };
+    } catch (error) {
+      await this.tx.end();
+      throw error;
+    }
+  };
+
+  logout = async (userId: string): Promise<any> => {
+    if (!userId) {
+      throw new BadRequestException(
+        "User ID is required",
+        HttpStatus.BAD_REQUEST,
+        ErrorCode.VALIDATION_ERROR,
+      );
+    }
+
+    await User.findByIdAndUpdate(userId, {
+      $unset: { refreshToken: 1, refreshTokenExpiry: 1 },
+    });
+
+    return {
+      httpOnly: true,
+      secure: nodeEnv === "production",
+      sameSite: "strict",
+      path: "/",
+      expires: new Date(0),
+    };
+  };
 }
+
+// passwordResetRequest = async (phoneNumber: string) => {
+//   const user = await User.findOne({ phoneNumber });
+
+//   if (!user) {
+//     throw new NotFoundException(
+//       "User not found",
+//       HttpStatus.NOT_FOUND,
+//       ErrorCode.AUTH_USER_NOT_FOUND,
+//     );
+//   }
+
+//   const token = Crypto.randomBytes(20).toString("hex");
+//   user.resetToken = token;
+//   user.resetTokenExpiry = Date.now() + 20 * 60 * 1000;
+//   await user.save();
+
+//   return { token };
+// };
+
+// passwordReset = async (newPassword: string, token: string) => {
+//   const user = await User.findOne({
+//     resetToken: token,
+//     resetTokenExpiry: { $gt: Date.now(), $lt: Date.now() + 20 * 60 * 1000 },
+//   });
+//   if (!user) {
+//     throw new NotFoundException(
+//       "User not found",
+//       HttpStatus.NOT_FOUND,
+//       ErrorCode.AUTH_USER_NOT_FOUND,
+//     );
+//   }
+
+//   user.passwordHash = await bcrypt.hash(newPassword, 10);
+//   user.resetToken = null;
+//   user.resetTokenExpiry = null;
+//   await user.save();
+// };

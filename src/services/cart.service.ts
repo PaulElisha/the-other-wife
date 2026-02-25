@@ -7,6 +7,7 @@ import { NotFoundException } from "../errors/not-found-exception.error.js";
 import Cart from "../models/cart.model.js";
 import Meal from "../models/meal.model.js";
 
+
 export class CartService {
   addToCart = async (
     customerId: string,
@@ -125,3 +126,5 @@ export class CartService {
       );
     })();
 }
+
+console.log(import.meta.url);

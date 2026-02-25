@@ -4,10 +4,10 @@ import mongoose from "mongoose";
 
 import { mongoUri } from "../constants/constants.js";
 
-class Db {
+export class Db {
   private connectionPromise: Promise<typeof mongoose> | null = null;
 
-  async connect() {
+  connect = async () => {
     if (this.connectionPromise) return this.connectionPromise;
 
     if (!mongoUri) {
@@ -22,11 +22,9 @@ class Db {
     try {
       return await this.connectionPromise;
     } catch (error) {
-      this.connectionPromise = null; // Reset to allow retry on next call
+      this.connectionPromise = null;
       console.error("Error connecting to MongoDB:", error);
       throw error;
     }
-  }
+  };
 }
-
-export { Db };
