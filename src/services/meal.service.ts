@@ -12,7 +12,7 @@ export class MealService {
   constructor() {}
 
   createMeal = async (
-    vendorId: string,
+    userId: string,
     mealData: {
       name: string;
       description: string;
@@ -29,14 +29,6 @@ export class MealService {
       additionalData: string;
     },
   ) => {
-    if (!vendorId) {
-      throw new BadRequestException(
-        "VendorID is required",
-        HttpStatus.BAD_REQUEST,
-        ErrorCode.VALIDATION_ERROR,
-      );
-    }
-
     const {
       name,
       description,
@@ -52,6 +44,16 @@ export class MealService {
       servingSize,
       additionalData,
     } = mealData;
+
+    const vendor = await Vendor.findOne({ userId });
+    if (!vendor) {
+      throw new BadRequestException(
+        "Vendor not found",
+        HttpStatus.BAD_REQUEST,
+        ErrorCode.VALIDATION_ERROR,
+      );
+    }
+    const vendorId = vendor._id;
 
     const meal = await Meal.create({
       vendorId,
@@ -90,17 +92,7 @@ export class MealService {
     },
     pagination: { pageSize: number; pageNumber: number },
   ) => {
-    const vendor = await Vendor.findOne({ userId });
-    if (!vendor) {
-      throw new BadRequestException(
-        "Vendor not found",
-        HttpStatus.BAD_REQUEST,
-        ErrorCode.VALIDATION_ERROR,
-      );
-    }
-    const vendorId = vendor._id;
-
-    vendorId &&
+    userId &&
       (() => {
         throw new BadRequestException(
           "UserID is required",
@@ -124,14 +116,13 @@ export class MealService {
       );
     }
 
-    const query: Record<string, any> = {
-      vendorId,
-      categoryId,
-    };
+    const query: Record<string, any> = {};
 
     search && (query.search = { $regex: search, $options: "i" });
     tags && (query.tags = tags);
     mealId && (query._id = mealId as unknown as mongoose.Types.ObjectId);
+    categoryId &&
+      (query.categoryId = categoryId as unknown as mongoose.Types.ObjectId);
 
     const meals = await Meal.find(query)
       .populate("vendorId", "userId")

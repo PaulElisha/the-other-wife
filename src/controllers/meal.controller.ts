@@ -13,22 +13,20 @@ export class MealController {
     this.mealService = new MealService();
   }
 
-  createMeal = handleAsyncControl(
-    async (req: Request<{ vendorId: string }>, res: Response) => {
-      try {
-        const { vendorId } = req.params;
-        const { mealData } = req.body;
-        const meal = await this.mealService.createMeal(vendorId, mealData);
-        return res.status(HttpStatus.CREATED).json({
-          status: "ok",
-          message: "Meal created successfully",
-          data: meal,
-        } as ApiResponse);
-      } catch (error) {
-        throw error;
-      }
-    },
-  );
+  createMeal = handleAsyncControl(async (req: Request<{}>, res: Response) => {
+    try {
+      const userId = req?.user?._id as unknown as string;
+      const mealData = req.body;
+      const meal = await this.mealService.createMeal(userId, mealData);
+      return res.status(HttpStatus.CREATED).json({
+        status: "ok",
+        message: "Meal created successfully",
+        data: meal,
+      } as ApiResponse);
+    } catch (error) {
+      throw error;
+    }
+  });
 
   getMeals = handleAsyncControl(
     async (req: Request<{ mealId: string }>, res: Response) => {

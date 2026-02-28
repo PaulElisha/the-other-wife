@@ -2,6 +2,7 @@
 
 import { Router } from "express";
 import { MealController } from "../controllers/meal.controller";
+import { authMiddleware } from "../middlewares/auth.middleware";
 
 /**
  * @swagger
@@ -46,7 +47,7 @@ import { MealController } from "../controllers/meal.controller";
 
 /**
  * @swagger
- * /api/v1/meals/{vendorId}:
+ * /api/v1/meals/
  *   post:
  *     summary: Create a new meal
  *     parameters:
@@ -101,11 +102,12 @@ class MealRouter {
   constructor() {
     this.router = Router();
     this.mealController = new MealController();
+    this.router.use(authMiddleware);
   }
 
   initializeRoutes() {
     this.router.get("/:id", this.mealController.getMeals);
-    this.router.post("/:vendorId", this.mealController.createMeal);
+    this.router.post("/", this.mealController.createMeal);
   }
 }
 
