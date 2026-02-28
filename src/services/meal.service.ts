@@ -7,6 +7,7 @@ import { BadRequestException } from "../errors/bad-request-exception.error";
 
 import Meal from "../models/meal.model";
 import Vendor from "../models/vendor.model";
+import MealCategory from "../models/mealCategory.model";
 
 export class MealService {
   constructor() {}
@@ -85,10 +86,11 @@ export class MealService {
 
   getMeals = async (
     userId: string,
-    mealId: string,
     data: {
       search: string;
-      tags: string;
+      tags: string[];
+      mealId: string;
+      category: string;
     },
     pagination: { pageSize: number; pageNumber: number },
   ) => {
@@ -101,16 +103,16 @@ export class MealService {
         );
       })();
 
-    const { search, tags } = data;
+    const { search, tags, mealId, category } = data;
     const { pageSize, pageNumber } = pagination;
     const skip = (pageNumber - 1) * pageSize;
 
-    const meal = await Meal.findById(mealId);
-    const categoryId = meal?.categoryId;
+    const mealCategory = await MealCategory.findOne({ category });
+    const categoryId = mealCategory?._id;
 
-    if (!meal) {
+    if (!mealCategory) {
       throw new BadRequestException(
-        "Meal not found",
+        "Meal category not found",
         HttpStatus.BAD_REQUEST,
         ErrorCode.VALIDATION_ERROR,
       );
@@ -119,13 +121,13 @@ export class MealService {
     const query: Record<string, any> = {};
 
     search && (query.search = { $regex: search, $options: "i" });
-    tags && (query.tags = tags);
+    Array.isArray(tags) && tags.length > 0 && (query.tags = { $in: tags });
     mealId && (query._id = mealId as unknown as mongoose.Types.ObjectId);
     categoryId &&
       (query.categoryId = categoryId as unknown as mongoose.Types.ObjectId);
 
     const meals = await Meal.find(query)
-      .populate("vendorId", "userId")
+      .populate("vendorId")
       .skip(skip)
       .limit(pageSize)
       .sort({ createdAt: -1 });

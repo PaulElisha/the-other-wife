@@ -6,15 +6,9 @@ import { authMiddleware } from "../middlewares/auth.middleware";
 
 /**
  * @swagger
- * /api/v1/meals/{id}:
+ * /api/v1/meals/
  *   get:
  *     summary: Get meals by query
- *     parameters:
- *       - name: id
- *         in: path
- *         required: true
- *         schema:
- *           type: string
  *     requestQuery:
  *       - name: search
  *         in: query
@@ -22,6 +16,18 @@ import { authMiddleware } from "../middlewares/auth.middleware";
  *         schema:
  *           type: string
  *       - name: tags
+ *         in: query
+ *         required: false
+ *         schema:
+ *           type: array
+ *           items:
+ *             type: string
+ *       - name: mealId
+ *         in: query
+ *         required: false
+ *         schema:
+ *           type: string
+ *       - name: category
  *         in: query
  *         required: false
  *         schema:
@@ -50,12 +56,6 @@ import { authMiddleware } from "../middlewares/auth.middleware";
  * /api/v1/meals/
  *   post:
  *     summary: Create a new meal
- *     parameters:
- *       - name: vendorId
- *         in: path
- *         required: true
- *         schema:
- *           type: string
  *     requestBody:
  *       required: true
  *       content:
@@ -106,7 +106,7 @@ class MealRouter {
   }
 
   initializeRoutes() {
-    this.router.get("/:id", this.mealController.getMeals);
+    this.router.get("/", this.mealController.getMeals);
     this.router.post("/", this.mealController.createMeal);
   }
 }
