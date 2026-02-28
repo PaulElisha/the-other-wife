@@ -19,16 +19,13 @@ import {
   verifyToken,
 } from "../util/generate-token.util.js";
 import { jwtRefreshSecret, nodeEnv } from "../constants/constants.js";
-import { Db } from "../config/db.config.js";
-import { CreateTransaction } from "../util/transaction.util.js";
+import { transaction } from "../util/transaction.util.js";
 
 export class AuthService {
-  private db: Db;
-  private tx: CreateTransaction;
+  private tx;
 
   constructor() {
-    this.db = new Db();
-    this.tx = new CreateTransaction();
+    this.tx = transaction();
   }
 
   signup = async (body: {
@@ -42,9 +39,8 @@ export class AuthService {
     const { firstName, lastName, password, userType, phoneNumber, email } =
       body;
 
+    const session = await this.tx?.startTransaction();
     try {
-      const session = await this.tx.startTransaction();
-
       if (!phoneNumber && !email) {
         throw new BadRequestException(
           "Email or phone number is required",
@@ -131,7 +127,7 @@ export class AuthService {
         },
       }).session(session);
 
-      await this.tx.commitTransaction();
+      await this.tx.commitTransaction(session);
 
       return {
         accessToken,
@@ -139,7 +135,7 @@ export class AuthService {
         ...(newUser.omitPassword() as any),
       };
     } catch (error) {
-      await this.tx.end();
+      await this.tx.end(session);
       throw error;
     }
   };
@@ -150,8 +146,9 @@ export class AuthService {
     password: string;
   }): Promise<any> => {
     const { phoneNumber, email, password } = body;
+
+    const session = await this.tx.startTransaction();
     try {
-      const session = await this.tx.startTransaction();
       if (!email && !phoneNumber) {
         throw new BadRequestException(
           "Email or phone number is required",
@@ -200,7 +197,7 @@ export class AuthService {
 
       const userWithoutPassword = user?.omitPassword();
 
-      await this.tx.commitTransaction();
+      await this.tx.commitTransaction(session);
 
       return {
         accessToken,
@@ -208,14 +205,14 @@ export class AuthService {
         ...userWithoutPassword,
       };
     } catch (error) {
-      await this.tx.end();
+      await this.tx.end(session);
       throw error;
     }
   };
 
   refreshLogin = async (refreshToken: string) => {
+    const session = await this.tx.startTransaction();
     try {
-      const session = await this.tx.startTransaction();
       if (!refreshToken) {
         throw new BadRequestException(
           "Refresh token is required",
@@ -262,7 +259,7 @@ export class AuthService {
       ).session(session);
 
       console.log("New Access Token:", newAccessToken);
-      await this.tx.commitTransaction();
+      await this.tx.commitTransaction(session);
 
       return {
         accessToken: newAccessToken,
@@ -270,7 +267,7 @@ export class AuthService {
         ...user?.omitPassword(),
       };
     } catch (error) {
-      await this.tx.end();
+      await this.tx.end(session);
       throw error;
     }
   };

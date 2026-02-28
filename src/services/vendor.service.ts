@@ -11,7 +11,7 @@ import { BadRequestException } from "../errors/bad-request-exception.error.js";
 export class VendorService {
   constructor() {}
 
-  getVendorProfile = async (vendorId: string) => {
+  getVendorProfile = async (vendorId: string, userId: string) => {
     if (!vendorId) {
       throw new BadRequestException(
         "Vendor ID is required",
@@ -20,7 +20,7 @@ export class VendorService {
       );
     }
 
-    const vendor = await Vendor.findById(vendorId)
+    const vendor = await Vendor.findOne({ _id: vendorId, userId })
       .populate("userId")
       .populate("addressId");
 
@@ -33,6 +33,76 @@ export class VendorService {
     }
 
     return { vendor };
+  };
+
+  updateVendorProfile = async (
+    vendorId: string,
+    userId: string,
+    body: {
+      firstName: string;
+      lastName: string;
+      phoneNumber: string;
+      businessName: string;
+      businessDescription: string;
+      businessLogoUrl: string;
+    },
+  ) => {
+    if (!vendorId) {
+      throw new BadRequestException(
+        "Vendor ID is required",
+        HttpStatus.BAD_REQUEST,
+        ErrorCode.VALIDATION_ERROR,
+      );
+    }
+
+    const {
+      firstName,
+      lastName,
+      phoneNumber,
+      businessName,
+      businessDescription,
+      businessLogoUrl,
+    } = body;
+
+    const vendorData: Record<string, string> = {};
+    const userData: Record<string, string> = {};
+
+    if (firstName) userData.firstName = firstName;
+    if (lastName) userData.lastName = lastName;
+    if (phoneNumber) userData.phoneNumber = phoneNumber;
+
+    if (businessName) vendorData.businessName = businessName;
+    if (businessDescription)
+      vendorData.businessDescription = businessDescription;
+    if (businessLogoUrl) vendorData.businessLogoUrl = businessLogoUrl;
+
+    const vendor = await Vendor.findOneAndUpdate(
+      { _id: vendorId, userId },
+      {
+        $set: vendorData,
+      },
+      {
+        new: true,
+      },
+    );
+
+    const user = await User.findOneAndUpdate(
+      { _id: vendorId, userId },
+      {
+        $set: userData,
+      },
+      { new: true },
+    );
+
+    if (!vendor) {
+      throw new NotFoundException(
+        "Vendor not found",
+        HttpStatus.NOT_FOUND,
+        ErrorCode.RESOURCE_NOT_FOUND,
+      );
+    }
+
+    return { ...{ user }, ...{ vendor } };
   };
 
   approveVendor = async (
@@ -57,8 +127,8 @@ export class VendorService {
       );
     }
 
-    const vendor = await Vendor.findByIdAndUpdate(
-      vendorId,
+    const vendor = await Vendor.findOneAndUpdate(
+      { _id: vendorId, userId },
       {
         approvalStatus: "approved",
         approvedBy: userId,
@@ -78,7 +148,11 @@ export class VendorService {
     return { vendor };
   };
 
-  rejectVendor = async (vendorId: string, reason: string | undefined) => {
+  rejectVendor = async (
+    vendorId: string,
+    userId: string,
+    reason: string | undefined,
+  ) => {
     if (!vendorId) {
       throw new BadRequestException(
         "Vendor ID is required",
@@ -87,8 +161,8 @@ export class VendorService {
       );
     }
 
-    const vendor = await Vendor.findByIdAndUpdate(
-      vendorId,
+    const vendor = await Vendor.findOneAndUpdate(
+      { _id: vendorId, userId },
       {
         approvalStatus: "rejected",
         rejectionReason: reason,
@@ -107,7 +181,7 @@ export class VendorService {
     return { vendor };
   };
 
-  suspendVendor = async (vendorId: string) => {
+  suspendVendor = async (vendorId: string, userId: string) => {
     if (!vendorId) {
       throw new BadRequestException(
         "Vendor ID is required",
@@ -116,8 +190,8 @@ export class VendorService {
       );
     }
 
-    const vendor = await Vendor.findByIdAndUpdate(
-      vendorId,
+    const vendor = await Vendor.findOneAndUpdate(
+      { _id: vendorId, userId },
       {
         approvalStatus: "suspended",
       },
@@ -135,7 +209,7 @@ export class VendorService {
     return { vendor };
   };
 
-  deleteVendorProfile = async (vendorId: string) => {
+  deleteVendorProfile = async (vendorId: string, userId: string) => {
     if (!vendorId) {
       throw new BadRequestException(
         "Vendor ID is required",
@@ -144,7 +218,7 @@ export class VendorService {
       );
     }
 
-    const vendor = await Vendor.findOne({ vendorId });
+    const vendor = await Vendor.findOneAndDelete({ _id: vendorId, userId });
 
     if (!vendor) {
       throw new NotFoundException(
@@ -154,7 +228,7 @@ export class VendorService {
       );
     }
 
-    const user = await User.findById(vendor.userId);
+    const user = await User.findOneAndDelete({ _id: userId });
 
     if (!user) {
       throw new NotFoundException(

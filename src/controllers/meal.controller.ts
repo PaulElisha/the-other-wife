@@ -1,0 +1,65 @@
+/** @format */
+
+import { NextFunction, Request, Response } from "express";
+import { handleAsyncControl } from "../middlewares/handle-async-control.middleware";
+import { MealService } from "../services/meal.service";
+import { HttpStatus } from "../config/http.config";
+import { ApiResponse } from "../util/response.util";
+
+export class MealController {
+  private mealService: MealService;
+
+  constructor() {
+    this.mealService = new MealService();
+  }
+
+  createMeal = handleAsyncControl(
+    async (req: Request<{ vendorId: string }>, res: Response) => {
+      try {
+        const { vendorId } = req.params;
+        const { mealData } = req.body;
+        const meal = await this.mealService.createMeal(vendorId, mealData);
+        return res.status(HttpStatus.CREATED).json({
+          status: "ok",
+          message: "Meal created successfully",
+          data: meal,
+        } as ApiResponse);
+      } catch (error) {
+        throw error;
+      }
+    },
+  );
+
+  getMeals = handleAsyncControl(
+    async (req: Request<{ mealId: string }>, res: Response) => {
+      try {
+        const { mealId } = req.params;
+        const userId = req.user?._id as unknown as string;
+
+        const query = {
+          search: req.query.search as string,
+          tags: req.query.tags as string,
+        };
+
+        const pagination = {
+          pageSize: parseInt(req.query.pageSize as string),
+          pageNumber: parseInt(req.query.pageNumber as string),
+        };
+
+        const meal = await this.mealService.getMeals(
+          userId,
+          mealId,
+          query,
+          pagination,
+        );
+        return res.status(HttpStatus.OK).json({
+          status: "ok",
+          message: "Meals fetched successfully",
+          data: meal,
+        } as ApiResponse);
+      } catch (error) {
+        throw error;
+      }
+    },
+  );
+}

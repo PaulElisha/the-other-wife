@@ -150,41 +150,41 @@ export class AuthController {
       }
     },
   );
-
-  // passwordResetRequest = handleAsyncControl(
-  //   async (
-  //     req: Request<{}, {}, { phoneNumber: string }>,
-  //     res: Response,
-  //   ): Promise<any> => {
-  //     try {
-  //       const { token } = await this.authService.passwordResetRequest(
-  //         req.body.phoneNumber,
-  //       );
-  //       return res
-  //         .status(HttpStatus.OK)
-  //         .json({ status: "ok", message: "User login successful" });
-  //     } catch (error) {
-  //       throw error;
-  //     }
-  //   },
-  // );
-
-  // passwordReset = handleAsyncControl(
-  //   async (
-  //     req: Request<{}, {}, { phoneNumber: string; token: string }>,
-  //     res: Response,
-  //   ): Promise<any> => {
-  //     try {
-  //       await this.authService.passwordReset(
-  //         req.body.phoneNumber,
-  //         req.body.token,
-  //       );
-  //       return res
-  //         .status(HttpStatus.OK)
-  //         .json({ status: "ok", message: "User login successful" });
-  //     } catch (error) {
-  //       throw error;
-  //     }
-  //   },
-  // );
 }
+
+// passwordResetRequest = handleAsyncControl(
+//   async (
+//     req: Request<{}, {}, { phoneNumber: string }>,
+//     res: Response,
+//   ): Promise<any> => {
+//     try {
+//       const { token } = await this.authService.passwordResetRequest(
+//         req.body.phoneNumber,
+//       );
+//       return res
+//         .status(HttpStatus.OK)
+//         .json({ status: "ok", message: "User login successful" });
+//     } catch (error) {
+//       throw error;
+//     }
+//   },
+// );
+
+// passwordReset = handleAsyncControl(
+//   async (
+//     req: Request<{}, {}, { phoneNumber: string; token: string }>,
+//     res: Response,
+//   ): Promise<any> => {
+//     try {
+//       await this.authService.passwordReset(
+//         req.body.phoneNumber,
+//         req.body.token,
+//       );
+//       return res
+//         .status(HttpStatus.OK)
+//         .json({ status: "ok", message: "User login successful" });
+//     } catch (error) {
+//       throw error;
+//     }
+//   },
+// );

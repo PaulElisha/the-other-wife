@@ -56,6 +56,85 @@ const swaggerDefinition = {
           },
         },
       },
+      Meal: {
+        type: "object",
+        properties: {
+          _id: {
+            type: "string",
+            description: "The meal unique identifier",
+          },
+          vendorId: {
+            type: "string",
+            description: "The vendor unique identifier",
+          },
+          categoryId: {
+            type: "string",
+            description: "The category unique identifier",
+          },
+          name: {
+            type: "string",
+            description: "The meal name",
+          },
+          description: {
+            type: "string",
+            description: "The meal description",
+          },
+          price: {
+            type: "number",
+            description: "The meal price",
+          },
+          imageUrl: {
+            type: "string",
+            description: "The meal image url",
+          },
+          isAvailable: {
+            type: "boolean",
+            description: "Whether the meal is available",
+          },
+          availableFrom: {
+            type: "string",
+            description: "The date the meal is available from",
+          },
+          availableUntil: {
+            type: "string",
+            description: "The date the meal is available until",
+          },
+          primaryImageUrl: {
+            type: "string",
+            description: "The primary image url of the meal",
+          },
+          additionalImages: {
+            type: "array",
+            items: {
+              type: "string",
+            },
+            description: "The additional images of the meal",
+          },
+          tags: {
+            type: "array",
+            items: {
+              type: "string",
+            },
+            description: "The tags of the meal",
+          },
+          preparationTime: {
+            type: "number",
+            description: "The preparation time of the meal",
+          },
+          servingSize: {
+            type: "string",
+            description: "The serving size of the meal",
+          },
+          additionalData: {
+            type: "string",
+            description: "The additional data of the meal",
+          },
+          isDeleted: {
+            type: "boolean",
+            description: "Whether the meal is deleted",
+          },
+        },
+      },
       Customer: {
         type: "object",
         properties: {

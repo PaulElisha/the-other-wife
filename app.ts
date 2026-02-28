@@ -24,6 +24,7 @@ import { customerRouter } from "./src/routes/customer.route.js";
 import { vendorRouter } from "./src/routes/vendor.route.js";
 import { cartRouter } from "./src/routes/cart.route.js";
 import { HttpStatus } from "./src/config/http.config.js";
+import { mealRouter } from "./src/routes/meal.route.js";
 
 export class App {
   app: Express;
@@ -85,11 +86,16 @@ export class App {
     this.app.use("/api/v1/customers", customerRouter);
     this.app.use("/api/v1/vendors", vendorRouter);
     this.app.use("/api/v1/carts", cartRouter);
+    this.app.use("api/v1/meals", mealRouter);
 
     this.app.get("/api-docs", async (_req, res) => {
       const filePath = fileURLToPath(import.meta.url);
       const _dirname = dirname(filePath);
-      const templatePath = path.join(_dirname, "src/utils/", "template.html");
+      const templatePath = path.join(
+        _dirname,
+        "src/utils/",
+        "swagger-template.html",
+      );
 
       try {
         const template = await fs.readFile(templatePath, "utf-8");

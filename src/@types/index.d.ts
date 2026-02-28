@@ -1,12 +1,12 @@
 /** @format */
 
-import { UserDocument } from "../models/user.model";
 import mongoose from "mongoose";
 
 declare global {
   namespace Express {
-    interface User extends UserDocument {
+    interface User {
       _id?: mongoose.Types.ObjectId;
+      userType?: string;
     }
 
     interface Request {

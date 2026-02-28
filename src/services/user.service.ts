@@ -29,7 +29,11 @@ export class UserService {
   };
 
   getAllUsers = async () => {
-    const users = await User.find().select("-passwordHash");
+    const users = await User.find()
+      .select("-passwordHash")
+      .populate("addressId")
+      .sort({ createdAt: -1 })
+      .limit(10);
 
     if (!users) {
       throw new NotFoundException(

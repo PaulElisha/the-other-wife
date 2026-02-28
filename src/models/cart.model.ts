@@ -18,6 +18,7 @@ const CartSchema = new Schema(
     customerId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
+      unique: true,
       required: true,
     },
     meals: [

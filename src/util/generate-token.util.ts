@@ -4,15 +4,19 @@ import jwt from "jsonwebtoken";
 import { jwtSecret, jwtRefreshSecret } from "../constants/constants.js";
 
 export const generateToken = (user: any) => {
-  const token = jwt.sign({ id: user._id }, jwtSecret, {
-    expiresIn: "15m",
-  });
+  const token = jwt.sign(
+    { _id: user._id, userType: user.userType },
+    jwtSecret,
+    {
+      expiresIn: "15m",
+    },
+  );
 
   return { token };
 };
 
 export const generateRefreshToken = (user: any) => {
-  const refreshToken = jwt.sign({ id: user._id }, jwtRefreshSecret, {
+  const refreshToken = jwt.sign({ _id: user._id }, jwtRefreshSecret, {
     expiresIn: "7d",
   });
 

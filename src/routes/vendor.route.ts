@@ -7,13 +7,13 @@ import { roleGuardMiddleware } from "../middlewares/role-guard.middleware.js";
 
 /**
  * @swagger
- * /api/v1/vendors/{vendorId}:
+ * /api/v1/vendors/{id}:
  *   get:
  *     summary: Get vendor profile
  *     tags: [Vendor]
  *     parameters:
  *       - in: path
- *         name: vendorId
+ *         name: id
  *         required: true
  *         schema:
  *           type: string
@@ -54,13 +54,73 @@ import { roleGuardMiddleware } from "../middlewares/role-guard.middleware.js";
 
 /**
  * @swagger
- * /api/v1/vendors/approve/{vendorId}:
+ * /api/v1/vendors/{id}:
+ *   put:
+ *     summary: Update vendor profile
+ *     tags: [Vendor]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *           required: true
+ *           description: The vendor ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               firstName: { type: string }
+ *               lastName: { type: string }
+ *               phoneNumber: { type: string }
+ *               businessName: { type: string }
+ *               businessDescription: { type: string }
+ *               businessLogoUrl: { type: string }
+ *     responses:
+ *       "200":
+ *         description: Vendor profile updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/schemas/Vendor"
+ *       "401":
+ *         description: Unauthorized
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/responses/401"
+ *       "403":
+ *         description: Forbidden
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/responses/403"
+ *       "404":
+ *         description: Not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/responses/404"
+ *       "500":
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/responses/500"
+ */
+
+/**
+ * @swagger
+ * /api/v1/vendors/approve/{id}:
  *   put:
  *     summary: Approve vendor
  *     tags: [Vendor]
  *     parameters:
  *       - in: path
- *         name: vendorId
+ *         name: id
  *         required: true
  *         schema:
  *           type: string
@@ -102,13 +162,13 @@ import { roleGuardMiddleware } from "../middlewares/role-guard.middleware.js";
 
 /**
  * @swagger
- * /api/v1/vendors/reject/{vendorId}:
+ * /api/v1/vendors/reject/{id}:
  *   put:
  *     summary: Reject vendor
  *     tags: [Vendor]
  *     parameters:
  *       - in: path
- *         name: vendorId
+ *         name: id
  *         required: true
  *         schema:
  *           type: string
@@ -157,13 +217,13 @@ import { roleGuardMiddleware } from "../middlewares/role-guard.middleware.js";
 
 /**
  * @swagger
- * /api/v1/vendors/suspend/{vendorId}:
+ * /api/v1/vendors/suspend/{id}:
  *   put:
  *     summary: Suspend vendor
  *     tags: [Vendor]
  *     parameters:
  *       - in: path
- *         name: vendorId
+ *         name: id
  *         required: true
  *         schema:
  *           type: string
@@ -204,13 +264,13 @@ import { roleGuardMiddleware } from "../middlewares/role-guard.middleware.js";
 
 /**
  * @swagger
- * /api/v1/vendors/{vendorId}:
+ * /api/v1/vendors/{id}:
  *   delete:
  *     summary: Delete vendor profile
  *     tags: [Vendor]
  *     parameters:
  *       - in: path
- *         name: vendorId
+ *         name: id
  *         required: true
  *         schema:
  *           type: string
@@ -262,27 +322,32 @@ class VendorRouter {
 
   initializeRoutes() {
     this.router.get(
-      "/:vendorId",
+      "/:id",
       roleGuardMiddleware(["vendor", "admin"]),
       this.vendorController.getVendorProfile,
     );
     this.router.put(
-      "/approve/:vendorId",
+      "/:id",
+      roleGuardMiddleware(["vendor", "admin"]),
+      this.vendorController.updateVendorProfile,
+    );
+    this.router.put(
+      "/approve/:id",
       roleGuardMiddleware(["admin"]),
       this.vendorController.approveVendor,
     );
     this.router.put(
-      "/reject/:vendorId",
+      "/reject/:id",
       roleGuardMiddleware(["admin"]),
       this.vendorController.rejectVendor,
     );
     this.router.put(
-      "/suspend/:vendorId",
+      "/suspend/:id",
       roleGuardMiddleware(["admin"]),
       this.vendorController.suspendVendor,
     );
     this.router.delete(
-      "/:vendorId",
+      "/:id",
       roleGuardMiddleware(["vendor", "admin"]),
       this.vendorController.deleteVendorProfile,
     );

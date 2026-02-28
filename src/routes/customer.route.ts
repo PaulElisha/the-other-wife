@@ -7,13 +7,13 @@ import { roleGuardMiddleware } from "../middlewares/role-guard.middleware.js";
 
 /**
  * @swagger
- * /api/v1/customers/{customerId}:
+ * /api/v1/customers/{id}:
  *   get:
  *     summary: Get customer profile
  *     tags: [Customer]
  *     parameters:
  *       - in: path
- *         name: userId
+ *         name: id
  *         required: true
  *         schema:
  *           type: string
@@ -54,13 +54,13 @@ import { roleGuardMiddleware } from "../middlewares/role-guard.middleware.js";
 
 /**
  * @swagger
- * /api/v1/customers/{customerId}:
+ * /api/v1/customers/{id}:
  *   put:
  *     summary: Update customer profile
  *     tags: [Customer]
  *     parameters:
  *       - in: path
- *         name: userId
+ *         name: id
  *         required: true
  *         schema:
  *           type: string
@@ -110,13 +110,13 @@ import { roleGuardMiddleware } from "../middlewares/role-guard.middleware.js";
 
 /**
  * @swagger
- * /api/v1/customers/{customerId}:
+ * /api/v1/customers/{id}:
  *   delete:
  *     summary: Delete customer profile
  *     tags: [Customer]
  *     parameters:
  *       - in: path
- *         name: userId
+ *         name: id
  *         required: true
  *         schema:
  *           type: string
@@ -167,17 +167,17 @@ class CustomerRouter {
 
   initializeRoutes() {
     this.router.get(
-      "/:userId",
+      "/:id",
       roleGuardMiddleware(["customer", "admin"]),
       this.customerController.getCustomerProfile,
     );
     this.router.put(
-      "/:userId",
+      "/:id",
       roleGuardMiddleware(["customer"]),
       this.customerController.updateCustomerProfile,
     );
     this.router.delete(
-      "/:userId",
+      "/:id",
       roleGuardMiddleware(["customer", "admin"]),
       this.customerController.deleteCustomerProfile,
     );

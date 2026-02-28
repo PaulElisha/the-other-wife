@@ -4,19 +4,20 @@ import mongoose, { Document, Schema, model } from "mongoose";
 
 export interface MealDocument extends Document {
   vendorId: mongoose.Types.ObjectId;
+  categoryId: mongoose.Types.ObjectId;
   name: string;
   description: string;
   price: number;
   imageUrl: string;
   isAvailable: boolean;
-  availableFrom: Date;
-  availableUntil: Date;
+  availableFrom: string;
+  availableUntil: string;
   primaryImageUrl: string;
-  additionalImages: string[];
-  tags: string[];
+  additionalImages: Array<string>;
+  tags: Array<string>;
   preparationTime: number;
   servingSize: string;
-  additionalData: Object;
+  additionalData: string;
   isDeleted: boolean;
 }
 
@@ -44,12 +45,13 @@ const MealSchema = new Schema({
     required: true,
   },
   isAvailable: {
-    type: Boolean,
+    type: String,
     required: true,
-    default: true,
+    enum: ["pending", "available", "unavailable"],
+    default: "pending",
   },
   availableFrom: {
-    type: Date,
+    type: String,
     required: true,
   },
   availableUntil: {
@@ -77,7 +79,7 @@ const MealSchema = new Schema({
     required: true,
   },
   additionalData: {
-    type: Object,
+    type: String,
     required: false,
   },
   isDeleted: {

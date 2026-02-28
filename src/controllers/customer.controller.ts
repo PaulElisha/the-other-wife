@@ -13,14 +13,14 @@ export class CustomerController {
   }
 
   getCustomerProfile = handleAsyncControl(
-    async (
-      req: Request<{ userId: string }>,
-      res: Response,
-    ): Promise<Response> => {
+    async (req: Request<{ id: string }>, res: Response): Promise<Response> => {
       try {
-        const { userId } = req.params;
-        const { customer } =
-          await this.customerService.getCustomerProfile(userId);
+        const customerId = req.params.id;
+        const userId = req?.user?._id as unknown as string;
+        const { customer } = await this.customerService.getCustomerProfile(
+          userId,
+          customerId,
+        );
         return res.status(HttpStatus.OK).json({
           status: "ok",
           message: "Customer profile fetched",
@@ -33,21 +33,21 @@ export class CustomerController {
   );
 
   updateCustomerProfile = handleAsyncControl(
-    async (
-      req: Request<{ userId: string }>,
-      res: Response,
-    ): Promise<Response> => {
+    async (req: Request<{ id: string }>, res: Response): Promise<Response> => {
       try {
-        const { userId } = req.params;
+        const customerId = req.params.id;
+        const userId = req?.user?._id as unknown as string;
         const { profileImageUrl } = req.body;
-        const { customer } = await this.customerService.updateCustomerProfile(
-          userId,
-          profileImageUrl,
-        );
+        const customerProfile =
+          await this.customerService.updateCustomerProfile(
+            userId,
+            customerId,
+            profileImageUrl,
+          );
         return res.status(HttpStatus.OK).json({
           status: "ok",
           message: "Customer updated",
-          data: customer,
+          data: customerProfile,
         } as ApiResponse);
       } catch (error) {
         throw error;
@@ -56,13 +56,11 @@ export class CustomerController {
   );
 
   deleteCustomerProfile = handleAsyncControl(
-    async (
-      req: Request<{ userId: string }>,
-      res: Response,
-    ): Promise<Response> => {
+    async (req: Request<{ id: string }>, res: Response): Promise<Response> => {
       try {
-        const { userId } = req.params;
-        await this.customerService.deleteCustomerProfile(userId);
+        const customerId = req.params.id;
+        const userId = req?.user?._id as unknown as string;
+        await this.customerService.deleteCustomerProfile(userId, customerId);
         return res.status(HttpStatus.NO_CONTENT).send();
       } catch (error) {
         throw error;

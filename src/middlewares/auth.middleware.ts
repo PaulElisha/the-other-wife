@@ -7,10 +7,8 @@ import { ErrorCode } from "../enums/error-code.enum.js";
 
 import { jwtSecret } from "../constants/constants.js";
 
-import User from "../models/user.model.js";
 import { verifyToken } from "../util/generate-token.util.js";
-
-import fs from "node:fs/promises";
+import { UserDocument } from "../models/user.model.js";
 
 export const authMiddleware = async (
   req: Request,
@@ -40,8 +38,7 @@ export const authMiddleware = async (
       );
     }
 
-    req.user = await User.findById(decoded.id).select("-passwordHash");
-    console.log("User: ", req.user);
+    req.user = decoded as unknown as UserDocument;
 
     if (!req.user)
       throw new UnauthorizedExceptionError(

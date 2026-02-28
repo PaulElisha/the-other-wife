@@ -1,7 +1,5 @@
 /** @format */
 
-import { Response } from "express";
-
 /**
  * Standard API response structure
  */

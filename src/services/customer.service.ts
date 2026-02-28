@@ -6,11 +6,16 @@ import { NotFoundException } from "../errors/not-found-exception.error.js";
 import { HttpStatus } from "../config/http.config.js";
 import { ErrorCode } from "../enums/error-code.enum.js";
 import mongoose from "mongoose";
-import { CreateTransaction } from "../util/transaction.util.js";
+import { transaction } from "../util/transaction.util.js";
 import { BadRequestException } from "../errors/bad-request-exception.error.js";
 
 export class CustomerService {
-  getCustomerProfile = async (customerId: string) => {
+  private tx;
+
+  constructor() {
+    this.tx = transaction();
+  }
+  getCustomerProfile = async (customerId: string, userId: string) => {
     if (!customerId) {
       throw new BadRequestException(
         "Customer ID is required",
@@ -19,7 +24,7 @@ export class CustomerService {
       );
     }
 
-    const customer = await Customer.findById(customerId)
+    const customer = await Customer.findOne({ _id: customerId, userId })
       .populate("userId")
       .populate("addressId");
 
@@ -36,6 +41,7 @@ export class CustomerService {
 
   updateCustomerProfile = async (
     customerId: string,
+    userId: string,
     body: {
       profileImageUrl: string;
       firstName: string;
@@ -54,35 +60,25 @@ export class CustomerService {
 
     const { profileImageUrl, firstName, lastName, email, phoneNumber } = body;
 
-    const tx = new CreateTransaction();
+    const session = await this.tx.startTransaction();
+
     try {
-      const session = await tx.startTransaction();
-
-      const customer = await Customer.findByIdAndUpdate(
-        [
-          customerId,
-          {
-            $set: { profileImageUrl },
-          },
-          { new: true },
-        ],
+      const customer = await Customer.findOneAndUpdate([
+        customerId,
+        userId,
         {
-          session,
+          $set: { profileImageUrl },
         },
-      );
+        { new: true },
+      ]).session(session);
 
-      const user = await User.findByIdAndUpdate(
-        [
-          customer?.userId,
-          {
-            $set: { firstName, lastName, email, phoneNumber },
-          },
-          { new: true },
-        ],
+      const user = await User.findOneAndUpdate(
+        { _id: customerId, userId },
         {
-          session,
+          $set: { firstName, lastName, email, phoneNumber },
         },
-      );
+        { new: true },
+      ).session(session);
 
       if (!customer && !user) {
         throw new NotFoundException(
@@ -92,15 +88,15 @@ export class CustomerService {
         );
       }
 
-      await tx.commitTransaction();
-      return { customer, user };
+      await this.tx.commitTransaction(session);
+      return { ...{ user }, ...{ customer } };
     } catch (error) {
-      await tx.end();
+      await this.tx.end(session);
       throw error;
     }
   };
 
-  deleteCustomerProfile = async (customerId: string) => {
+  deleteCustomerProfile = async (customerId: string, userId: string) => {
     if (!customerId) {
       throw new BadRequestException(
         "Customer ID is required",
@@ -109,12 +105,13 @@ export class CustomerService {
       );
     }
 
-    const tx = new CreateTransaction();
+    const session = await this.tx.startTransaction();
 
     try {
-      const session = await tx.startTransaction();
-
-      const customer = await Customer.findOne([{ customerId }], { session });
+      const customer = await Customer.findOne({
+        _id: customerId,
+        userId,
+      }).session(session);
 
       if (!customer) {
         throw new NotFoundException(
@@ -124,7 +121,9 @@ export class CustomerService {
         );
       }
 
-      const user = await User.findById([customer.userId], { session });
+      const user = await User.findOneAndUpdate({
+        _id: customer.userId,
+      }).session(session);
 
       if (!user) {
         throw new NotFoundException(
@@ -137,9 +136,9 @@ export class CustomerService {
       await user.deleteOne({ session });
       await customer.deleteOne({ session });
 
-      await tx.commitTransaction();
+      await this.tx.commitTransaction(session);
     } catch (error) {
-      await tx.end();
+      await this.tx.end(session);
       throw error;
     }
   };
