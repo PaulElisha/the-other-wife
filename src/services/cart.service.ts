@@ -3,6 +3,7 @@
 import mongoose from "mongoose";
 import { HttpStatus } from "../config/http.config.js";
 import { ErrorCode } from "../enums/error-code.enum.js";
+import { BadRequestException } from "../errors/bad-request-exception.error.js";
 import { NotFoundException } from "../errors/not-found-exception.error.js";
 import Cart from "../models/cart.model.js";
 import Meal from "../models/meal.model.js";
@@ -15,6 +16,17 @@ export class CartService {
     this.tx = transaction();
   }
 
+  private recalculateTotalAmount = (cart: InstanceType<typeof Cart>) => {
+    cart.meals.forEach((meal) => {
+      meal.totalPrice = meal.price * meal.quantity;
+    });
+
+    cart.totalAmount = cart.meals.reduce(
+      (total, meal) => total + meal.totalPrice,
+      0,
+    );
+  };
+
   addToCart = async (
     customerId: string,
     mealId: string,
@@ -24,8 +36,24 @@ export class CartService {
     const session = await this.tx.startTransaction();
 
     try {
+      if (!customerId) {
+        throw new BadRequestException(
+          "User not found",
+          HttpStatus.BAD_REQUEST,
+          ErrorCode.AUTH_UNAUTHORIZED_ACCESS,
+        );
+      }
+
+      if (quantity < 1) {
+        throw new BadRequestException(
+          "Quantity must be at least 1",
+          HttpStatus.BAD_REQUEST,
+          ErrorCode.VALIDATION_ERROR,
+        );
+      }
+
       const meal = await Meal.findById(mealId).session(session);
-      const existingCart = await Cart.findById(customerId).session(session);
+      const existingCart = await Cart.findOne({ customerId }).session(session);
 
       if (!meal) {
         throw new NotFoundException(
@@ -65,27 +93,29 @@ export class CartService {
           existingCart.meals.push(newMeal);
         }
 
-        existingCart.totalAmount = existingCart.meals.reduce(
-          (total, meal, index) =>
-            total + existingCart.meals[index].quantity * meal.price,
-          0,
-        );
+        this.recalculateTotalAmount(existingCart);
 
         await existingCart.save();
+        await this.tx.commitTransaction(session);
         return existingCart;
       } else {
-        const cart = await Cart.create({
-          customerId,
-          meals: [
+        const [cart] = await Cart.create(
+          [
             {
-              mealId: mealId as unknown as mongoose.Types.ObjectId,
-              price: meal.price,
-              quantity,
-              totalPrice: meal.price * quantity,
+              customerId,
+              meals: [
+                {
+                  mealId: mealId as unknown as mongoose.Types.ObjectId,
+                  price: meal.price,
+                  quantity,
+                  totalPrice: meal.price * quantity,
+                },
+              ],
+              totalAmount: meal.price * quantity,
             },
           ],
-          totalAmount: meal.price * quantity,
-        });
+          { session },
+        );
 
         await this.tx.commitTransaction(session);
         return cart;
@@ -93,12 +123,22 @@ export class CartService {
     } catch (error) {
       await this.tx.end(session);
       throw error;
+    } finally {
+      session.endSession();
     }
   };
 
   deleteFromCart = async (customerId: string, mealId: string) => {
     const session = await this.tx.startTransaction();
     try {
+      if (!customerId) {
+        throw new BadRequestException(
+          "User not found",
+          HttpStatus.BAD_REQUEST,
+          ErrorCode.AUTH_UNAUTHORIZED_ACCESS,
+        );
+      }
+
       const meal = await Meal.findById(mealId).session(session);
       const existingCart = await Cart.findOne({ customerId }).session(session);
 
@@ -124,21 +164,21 @@ export class CartService {
         }
 
         existingCart.meals.splice(mealIndex, 1);
-        existingCart.totalAmount = existingCart.meals.reduce(
-          (total, meal, index) =>
-            total + existingCart.meals[index].quantity * meal.price,
-          0,
-        );
+        this.recalculateTotalAmount(existingCart);
 
         await existingCart.save();
+        await this.tx.commitTransaction(session);
       }
     } catch (error) {
+      await this.tx.end(session);
       throw error;
+    } finally {
+      session.endSession();
     }
   };
 
   getUserCart = async (customerId: string) =>
-    (await Cart.findById(customerId)) ??
+    (await Cart.findOne({ customerId })) ??
     (() => {
       throw new NotFoundException(
         "Cart not found",

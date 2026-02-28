@@ -6,6 +6,8 @@ import { NotFoundException } from "../errors/not-found-exception.error.js";
 import { HttpStatus } from "../config/http.config.js";
 import { ErrorCode } from "../enums/error-code.enum.js";
 import Customer from "../models/customer.model.js";
+import Vendor from "../models/vendor.model.js";
+import { BadRequestException } from "../errors/bad-request-exception.error.js";
 
 export class AddressService {
   constructor() {}
@@ -22,14 +24,17 @@ export class AddressService {
     address?: string,
     isDefault?: boolean,
   ) => {
-    userId &&
-      (() => {
-        throw new NotFoundException(
-          "User not found",
-          HttpStatus.NOT_FOUND,
-          ErrorCode.RESOURCE_NOT_FOUND,
-        );
-      })();
+    if (!userId) {
+      throw new BadRequestException(
+        "User not found",
+        HttpStatus.BAD_REQUEST,
+        ErrorCode.AUTH_UNAUTHORIZED_ACCESS,
+      );
+    }
+
+    if (isDefault) {
+      await Address.updateMany({ userId }, { $set: { isDefault: false } });
+    }
 
     const userAddress = await Address.create({
       userId,
@@ -52,13 +57,18 @@ export class AddressService {
       );
     }
 
-    if (userId) {
-      await Customer.findOneAndUpdate(
+    await Promise.all([
+      Customer.findOneAndUpdate(
         { userId },
         { $set: { addressId: userAddress._id } },
         { new: true },
-      );
-    }
+      ),
+      Vendor.findOneAndUpdate(
+        { userId },
+        { $set: { addressId: userAddress._id } },
+        { new: true },
+      ),
+    ]);
 
     return { userAddress };
   };
@@ -82,6 +92,13 @@ export class AddressService {
         "Address not found",
         HttpStatus.NOT_FOUND,
         ErrorCode.RESOURCE_NOT_FOUND,
+      );
+    }
+
+    if (typeof isDefault === "boolean" && isDefault) {
+      await Address.updateMany(
+        { userId: userAddress.userId },
+        { $set: { isDefault: false } },
       );
     }
 
@@ -111,7 +128,16 @@ export class AddressService {
       );
     }
 
-    userAddress.isDefault = !userAddress.isDefault;
+    const nextIsDefault = !userAddress.isDefault;
+
+    if (nextIsDefault) {
+      await Address.updateMany(
+        { userId: userAddress.userId },
+        { $set: { isDefault: false } },
+      );
+    }
+
+    userAddress.isDefault = nextIsDefault;
 
     await userAddress.save();
 
@@ -129,14 +155,13 @@ export class AddressService {
     })();
 
   getUserAddresses = async (userId: string) => {
-    userId &&
-      (() => {
-        throw new NotFoundException(
-          "User not found",
-          HttpStatus.NOT_FOUND,
-          ErrorCode.RESOURCE_NOT_FOUND,
-        );
-      })();
+    if (!userId) {
+      throw new BadRequestException(
+        "User not found",
+        HttpStatus.BAD_REQUEST,
+        ErrorCode.AUTH_UNAUTHORIZED_ACCESS,
+      );
+    }
 
     const userAddresses = await Address.find({ userId }).populate(
       "userId",
