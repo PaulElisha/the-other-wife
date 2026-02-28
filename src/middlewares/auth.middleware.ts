@@ -15,16 +15,15 @@ export const authMiddleware = async (
   res: Response,
   next: NextFunction,
 ) => {
-  const accessToken = req.cookies.token;
+  const accessToken = req.cookies?.token;
 
-  accessToken ??
-    (() => {
-      throw new UnauthorizedExceptionError(
-        "Unauthorized. Please log in.",
-        HttpStatus.UNAUTHORIZED,
-        ErrorCode.AUTH_UNAUTHORIZED_ACCESS,
-      );
-    })();
+  if (!accessToken) {
+    throw new UnauthorizedExceptionError(
+      "Unauthorized. Please log in.",
+      HttpStatus.UNAUTHORIZED,
+      ErrorCode.AUTH_UNAUTHORIZED_ACCESS,
+    );
+  }
 
   try {
     const decoded = verifyToken(accessToken, jwtSecret);

@@ -86,7 +86,7 @@ export class App {
     this.app.use("/api/v1/customers", customerRouter);
     this.app.use("/api/v1/vendors", vendorRouter);
     this.app.use("/api/v1/carts", cartRouter);
-    this.app.use("api/v1/meals", mealRouter);
+    this.app.use("/api/v1/meals", mealRouter);
 
     this.app.get("/api-docs", async (_req, res) => {
       const filePath = fileURLToPath(import.meta.url);

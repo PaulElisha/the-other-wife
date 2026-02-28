@@ -117,7 +117,10 @@ export class AuthService {
           throw new Error("User type not specified.");
       }
 
-      const { token: accessToken } = generateToken(newUser._id);
+      const { token: accessToken } = generateToken({
+        _id: newUser._id,
+        userType: newUser.userType,
+      });
       const { refreshToken } = generateRefreshToken(newUser._id);
 
       await User.findByIdAndUpdate(newUser._id, {
@@ -137,6 +140,8 @@ export class AuthService {
     } catch (error) {
       await this.tx.end(session);
       throw error;
+    } finally {
+      session.endSession();
     }
   };
 
@@ -178,10 +183,11 @@ export class AuthService {
         );
       }
 
-      const { token: accessToken } = generateToken(user._id);
+      const { token: accessToken } = generateToken({
+        _id: user._id,
+        userType: user.userType,
+      });
       const { refreshToken } = generateRefreshToken(user._id);
-
-      console.log("Old Access Token:", accessToken);
 
       user = await User.findByIdAndUpdate(
         user._id,
@@ -207,6 +213,8 @@ export class AuthService {
     } catch (error) {
       await this.tx.end(session);
       throw error;
+    } finally {
+      session.endSession();
     }
   };
 
@@ -232,7 +240,7 @@ export class AuthService {
       }
 
       let user = await User.findOne({
-        _id: decoded.id,
+        _id: decoded._id,
         refreshToken,
         refreshTokenExpiry: { $gt: new Date() },
       }).session(session);
@@ -245,7 +253,10 @@ export class AuthService {
         );
       }
 
-      const { token: newAccessToken } = generateToken(user._id);
+      const { token: newAccessToken } = generateToken({
+        _id: user._id,
+        userType: user.userType,
+      });
       const { refreshToken: newRefreshToken } = generateRefreshToken(user._id);
       user = await User.findByIdAndUpdate(
         user._id,
@@ -258,7 +269,6 @@ export class AuthService {
         { new: true },
       ).session(session);
 
-      console.log("New Access Token:", newAccessToken);
       await this.tx.commitTransaction(session);
 
       return {
@@ -269,6 +279,8 @@ export class AuthService {
     } catch (error) {
       await this.tx.end(session);
       throw error;
+    } finally {
+      session.endSession();
     }
   };
 

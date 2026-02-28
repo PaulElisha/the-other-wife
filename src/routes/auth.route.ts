@@ -227,7 +227,6 @@ class AuthRouter {
     );
     this.router.post(
       "/refresh",
-      authMiddleware,
       this.authController.handleRefreshLogin,
     );
   }
