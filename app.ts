@@ -88,7 +88,7 @@ export class App {
     this.app.use("/api/v1/carts", cartRouter);
     this.app.use("/api/v1/meals", mealRouter);
 
-    this.app.get("/api-docs", async (_req, res) => {
+    this.app.get("/api-docs", async (req, res) => {
       const filePath = fileURLToPath(import.meta.url);
       const _dirname = dirname(filePath);
       const templatePath = path.join(
