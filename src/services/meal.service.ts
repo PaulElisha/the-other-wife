@@ -7,7 +7,7 @@ import { BadRequestException } from "../errors/bad-request-exception.error.js";
 
 import Meal from "../models/meal.model.js";
 import Vendor from "../models/vendor.model.js";
-import MealCategory from "../models/mealCategory.model";
+import MealCategory from "../models/mealCategory.model.js";
 
 export class MealService {
   constructor() {}
