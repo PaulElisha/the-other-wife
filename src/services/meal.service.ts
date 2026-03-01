@@ -1,12 +1,12 @@
 /** @format */
 
 import mongoose from "mongoose";
-import { HttpStatus } from "../config/http.config";
-import { ErrorCode } from "../enums/error-code.enum";
-import { BadRequestException } from "../errors/bad-request-exception.error";
+import { HttpStatus } from "../config/http.config.js";
+import { ErrorCode } from "../enums/error-code.enum.js";
+import { BadRequestException } from "../errors/bad-request-exception.error.js";
 
-import Meal from "../models/meal.model";
-import Vendor from "../models/vendor.model";
+import Meal from "../models/meal.model.js";
+import Vendor from "../models/vendor.model.js";
 import MealCategory from "../models/mealCategory.model";
 
 export class MealService {

@@ -5,7 +5,6 @@ import User from "../models/user.model.js";
 import { NotFoundException } from "../errors/not-found-exception.error.js";
 import { HttpStatus } from "../config/http.config.js";
 import { ErrorCode } from "../enums/error-code.enum.js";
-import mongoose from "mongoose";
 import { transaction } from "../util/transaction.util.js";
 import { BadRequestException } from "../errors/bad-request-exception.error.js";
 
@@ -15,6 +14,7 @@ export class CustomerService {
   constructor() {
     this.tx = transaction();
   }
+
   getCustomerProfile = async (customerId: string, userId: string) => {
     if (!customerId) {
       throw new BadRequestException(

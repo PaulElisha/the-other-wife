@@ -1,10 +1,10 @@
 /** @format */
 
-import { NextFunction, Request, Response } from "express";
-import { handleAsyncControl } from "../middlewares/handle-async-control.middleware";
-import { MealService } from "../services/meal.service";
-import { HttpStatus } from "../config/http.config";
-import { ApiResponse } from "../util/response.util";
+import { Request, Response } from "express";
+import { handleAsyncControl } from "../middlewares/handle-async-control.middleware.js";
+import { MealService } from "../services/meal.service.js";
+import { HttpStatus } from "../config/http.config.js";
+import { ApiResponse } from "../util/response.util.js";
 
 export class MealController {
   private mealService: MealService;

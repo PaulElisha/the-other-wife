@@ -187,6 +187,7 @@ export class AuthService {
         _id: user._id,
         userType: user.userType,
       });
+
       const { refreshToken } = generateRefreshToken(user._id);
 
       user = await User.findByIdAndUpdate(

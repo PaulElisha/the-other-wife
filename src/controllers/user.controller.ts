@@ -6,8 +6,6 @@ import { UserService } from "../services/user.service.js";
 import { HttpStatus } from "../config/http.config.js";
 import { ApiResponse } from "../util/response.util.js";
 
-import fs from "node:fs/promises";
-
 export class UserController {
   userService: UserService;
 

@@ -1,8 +1,8 @@
 /** @format */
 
 import { Router } from "express";
-import { MealController } from "../controllers/meal.controller";
-import { authMiddleware } from "../middlewares/auth.middleware";
+import { MealController } from "../controllers/meal.controller.js";
+import { authMiddleware } from "../middlewares/auth.middleware.js";
 
 /**
  * @swagger

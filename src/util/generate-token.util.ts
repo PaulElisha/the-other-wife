@@ -13,20 +13,22 @@ export const generateToken = (
   const payload =
     typeof user === "string" || user instanceof mongoose.Types.ObjectId
       ? { _id: user.toString() }
-      : { _id: user._id.toString(), ...(user.userType && { userType: user.userType }) };
-  const token = jwt.sign(
-    payload,
-    jwtSecret,
-    {
-      expiresIn: "15m",
-    },
-  );
+      : {
+          _id: user._id.toString(),
+          ...(user.userType && { userType: user.userType }),
+        };
+  const token = jwt.sign(payload, jwtSecret, {
+    expiresIn: "15m",
+  });
 
   return { token };
 };
 
 export const generateRefreshToken = (
-  user: { _id: mongoose.Types.ObjectId | string } | mongoose.Types.ObjectId | string,
+  user:
+    | { _id: mongoose.Types.ObjectId | string }
+    | mongoose.Types.ObjectId
+    | string,
 ) => {
   const userId =
     typeof user === "string" || user instanceof mongoose.Types.ObjectId
@@ -39,6 +41,5 @@ export const generateRefreshToken = (
   return { refreshToken };
 };
 
-export const verifyToken = (token: string, secret: string) => {
-  return jwt.verify(token, secret);
-};
+export const verifyToken = (token: string, secret: string) =>
+  jwt.verify(token, secret);

@@ -1,6 +1,5 @@
 /** @format */
 
-import mongoose from "mongoose";
 import Address from "../models/address.model.js";
 import { NotFoundException } from "../errors/not-found-exception.error.js";
 import { HttpStatus } from "../config/http.config.js";
