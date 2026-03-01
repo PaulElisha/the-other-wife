@@ -93,7 +93,7 @@ export class App {
       const _dirname = dirname(filePath);
       const templatePath = path.join(
         _dirname,
-        "src/utils/",
+        "src/util/",
         "swagger-template.html",
       );
 
