@@ -18,32 +18,22 @@ export class MealService {
       name: string;
       description: string;
       price: number;
-      imageUrl: string;
+      categoryName: string;
       availableFrom: string;
       availableUntil: string;
       primaryImageUrl: string;
-      additionalImages: string[];
       tags: string[];
-      isAvailable: boolean;
-      preparationTime: number;
-      servingSize: string;
-      additionalData: string;
     },
   ) => {
     const {
       name,
       description,
       price,
-      imageUrl,
+      categoryName,
       availableFrom,
       availableUntil,
       primaryImageUrl,
-      additionalImages,
       tags,
-      isAvailable,
-      preparationTime,
-      servingSize,
-      additionalData,
     } = mealData;
 
     const vendor = await Vendor.findOne({ userId });
@@ -56,21 +46,28 @@ export class MealService {
     }
     const vendorId = vendor._id;
 
+    const category = await MealCategory.findOne({ category: categoryName });
+    if (!category) {
+      throw new BadRequestException(
+        "Meal category not found",
+        HttpStatus.BAD_REQUEST,
+        ErrorCode.VALIDATION_ERROR,
+      );
+    }
+
+    const categoryId = category._id;
+
     const meal = await Meal.create({
       vendorId,
       name,
+      categoryName,
+      categoryId,
       description,
       price,
-      imageUrl,
       availableFrom,
       availableUntil,
       primaryImageUrl,
-      additionalImages,
       tags,
-      isAvailable,
-      preparationTime,
-      servingSize,
-      additionalData,
     });
 
     if (!meal) {

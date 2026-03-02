@@ -6,6 +6,7 @@ export interface MealDocument extends Document {
   vendorId: mongoose.Types.ObjectId;
   categoryId: mongoose.Types.ObjectId;
   name: string;
+  categoryName: string;
   description: string;
   price: number;
   imageUrl: string;
@@ -30,9 +31,12 @@ const MealSchema = new Schema({
   categoryId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Category",
-    required: true,
   },
   name: {
+    type: String,
+    required: true,
+  },
+  categoryName: {
     type: String,
     required: true,
   },
@@ -46,7 +50,6 @@ const MealSchema = new Schema({
   },
   isAvailable: {
     type: String,
-    required: true,
     enum: ["pending", "available", "unavailable"],
     default: "pending",
   },
@@ -64,19 +67,17 @@ const MealSchema = new Schema({
   },
   additionalImages: {
     type: [String],
-    required: false,
   },
   tags: {
     type: [String],
+    required: true,
     default: [],
   },
   preparationTime: {
     type: Number,
-    required: true,
   },
   servingSize: {
     type: String,
-    required: true,
   },
   additionalData: {
     type: String,

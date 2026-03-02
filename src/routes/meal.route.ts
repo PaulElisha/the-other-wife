@@ -96,8 +96,8 @@ import { authMiddleware } from "../middlewares/auth.middleware.js";
  */
 
 class MealRouter {
-  private mealController: MealController;
-  public router: Router;
+  mealController: MealController;
+  router: Router;
 
   constructor() {
     this.router = Router();
