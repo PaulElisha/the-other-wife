@@ -116,7 +116,6 @@ export class App {
 
       try {
         const template = await fs.readFile(templatePath, "utf-8");
-        await fs.writeFile("swagger.html", template);
         res.send(`${template}`);
       } catch (error: any) {
         res
