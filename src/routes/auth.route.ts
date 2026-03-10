@@ -118,7 +118,7 @@ import { zodValidation } from "../middlewares/validation.js";
  *   post:
  *     summary: Refresh user login
  *     tags: [Auth]
- *     requestCookie:
+ *     requestBody:
  *       required: true
  *       content:
  *         application/json:
