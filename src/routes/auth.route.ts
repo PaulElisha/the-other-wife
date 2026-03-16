@@ -65,7 +65,7 @@ import { zodValidation } from "../middlewares/validation.js";
 /**
  * @openapi
  * /api/v1/auth/verify:
- *   post:
+ *   get:
  *     summary: Verify a new user's email after signup
  *     tags: [Auth]
  *     parameters:
@@ -261,7 +261,7 @@ class AuthRouter {
       zodValidation(registerUserSchema),
       this.authController.handleSignup,
     );
-    this.router.post("/verify", this.authController.verifySignup);
+    this.router.get("/verify", this.authController.verifySignup);
     this.router.post(
       "/login",
       zodValidation(loginUserSchema),
