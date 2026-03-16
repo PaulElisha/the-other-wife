@@ -5,7 +5,7 @@ import { UnauthorizedExceptionError } from "../errors/unauthorized-exception.err
 import { HttpStatus } from "../config/http.config.js";
 import { ErrorCode } from "../enums/error-code.enum.js";
 
-import { jwtSecret } from "../constants/constants.js";
+import { jwtSecret } from "../constants/env.js";
 
 import { verifyToken } from "../util/generate-token.util.js";
 import { UserDocument } from "../models/user.model.js";

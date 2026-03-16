@@ -7,8 +7,10 @@ import { handleAsyncControl } from "../middlewares/handle-async-control.middlewa
 import type { NextFunction, Request, Response } from "express";
 import { HttpStatus } from "../config/http.config.js";
 
-import { nodeEnv } from "../constants/constants.js";
+import { nodeEnv } from "../constants/env.js";
 import { ApiResponse } from "../util/response.util.js";
+import { CreateProfile } from "../dispatcher/profile.dispatcher.js";
+import { email } from "zod";
 
 export class AuthController {
   authService: AuthService;
@@ -37,8 +39,12 @@ export class AuthController {
         req.body;
 
       try {
+        const handleSignup = this.authService.signup([
+          userType as keyof typeof CreateProfile,
+        ]);
+
         const { accessToken, refreshToken, ...userWithoutPassword } =
-          await this.authService.signup({
+          await handleSignup({
             firstName,
             lastName,
             email,
@@ -51,6 +57,29 @@ export class AuthController {
           status: "ok",
           message: "User registered successfully",
           data: { accessToken, refreshToken, userWithoutPassword },
+        } as ApiResponse);
+      } catch (error) {
+        throw error;
+      }
+    },
+  );
+
+  verifySignup = handleAsyncControl(
+    async (
+      req: Request<{}, {}, { token: string }>,
+      res: Response,
+    ): Promise<any> => {
+      const emailToken = req.query.emailToken as string;
+      try {
+        const { userWithoutPassword } =
+          await this.authService.verifySignup(emailToken);
+
+        return res.status(HttpStatus.OK).json({
+          status: "ok",
+          message: "User login successful",
+          data: {
+            userWithoutPassword,
+          },
         } as ApiResponse);
       } catch (error) {
         throw error;
@@ -148,6 +177,18 @@ export class AuthController {
       } catch (error) {
         throw error;
       }
+    },
+  );
+
+  handleDeleteUser = handleAsyncControl(
+    async (req: Request, res: Response): Promise<any> => {
+      const { email } = req.body;
+      console.log(req.body.email);
+      await this.authService.deleteUser(email);
+      return res.status(200).json({
+        success: true,
+        message: `User with email ${email} has been deleted.`,
+      });
     },
   );
 }

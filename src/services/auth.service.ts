@@ -10,126 +10,260 @@ import { UnauthorizedExceptionError } from "../errors/unauthorized-exception.err
 import { NotFoundException } from "../errors/not-found-exception.error.js";
 
 import User, { UserDocument } from "../models/user.model.js";
-import Customer from "../models/customer.model.js";
-import Vendor from "../models/vendor.model.js";
 
 import {
   generateToken,
   generateRefreshToken,
   verifyToken,
+  generateEmailToken,
+  generateOtp,
 } from "../util/generate-token.util.js";
-import { jwtRefreshSecret, nodeEnv } from "../constants/constants.js";
+import { jwtRefreshSecret, nodeEnv } from "../constants/env.js";
 import { transaction } from "../util/transaction.util.js";
+import { CreateProfile } from "../dispatcher/profile.dispatcher.js";
+import { MailData, mailer } from "./email.service.js";
+import { getTemplate } from "../util/convert-template.util.js";
+import { MailAction } from "../dispatcher/mail.dispatcher.js";
+import { getFormattedData } from "../util/get-maildata.js";
 
 export class AuthService {
   constructor() {}
 
-  signup = transaction.use(
-    async (
-      session: ClientSession,
-      body: {
-        firstName: string;
-        lastName: string;
-        email: string;
-        password: string;
-        userType: string;
-        phoneNumber: string;
-      },
-    ): Promise<any> => {
-      const { firstName, lastName, password, userType, phoneNumber, email } =
-        body;
+  signup =
+    (allowedTypes: Array<keyof typeof CreateProfile>) =>
+    async (body: {
+      firstName: string;
+      lastName: string;
+      email: string;
+      password: string;
+      userType: string;
+      phoneNumber: string;
+    }) => {
+      return await transaction
+        .use(async (session: ClientSession, body): Promise<any> => {
+          const {
+            firstName,
+            lastName,
+            password,
+            userType,
+            phoneNumber,
+            email,
+          } = body;
 
-      try {
-        const existingUser = await User.findOne({
-          $or: [
-            { ...(email && { email }) },
-            { ...(phoneNumber && { phoneNumber }) },
-          ],
-        }).session(session);
-
-        const authType = existingUser
-          ? existingUser.email === email
-            ? "email"
-            : existingUser.phoneNumber === phoneNumber
-              ? "phone number"
-              : null
-          : null;
-
-        if (authType) {
-          throw new BadRequestException(
-            `${authType} already exists`,
-            HttpStatus.BAD_REQUEST,
-            authType === "email"
-              ? ErrorCode.AUTH_EMAIL_ALREADY_EXISTS
-              : ErrorCode.AUTH_PHONE_NUMBER_ALREADY_EXISTS,
-          );
-        }
-
-        const [newUser] = await User.create(
-          [
-            {
-              firstName,
-              lastName,
-              email,
-              passwordHash: password,
-              userType,
-              phoneNumber,
-            },
-          ],
-          { session },
-        );
-
-        switch (userType) {
-          case "customer":
-            await Customer.create(
-              [
-                {
-                  userId: newUser._id,
-                },
-              ],
-              { session },
-            );
-            break;
-          case "vendor":
-            await Vendor.create(
-              [
-                {
-                  userId: newUser._id,
-                },
-              ],
-              { session },
-            );
-            break;
-          case "admin":
+          if (!allowedTypes.includes(userType as keyof typeof CreateProfile)) {
             throw new BadRequestException(
-              "Admin user cannot be created.",
+              `User type ${userType} is not supported`,
               HttpStatus.BAD_REQUEST,
-              ErrorCode.ACCESS_UNAUTHORIZED,
+              ErrorCode.VALIDATION_ERROR,
             );
-          default:
-            throw new Error("User type not specified.");
+          }
+
+          try {
+            const existingUser = await User.findOne({
+              $or: [
+                { ...(email && { email }) },
+                { ...(phoneNumber && { phoneNumber }) },
+              ],
+            }).session(session);
+
+            const authType = existingUser
+              ? existingUser.email === email
+                ? "email"
+                : existingUser.phoneNumber === phoneNumber
+                  ? "phone number"
+                  : null
+              : null;
+
+            authType &&
+              (() => {
+                throw new BadRequestException(
+                  `${authType} already exists`,
+                  HttpStatus.BAD_REQUEST,
+                  authType === "email"
+                    ? ErrorCode.AUTH_EMAIL_ALREADY_EXISTS
+                    : ErrorCode.AUTH_PHONE_NUMBER_ALREADY_EXISTS,
+                );
+              })();
+
+            const [newUser] = await User.create(
+              [
+                {
+                  firstName,
+                  lastName,
+                  email,
+                  passwordHash: password,
+                  userType,
+                  phoneNumber,
+                },
+              ],
+              { session },
+            );
+
+            await CreateProfile[userType as keyof typeof CreateProfile](
+              newUser._id as unknown as string,
+              session,
+            );
+
+            const { token: accessToken } = generateToken(newUser);
+            const { refreshToken } = generateRefreshToken(newUser);
+            const { emailToken, emailTokenExpiry } = generateEmailToken();
+
+            newUser.refreshToken = refreshToken;
+            newUser.refreshTokenExpiry = new Date(
+              Date.now() + 7 * 24 * 60 * 1000,
+            );
+            newUser.emailToken = emailToken;
+            newUser.emailTokenExpiry = emailTokenExpiry;
+            await newUser.save({ session });
+
+            return {
+              accessToken,
+              refreshToken,
+              ...(newUser.omitPassword() as any),
+            };
+          } catch (error) {
+            throw error;
+          }
+        })(body)
+        .then((result) => {
+          const { accessToken, refreshToken, ...userWithoutPassword } = result;
+          let numOfAttempt = 0;
+          const maxNumOfAttempt = 3;
+
+          setImmediate(async () => {
+            const enableRetry = async () => {
+              try {
+                console.log(Object.freeze(userWithoutPassword));
+
+                const htmlTemplate = await getTemplate(
+                  "src/templates",
+                  "verify-signup.templates.html",
+                );
+
+                const { template } = getFormattedData(
+                  userWithoutPassword,
+                  htmlTemplate,
+                );
+
+                const html = template.replaceAll(
+                  "{{verificationUrl}}",
+                  `https://theotherwife.vercel.app/verify?emailToken=${userWithoutPassword.emailToken}`,
+                );
+
+                const data = {
+                  user: userWithoutPassword,
+                  message: html,
+                };
+
+                const info = await mailer.relayTo(
+                  data,
+                  MailAction.verifySignup,
+                );
+
+                console.log(`Email sent successfully: ${info}`);
+              } catch (error: any) {
+                numOfAttempt++;
+                if (numOfAttempt <= maxNumOfAttempt) {
+                  await new Promise((res) => setTimeout(res, 1000));
+                  return enableRetry();
+                }
+
+                console.error(error);
+              }
+            };
+
+            await enableRetry();
+          });
+
+          return result;
+        });
+    };
+
+  verifySignup = async (emailToken: string) => {
+    return await transaction
+      .use(async (session: ClientSession, emailToken: string): Promise<any> => {
+        try {
+          let user = await User.findOne({
+            emailToken,
+            emailTokenExpiry: { $gt: new Date() },
+          }).session(session);
+
+          if (!user) {
+            throw new NotFoundException(
+              "User not found",
+              HttpStatus.NOT_FOUND,
+              ErrorCode.AUTH_USER_NOT_FOUND,
+            );
+          }
+
+          // user.isEmailVerified = user.isEmailVerified && true;
+          // user.emailToken = null;
+          // user.emailTokenExpiry = null;
+          // user.lastLogin = new Date();
+          // await user.save({ session });
+
+          user = await User.findByIdAndUpdate(
+            user._id,
+            {
+              $set: {
+                lastLogin: new Date(),
+                emailToken: null,
+                emailTokenExpiry: null,
+                isEmailVerified: true,
+              },
+            },
+            { new: true, session: session },
+          );
+
+          const userWithoutPassword = user?.omitPassword();
+
+          return {
+            ...userWithoutPassword,
+          };
+        } catch (error) {
+          throw error;
         }
+      })(emailToken)
+      .then((result) => {
+        let numOfAttempt = 0;
+        const maxNumOfAttempt = 3;
 
-        const { token: accessToken } = generateToken(newUser);
-        const { refreshToken } = generateRefreshToken(newUser);
+        setImmediate(async () => {
+          const enableRetry = async () => {
+            try {
+              console.log(Object.freeze(result));
 
-        await User.findByIdAndUpdate(newUser._id, {
-          $set: {
-            refreshToken,
-            refreshTokenExpiry: new Date(Date.now() + 7 * 24 * 60 * 1000),
-          },
-        }).session(session);
+              const htmlTemplate = await getTemplate(
+                "src/templates",
+                "welcome-email.templates.html",
+              );
 
-        return {
-          accessToken,
-          refreshToken,
-          ...(newUser.omitPassword() as any),
-        };
-      } catch (error) {
-        throw error;
-      }
-    },
-  );
+              const { template } = getFormattedData(result, htmlTemplate);
+
+              const data = {
+                user: result,
+                message: template,
+              } as MailData;
+
+              const info = await mailer.relayTo(data, MailAction.welcome);
+
+              console.log(`Email sent successfully: ${info}`);
+            } catch (error: any) {
+              numOfAttempt++;
+              if (numOfAttempt <= maxNumOfAttempt) {
+                await new Promise((res) => setTimeout(res, 1000));
+                return enableRetry();
+              }
+
+              console.error(error);
+            }
+          };
+
+          await enableRetry();
+        });
+        return result;
+      });
+  };
 
   login = transaction.use(
     async (
@@ -277,26 +411,35 @@ export class AuthService {
       expires: new Date(0),
     };
   };
+
+  forgotPassword = async (email: string) => {
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      throw new NotFoundException(
+        "User not found",
+        HttpStatus.NOT_FOUND,
+        ErrorCode.AUTH_USER_NOT_FOUND,
+      );
+    }
+
+    const { otp, otpExpiry } = generateOtp();
+    user.otp = otp;
+    user.otpExpiry = otpExpiry;
+    await user.save();
+
+    return { otp };
+  };
+
+  deleteUser = async (email: string) => {
+    const deletedUser = await User.findOneAndDelete({ email });
+    if (!deletedUser) {
+      console.log("No user found with that email.");
+      throw new Error("No user found!");
+    }
+    return deletedUser;
+  };
 }
-
-// passwordResetRequest = async (phoneNumber: string) => {
-//   const user = await User.findOne({ phoneNumber });
-
-//   if (!user) {
-//     throw new NotFoundException(
-//       "User not found",
-//       HttpStatus.NOT_FOUND,
-//       ErrorCode.AUTH_USER_NOT_FOUND,
-//     );
-//   }
-
-//   const token = Crypto.randomBytes(20).toString("hex");
-//   user.resetToken = token;
-//   user.resetTokenExpiry = Date.now() + 20 * 60 * 1000;
-//   await user.save();
-
-//   return { token };
-// };
 
 // passwordReset = async (newPassword: string, token: string) => {
 //   const user = await User.findOne({

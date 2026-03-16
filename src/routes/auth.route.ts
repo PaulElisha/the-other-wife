@@ -215,6 +215,7 @@ class AuthRouter {
       zodValidation(registerUserSchema),
       this.authController.handleSignup,
     );
+    this.router.post("/verify", this.authController.verifySignup);
     this.router.post(
       "/login",
       zodValidation(loginUserSchema),
@@ -226,6 +227,7 @@ class AuthRouter {
       this.authController.handleLogout,
     );
     this.router.post("/refresh", this.authController.handleRefreshLogin);
+    this.router.delete("/delete", this.authController.handleDeleteUser);
   }
 }
 

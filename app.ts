@@ -13,7 +13,7 @@ import fs from "node:fs/promises";
 
 import { errorHandler } from "./src/middlewares/error-handler.middleware.js";
 
-import { hostName, port, corsOrigin } from "./src/constants/constants.js";
+import { hostName, port, corsOrigin } from "./src/constants/env.js";
 import { Db } from "./src/config/db.config.js";
 import { swaggerSpec } from "./src/config/swagger.config.js";
 
@@ -25,6 +25,7 @@ import { vendorRouter } from "./src/routes/vendor.route.js";
 import { cartRouter } from "./src/routes/cart.route.js";
 import { HttpStatus } from "./src/config/http.config.js";
 import { mealRouter } from "./src/routes/meal.route.js";
+import { getTemplate } from "./src/util/convert-template.util.js";
 
 export class App {
   app: Express;
@@ -106,16 +107,11 @@ export class App {
     this.app.use("/api/v1/meals", mealRouter);
 
     this.app.get("/api-docs", async (_req, res) => {
-      const filePath = fileURLToPath(import.meta.url);
-      const _dirname = dirname(filePath);
-      const templatePath = path.join(
-        _dirname,
-        "src/util",
-        "swagger-template.html",
-      );
-
       try {
-        const template = await fs.readFile(templatePath, "utf-8");
+        const template = await getTemplate(
+          "src/templates",
+          "swagger.template.html",
+        );
         res.send(`${template}`);
       } catch (error: any) {
         res

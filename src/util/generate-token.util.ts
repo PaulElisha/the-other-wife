@@ -1,13 +1,14 @@
 /** @format */
 
 import jwt from "jsonwebtoken";
-import { jwtSecret, jwtRefreshSecret } from "../constants/constants.js";
+import crypto from "crypto";
+import { jwtSecret, jwtRefreshSecret } from "../constants/env.js";
 import { UserDocument } from "../models/user.model.js";
 
 export const generateToken = (user: UserDocument) => {
   const payload = { _id: user._id, userType: user.userType };
   const token = jwt.sign(payload, jwtSecret, {
-    expiresIn: "15m",
+    expiresIn: "30m",
   });
 
   return { token };
@@ -24,6 +25,16 @@ export const generateRefreshToken = (user: UserDocument) => {
 
   return { refreshToken };
 };
+
+export const generateEmailToken = () => ({
+  emailToken: crypto.randomBytes(20).toString("hex"),
+  emailTokenExpiry: new Date(Date.now() + 30 * 60 * 1000),
+});
+
+export const generateOtp = () => ({
+  otp: Math.floor(1000 + Math.random() * 9000).toString(),
+  otpExpiry: new Date(Date.now() + 10 * 60 * 1000),
+});
 
 export const verifyToken = (token: string, secret: string) =>
   jwt.verify(token, secret);

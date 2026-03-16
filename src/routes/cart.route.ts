@@ -4,13 +4,12 @@ import { Router } from "express";
 import { CartController } from "../controllers/cart.controller.js";
 import { authMiddleware } from "../middlewares/auth.middleware.js";
 import { roleGuardMiddleware } from "../middlewares/role-guard.middleware.js";
-import { addToCartSchema } from "../zod-schema/cart.schema.js";
 import { zodValidation } from "../middlewares/validation.js";
 
 /**
  * @openapi
  * /api/v1/carts/{mealId}:
- *   post:
+ *   put:
  *     summary: Add meal to cart
  *     tags: [Cart]
  *     parameters:
@@ -21,24 +20,100 @@ import { zodValidation } from "../middlewares/validation.js";
  *           type: string
  *           required: true
  *           description: The meal ID
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required: ["quantity", "action"]
- *             properties:
- *               quantity:
- *                 type: number
- *                 required: true
- *                 description: The quantity of the meal to add to the cart
- *
- *               action:
- *                 type: string
- *                 required: true
- *                 enum: ["increment", "decrement"]
- *                 description: The action to perform on the meal in the cart
+ *     responses:
+ *       "200":
+ *         description: Meal added to cart successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/schemas/ApiResponse"
+ *       "401":
+ *         description: Unauthorized
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/responses/401"
+ *       "403":
+ *         description: Forbidden
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/responses/403"
+ *       "404":
+ *         description: Not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/responses/404"
+ *       "500":
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/responses/500"
+ */
+
+/**
+ * @openapi
+ * /api/v1/carts/{mealId}:
+ *   put:
+ *     summary: Increment meal quantity in cart
+ *     tags: [Cart]
+ *     parameters:
+ *       - in: path
+ *         name: mealId
+ *         required: true
+ *         schema:
+ *           type: string
+ *           required: true
+ *           description: The meal ID
+ *     responses:
+ *       "200":
+ *         description: Meal added to cart successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/schemas/ApiResponse"
+ *       "401":
+ *         description: Unauthorized
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/responses/401"
+ *       "403":
+ *         description: Forbidden
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/responses/403"
+ *       "404":
+ *         description: Not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/responses/404"
+ *       "500":
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/responses/500"
+ */
+
+/**
+ * @openapi
+ * /api/v1/carts/{mealId}:
+ *   put:
+ *     summary: Decrement meal quantity in cart
+ *     tags: [Cart]
+ *     parameters:
+ *       - in: path
+ *         name: mealId
+ *         required: true
+ *         schema:
+ *           type: string
+ *           required: true
+ *           description: The meal ID
  *     responses:
  *       "200":
  *         description: Meal added to cart successfully
@@ -178,13 +253,11 @@ export class CartRouter {
   }
 
   initializeRoutes() {
-    this.router.post(
-      "/:mealId",
-      zodValidation(addToCartSchema),
-      this.cartController.addToCart,
-    );
-    this.router.delete("/:mealId", this.cartController.deleteFromCart);
     this.router.get("/me", this.cartController.getUserCart);
+    this.router.put("/:mealId", this.cartController.addToCart);
+    this.router.put("/:mealId", this.cartController.incrementCart);
+    this.router.put("/:mealId", this.cartController.decrementCart);
+    this.router.delete("/:mealId", this.cartController.removeFromCart);
   }
 }
 

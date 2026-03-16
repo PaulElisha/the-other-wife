@@ -15,27 +15,14 @@ export class CartController {
 
   addToCart = handleAsyncControl(
     async (
-      req: Request<
-        { mealId: string },
-        {},
-        {
-          quantity: number;
-          action: "increment" | "decrement";
-        }
-      >,
+      req: Request<{ mealId: string }, {}, {}>,
       res: Response,
     ): Promise<Response> => {
       const userId = req.user?._id as unknown as string;
       const mealId = req.params.mealId;
 
       try {
-        const { quantity, action } = req.body;
-        const cart = await this.cartService.addToCart(
-          userId,
-          mealId,
-          quantity,
-          action,
-        );
+        const cart = await this.cartService.addToCart(userId, mealId);
         return res.status(HttpStatus.OK).json({
           status: "ok",
           message: "Meal added to cart successfully",
@@ -47,7 +34,7 @@ export class CartController {
     },
   );
 
-  deleteFromCart = handleAsyncControl(
+  removeFromCart = handleAsyncControl(
     async (
       req: Request<{ mealId: string }, {}, {}>,
       res: Response,
@@ -56,8 +43,50 @@ export class CartController {
       const mealId = req.params.mealId;
 
       try {
-        await this.cartService.deleteFromCart(userId, mealId);
+        await this.cartService.removeFromCart(userId, mealId);
         return res.status(HttpStatus.NO_CONTENT).send();
+      } catch (error) {
+        throw error;
+      }
+    },
+  );
+
+  incrementCart = handleAsyncControl(
+    async (
+      req: Request<{ mealId: string }, {}, {}>,
+      res: Response,
+    ): Promise<Response> => {
+      const userId = req.user?._id as unknown as string;
+      const mealId = req.params.mealId;
+
+      try {
+        const cart = await this.cartService.incrementCart(userId, mealId);
+        return res.status(HttpStatus.OK).json({
+          status: "ok",
+          message: "Meal incremented in cart successfully",
+          data: cart,
+        } as ApiResponse);
+      } catch (error) {
+        throw error;
+      }
+    },
+  );
+
+  decrementCart = handleAsyncControl(
+    async (
+      req: Request<{ mealId: string }, {}, {}>,
+      res: Response,
+    ): Promise<Response> => {
+      const userId = req.user?._id as unknown as string;
+      const mealId = req.params.mealId;
+
+      try {
+        const cart = await this.cartService.decrementCart(userId, mealId);
+        return res.status(HttpStatus.OK).json({
+          status: "ok",
+          message: "Meal decremented in cart successfully",
+          data: cart,
+        } as ApiResponse);
       } catch (error) {
         throw error;
       }

@@ -10,7 +10,10 @@ export interface UserDocument extends Document {
   email: string;
   passwordHash: string;
   phoneNumber: string;
-  pushToken: string;
+  emailToken: string;
+  emailTokenExpiry: Date;
+  otp: string;
+  otpExpiry: Date;
   refreshToken: string;
   refreshTokenExpiry: Date;
   status: string;
@@ -42,7 +45,6 @@ const UserSchema = new Schema(
       required: true,
       trim: true,
       lowercase: true,
-      unique: true,
     },
     passwordHash: {
       type: String,
@@ -53,8 +55,12 @@ const UserSchema = new Schema(
       required: true,
       unique: true,
     },
-    pushToken: {
+    emailToken: {
       type: String,
+      required: false,
+    },
+    emailTokenExpiry: {
+      type: Date,
       required: false,
     },
     refreshToken: {
