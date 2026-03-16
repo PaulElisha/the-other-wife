@@ -147,7 +147,7 @@ export class AuthService {
 
                 const html = template.replaceAll(
                   "{{verificationUrl}}",
-                  `https://the-other-wife.vercel.app/api/v1/auth/verify?emailToken=${userWithoutPassword.emailToken}`,
+                  `https://the-other-wife.vercel.app/api/v1/auth/verify?token=${userWithoutPassword.emailToken}`,
                 );
 
                 const data = {
@@ -183,19 +183,24 @@ export class AuthService {
     return await transaction
       .use(async (session: ClientSession, emailToken: string): Promise<any> => {
         try {
+          console.log(`Verifying signup with token: ${emailToken}`);
           let user = await User.findOne({
             emailToken,
             emailTokenExpiry: { $gt: new Date() },
           }).session(session);
 
           if (!user) {
+            console.log(
+              `Verification failed: Token ${emailToken} not found or expired`,
+            );
             throw new NotFoundException(
-              "User not found",
+              "User not found or token expired",
               HttpStatus.NOT_FOUND,
               ErrorCode.AUTH_USER_NOT_FOUND,
             );
           }
 
+          console.log(`User found for token: ${user.email}`);
           user.isEmailVerified = true;
           user.emailToken = "";
           user.emailTokenExpiry = new Date(Date.now() - 1000);
@@ -203,8 +208,6 @@ export class AuthService {
           await user.save({ session });
 
           const userWithoutPassword = user?.omitPassword();
-
-          console.log("UserWithoutPassword", userWithoutPassword);
 
           console.log("Verified user from DB:", userWithoutPassword);
 
@@ -214,6 +217,7 @@ export class AuthService {
             firstName: user.firstName,
           };
         } catch (error) {
+          console.error("Error in verifySignup service:", error);
           throw error;
         }
       })(emailToken)

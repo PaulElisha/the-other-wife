@@ -2,7 +2,6 @@
 
 import mongoose, { Document, Schema, model } from "mongoose";
 import bcrypt from "bcrypt";
-import { lowercase, trim } from "zod";
 
 export interface UserDocument extends Document {
   firstName: string;
@@ -112,10 +111,10 @@ UserSchema.pre("save", async function (next) {
     try {
       const salt = await bcrypt.genSalt(10);
       this.passwordHash = await bcrypt.hash(this.passwordHash, salt);
-      next();
+      return next();
     } catch (error) {
       console.error("Error hashing password:", error);
-      next(error as Error);
+      return next(error as Error);
     }
   }
   next();

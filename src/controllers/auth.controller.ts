@@ -65,10 +65,11 @@ export class AuthController {
 
   verifySignup = handleAsyncControl(
     async (
-      req: Request<{}, {}, { token: string }>,
+      req: Request<{}, {}, {}, { token: string }>,
       res: Response,
     ): Promise<any> => {
-      const emailToken = req.query.emailToken as string;
+      const emailToken = req.query.token as string;
+      console.log(`Received verification request for token: ${emailToken}`);
       try {
         const userWithoutPassword =
           await this.authService.verifySignup(emailToken);
@@ -81,6 +82,7 @@ export class AuthController {
           },
         } as ApiResponse);
       } catch (error) {
+        console.error("Error in verifySignup controller:", error);
         throw error;
       }
     },

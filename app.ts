@@ -7,10 +7,6 @@ import rateLimit from "express-rate-limit";
 import redoc from "redoc-express";
 import helmet from "helmet";
 
-import { fileURLToPath } from "node:url";
-import path, { dirname } from "node:path";
-import fs from "node:fs/promises";
-
 import { errorHandler } from "./src/middlewares/error-handler.middleware.js";
 
 import { hostName, port, corsOrigin } from "./src/constants/env.js";
@@ -79,11 +75,13 @@ export class App {
       }),
     );
 
-    this.app.use(async (_req, _res, next) => {
+    this.app.use(async (req, _res, next) => {
       try {
+        console.log(`Connecting to DB for request: ${req.method} ${req.url}`);
         await this.db.connect();
         next();
       } catch (error) {
+        console.error("Database connection failed in middleware:", error);
         next(error);
       }
     });
@@ -110,7 +108,7 @@ export class App {
       try {
         const template = await getTemplate(
           "src/templates",
-          "swagger.template.html",
+          "swagger.templates.html",
         );
         res.send(`${template}`);
       } catch (error: any) {
