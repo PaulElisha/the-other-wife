@@ -64,6 +64,52 @@ import { zodValidation } from "../middlewares/validation.js";
 
 /**
  * @openapi
+ * /api/v1/auth/verify:
+ *   post:
+ *     summary: Verify a new user's email after signup
+ *     tags: [Auth]
+ *     parameters:
+ *       - in: query
+ *         name: emailToken
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The email verification token sent to the user's email
+ *     responses:
+ *       "200":
+ *         description: User verified successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/schemas/ApiResponse"
+ *       "401":
+ *         description: Unauthorized
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/responses/401"
+ *       "403":
+ *         description: Forbidden
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/responses/403"
+ *       "404":
+ *         description: Not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/responses/404"
+ *       "500":
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/responses/500"
+ */
+
+/**
+ * @openapi
  * /api/v1/auth/login:
  *   post:
  *     summary: Login user
