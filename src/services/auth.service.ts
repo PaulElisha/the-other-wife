@@ -232,7 +232,7 @@ export class AuthService {
                 message: template,
               } as MailData;
 
-              const info = await mailer.relayTo(data, MailAction.welcome);
+              const info = await mailer.relayTo(data, MailAction.welcomeUser);
 
               console.log(`Welcome Email sent successfully: ${info}`);
             } catch (error: any) {

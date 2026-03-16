@@ -3,13 +3,11 @@
 import mongoose, { ClientSession } from "mongoose";
 
 class Transaction {
-  private session = {} as ClientSession;
-
   createTransaction = async () => {
     try {
-      this.session = await mongoose.startSession();
-      this.session.startTransaction();
-      return this.session;
+      const session = await mongoose.startSession();
+      session.startTransaction();
+      return session;
     } catch (error) {
       throw error;
     }
