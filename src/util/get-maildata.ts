@@ -9,5 +9,7 @@ export const getFormattedData = (template: string, user?: UserDocument) => {
 
   template = template.replace("{{firstName}}", firstName);
 
+  console.log("firstName", firstName);
+
   return { template };
 };

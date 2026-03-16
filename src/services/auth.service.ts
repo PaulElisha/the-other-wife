@@ -133,7 +133,7 @@ export class AuthService {
           setImmediate(async () => {
             const enableRetry = async () => {
               try {
-                console.log(Object.freeze(userWithoutPassword));
+                console.log("Signup user:", Object.freeze(userWithoutPassword));
 
                 const htmlTemplate = await getTemplate(
                   "src/templates",
@@ -205,7 +205,7 @@ export class AuthService {
           const userWithoutPassword = user?.omitPassword();
 
           return {
-            ...userWithoutPassword,
+            userWithoutPassword,
           };
         } catch (error) {
           throw error;
@@ -219,7 +219,7 @@ export class AuthService {
         setImmediate(async () => {
           const enableRetry = async () => {
             try {
-              console.log(Object.freeze(userWithoutPassword));
+              console.log("Verified user:", Object.freeze(userWithoutPassword));
 
               const htmlTemplate = await getTemplate(
                 "src/templates",
