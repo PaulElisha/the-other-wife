@@ -10,7 +10,6 @@ import { HttpStatus } from "../config/http.config.js";
 import { nodeEnv } from "../constants/env.js";
 import { ApiResponse } from "../util/response.util.js";
 import { CreateProfile } from "../dispatcher/profile.dispatcher.js";
-import { email } from "zod";
 
 export class AuthController {
   authService: AuthService;

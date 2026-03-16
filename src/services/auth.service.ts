@@ -141,8 +141,8 @@ export class AuthService {
                 );
 
                 const { template } = getFormattedData(
-                  userWithoutPassword,
                   htmlTemplate,
+                  userWithoutPassword,
                 );
 
                 const html = template.replaceAll(
@@ -196,24 +196,11 @@ export class AuthService {
             );
           }
 
-          // user.isEmailVerified = user.isEmailVerified && true;
-          // user.emailToken = null;
-          // user.emailTokenExpiry = null;
-          // user.lastLogin = new Date();
-          // await user.save({ session });
-
-          user = await User.findByIdAndUpdate(
-            user._id,
-            {
-              $set: {
-                lastLogin: new Date(),
-                emailToken: null,
-                emailTokenExpiry: null,
-                isEmailVerified: true,
-              },
-            },
-            { new: true, session: session },
-          );
+          user.isEmailVerified = user.isEmailVerified && true;
+          user.emailToken = "";
+          user.emailTokenExpiry = new Date(Date.now() - 1000);
+          user.lastLogin = new Date();
+          await user.save({ session });
 
           const userWithoutPassword = user?.omitPassword();
 
@@ -238,7 +225,7 @@ export class AuthService {
                 "welcome-email.templates.html",
               );
 
-              const { template } = getFormattedData(result, htmlTemplate);
+              const { template } = getFormattedData(htmlTemplate, result);
 
               const data = {
                 user: result,
@@ -313,8 +300,8 @@ export class AuthService {
               ),
             },
           },
-          { new: true },
-        ).session(session);
+          { new: true, session: session },
+        );
 
         const userWithoutPassword = user?.omitPassword();
 
@@ -413,22 +400,68 @@ export class AuthService {
   };
 
   forgotPassword = async (email: string) => {
-    const user = await User.findOne({ email });
+    return transaction
+      .use(async (session: ClientSession, email: string) => {
+        try {
+          const user = await User.findOne({ email }).session(session);
 
-    if (!user) {
-      throw new NotFoundException(
-        "User not found",
-        HttpStatus.NOT_FOUND,
-        ErrorCode.AUTH_USER_NOT_FOUND,
-      );
-    }
+          if (!user) {
+            throw new NotFoundException(
+              "User not found",
+              HttpStatus.NOT_FOUND,
+              ErrorCode.AUTH_USER_NOT_FOUND,
+            );
+          }
 
-    const { otp, otpExpiry } = generateOtp();
-    user.otp = otp;
-    user.otpExpiry = otpExpiry;
-    await user.save();
+          const { otp, otpExpiry } = generateOtp();
+          user.otp = otp;
+          user.otpExpiry = otpExpiry;
+          await user.save({ session });
 
-    return { otp };
+          return { otp };
+        } catch (error) {
+          throw error;
+        }
+      })(email)
+      .then((result) => {
+        let numOfAttempt = 0;
+        const maxNumOfAttempt = 3;
+
+        setImmediate(async () => {
+          const enableRetry = async () => {
+            try {
+              console.log(Object.freeze(result));
+
+              const htmlTemplate = await getTemplate(
+                "src/templates",
+                "welcome-email.templates.html",
+              );
+
+              const { template } = getFormattedData(htmlTemplate);
+
+              const data = {
+                user: result,
+                message: template,
+              } as MailData;
+
+              const info = await mailer.relayTo(data, MailAction.welcome);
+
+              console.log(`Email sent successfully: ${info}`);
+            } catch (error: any) {
+              numOfAttempt++;
+              if (numOfAttempt <= maxNumOfAttempt) {
+                await new Promise((res) => setTimeout(res, 1000));
+                return enableRetry();
+              }
+
+              console.error(error);
+            }
+          };
+
+          await enableRetry();
+        });
+        return result;
+      });
   };
 
   deleteUser = async (email: string) => {

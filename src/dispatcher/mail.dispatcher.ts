@@ -1,9 +1,8 @@
 /** @format */
 
-import { UserDocument } from "../models/user.model";
 import { Transporter } from "nodemailer";
-import { MailData } from "../services/email.service";
-import { mailSubject } from "../services/email.service";
+import { MailData } from "../services/email.service.js";
+import { mailSubject } from "../services/email.service.js";
 import { from } from "../constants/env.js";
 
 export type MailerCallback = (transporter: Transporter, data: MailData) => void;
