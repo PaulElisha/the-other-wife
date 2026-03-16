@@ -230,7 +230,7 @@ export class AuthService {
               const data = {
                 user: result,
                 message: template,
-              } as MailData;
+              };
 
               const info = await mailer.relayTo(data, MailAction.welcomeUser);
 
