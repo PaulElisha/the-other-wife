@@ -204,6 +204,8 @@ export class AuthService {
 
           const userWithoutPassword = user?.omitPassword();
 
+          console.log("UserWithoutPassword", userWithoutPassword);
+
           return {
             userWithoutPassword: {
               ...userWithoutPassword,
