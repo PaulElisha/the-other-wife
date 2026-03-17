@@ -65,16 +65,19 @@ import { roleGuardMiddleware } from "../middlewares/role-guard.middleware.js";
  *         schema:
  *           type: string
  *           required: true
- *           description: The user ID to update the customer profile
+ *           description: The customer ID to update
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
  *             type: object
- *             required: [profileImageUrl]
  *             properties:
  *               profileImageUrl: { type: string }
+ *               firstName: { type: string }
+ *               lastName: { type: string }
+ *               email: { type: string, format: email }
+ *               phoneNumber: { type: string }
  *     responses:
  *       "200":
  *         description: Customer updated
@@ -121,7 +124,7 @@ import { roleGuardMiddleware } from "../middlewares/role-guard.middleware.js";
  *         schema:
  *           type: string
  *           required: true
- *           description: The user ID to delete the customer profile
+ *           description: The customer ID to delete
  *     responses:
  *       "204":
  *         description: Customer deleted

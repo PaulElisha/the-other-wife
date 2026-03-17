@@ -70,7 +70,7 @@ import { zodValidation } from "../middlewares/validation.js";
  *     tags: [Auth]
  *     parameters:
  *       - in: query
- *         name: emailToken
+ *         name: token
  *         required: true
  *         schema:
  *           type: string

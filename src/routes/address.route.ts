@@ -12,7 +12,7 @@ import {
 
 /**
  * @swagger
- * /api/v1/addresses/:
+ * /api/v1/addresses:
  *   post:
  *     summary: Create address
  *     tags: [Address]
@@ -68,7 +68,7 @@ import {
 
 /**
  * @swagger
- * /api/v1/addresses/edit/{addressId}:
+ * /api/v1/addresses/edit/{id}:
  *   put:
  *     summary: Edit address
  *     tags: [Address]
@@ -78,7 +78,7 @@ import {
  *         required: true
  *         schema:
  *            type: string
- *            description: Edit Address ID
+ *         description: Edit address ID
  *     requestBody:
  *       required: true
  *       content:
@@ -130,7 +130,7 @@ import {
 
 /**
  * @swagger
- * /api/v1/addresses/toggle/{addressId}:
+ * /api/v1/addresses/toggle/{id}:
  *   put:
  *     summary: Toggle default address
  *     tags: [Address]
@@ -140,8 +140,7 @@ import {
  *         required: true
  *         schema:
  *            type: string
- *            required: true
- *            description: Toggle Address ID
+ *         description: Toggle address ID
  *     responses:
  *       "200":
  *         description: Default address set successfully
@@ -177,7 +176,7 @@ import {
 
 /**
  * @swagger
- * /api/v1/addresses/{addressId}:
+ * /api/v1/addresses/{id}:
  *   delete:
  *     summary: Delete address
  *     tags: [Address]
@@ -187,7 +186,7 @@ import {
  *         required: true
  *         schema:
  *            type: string
- *            description: Delete Address ID
+ *         description: Delete address ID
  *     responses:
  *       "204":
  *         description: Address deleted successfully

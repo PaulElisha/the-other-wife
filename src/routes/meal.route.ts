@@ -21,6 +21,7 @@ import { statusCheck } from "../middlewares/status-check.middleware.js";
  *       - name: tags
  *         in: query
  *         required: false
+ *         description: Comma-separated tags or repeated query params
  *         schema:
  *           type: array
  *           items:
@@ -60,6 +61,7 @@ import { statusCheck } from "../middlewares/status-check.middleware.js";
  *   post:
  *     summary: Create a new meal
  *     tags: [Meal]
+ *     description: Requires an authenticated approved vendor account
  *     requestBody:
  *       required: true
  *       content:

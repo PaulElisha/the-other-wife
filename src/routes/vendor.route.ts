@@ -17,7 +17,7 @@ import { roleGuardMiddleware } from "../middlewares/role-guard.middleware.js";
  *         content:
  *           application/json:
  *             schema:
- *               $ref: "#/components/schemas/Vendor"
+ *               $ref: "#/components/schemas/ApiResponse"
  *       "401":
  *         description: Unauthorized
  *         content:
@@ -69,7 +69,7 @@ import { roleGuardMiddleware } from "../middlewares/role-guard.middleware.js";
  *         content:
  *           application/json:
  *             schema:
- *               $ref: "#/components/schemas/Vendor"
+ *               $ref: "#/components/schemas/ApiResponse"
  *       "401":
  *         description: Unauthorized
  *         content:
