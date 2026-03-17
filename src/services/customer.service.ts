@@ -40,11 +40,11 @@ export class CustomerService {
       customerId: string,
       userId: string,
       body: {
-        profileImageUrl: string;
-        firstName: string;
-        lastName: string;
-        email: string;
-        phoneNumber: string;
+        profileImageUrl?: string;
+        firstName?: string;
+        lastName?: string;
+        email?: string;
+        phoneNumber?: string;
       },
     ) => {
       if (!customerId) {
@@ -58,19 +58,25 @@ export class CustomerService {
       const { profileImageUrl, firstName, lastName, email, phoneNumber } = body;
 
       try {
-        const customer = await Customer.findOneAndUpdate([
-          customerId,
-          userId,
-          {
-            $set: { profileImageUrl },
-          },
-          { new: true },
-        ]).session(session);
-
-        const user = await User.findOneAndUpdate(
+        const customer = await Customer.findOneAndUpdate(
           { _id: customerId, userId },
           {
-            $set: { firstName, lastName, email, phoneNumber },
+            $set: {
+              ...(profileImageUrl !== undefined && { profileImageUrl }),
+            },
+          },
+          { new: true },
+        ).session(session);
+
+        const user = await User.findOneAndUpdate(
+          { _id: userId },
+          {
+            $set: {
+              ...(firstName !== undefined && { firstName }),
+              ...(lastName !== undefined && { lastName }),
+              ...(email !== undefined && { email }),
+              ...(phoneNumber !== undefined && { phoneNumber }),
+            },
           },
           { new: true },
         ).session(session);
@@ -113,9 +119,7 @@ export class CustomerService {
           );
         }
 
-        const user = await User.findOneAndUpdate({
-          _id: customer.userId,
-        }).session(session);
+        const user = await User.findById(customer.userId).session(session);
 
         if (!user) {
           throw new NotFoundException(

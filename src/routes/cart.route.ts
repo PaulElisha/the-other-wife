@@ -240,7 +240,7 @@ export class CartRouter {
     this.router.get("/me", this.cartController.getUserCart);
     this.router.put("/:mealId", this.cartController.addToCart);
     this.router.patch("/:mealId", this.cartController.incrementCart);
-    this.router.patch("/:mealId", this.cartController.decrementCart);
+    this.router.patch("/:mealId/decrement", this.cartController.decrementCart);
     this.router.delete("/:mealId", this.cartController.removeFromCart);
   }
 }

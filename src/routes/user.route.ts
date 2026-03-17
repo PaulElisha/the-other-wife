@@ -5,6 +5,11 @@ import { UserController } from "../controllers/user.controller.js";
 
 import { roleGuardMiddleware } from "../middlewares/role-guard.middleware.js";
 import { authMiddleware } from "../middlewares/auth.middleware.js";
+import { zodValidation } from "../middlewares/validation.js";
+import {
+  closeCurrentUserAccountSchema,
+  updateUserStatusSchema,
+} from "../zod-schema/user.schema.js";
 
 /**
  * @swagger
@@ -108,10 +113,24 @@ class UserRouter {
       this.userController.getCurrentUser,
     );
 
+    this.router.delete(
+      "/me",
+      roleGuardMiddleware(["customer", "vendor", "admin"]),
+      zodValidation(closeCurrentUserAccountSchema),
+      this.userController.closeCurrentUserAccount,
+    );
+
     this.router.get(
       "/",
       roleGuardMiddleware(["admin"]),
       this.userController.getAllUsers,
+    );
+
+    this.router.patch(
+      "/:userId/status",
+      roleGuardMiddleware(["admin"]),
+      zodValidation(updateUserStatusSchema),
+      this.userController.updateUserStatus,
     );
   }
 }

@@ -74,17 +74,6 @@ export class App {
         },
       }),
     );
-
-    this.app.use(async (req, _res, next) => {
-      try {
-        console.log(`Connecting to DB for request: ${req.method} ${req.url}`);
-        await this.db.connect();
-        next();
-      } catch (error) {
-        console.error("Database connection failed in middleware:", error);
-        next(error);
-      }
-    });
   }
 
   async initializeDb() {

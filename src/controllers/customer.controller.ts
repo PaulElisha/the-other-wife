@@ -37,12 +37,11 @@ export class CustomerController {
       try {
         const { id: customerId } = req.params;
         const userId = req?.user?._id as unknown as string;
-        const { profileImageUrl } = req.body;
         const customerProfile =
           await this.customerService.updateCustomerProfile(
             customerId,
             userId,
-            profileImageUrl,
+            req.body,
           );
         return res.status(HttpStatus.OK).json({
           status: "ok",

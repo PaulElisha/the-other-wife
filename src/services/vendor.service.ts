@@ -90,7 +90,7 @@ export class VendorService {
       ).session(session);
 
       const user = await User.findOneAndUpdate(
-        { userId },
+        { _id: userId },
         {
           $set: userData,
         },

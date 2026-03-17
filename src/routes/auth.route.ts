@@ -273,7 +273,6 @@ class AuthRouter {
       this.authController.handleLogout,
     );
     this.router.post("/refresh", this.authController.handleRefreshLogin);
-    this.router.delete("/delete", this.authController.handleDeleteUser);
   }
 }
 

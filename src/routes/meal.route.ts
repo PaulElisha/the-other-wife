@@ -3,6 +3,8 @@
 import { Router } from "express";
 import { MealController } from "../controllers/meal.controller.js";
 import { authMiddleware } from "../middlewares/auth.middleware.js";
+import { roleGuardMiddleware } from "../middlewares/role-guard.middleware.js";
+import { statusCheck } from "../middlewares/status-check.middleware.js";
 
 /**
  * @swagger
@@ -104,13 +106,18 @@ class MealRouter {
   constructor() {
     this.router = Router();
     this.mealController = new MealController();
-    this.router.use(authMiddleware);
     this.initializeRoutes();
   }
 
   initializeRoutes() {
     this.router.get("/", this.mealController.getMeals);
-    this.router.post("/", this.mealController.createMeal);
+    this.router.post(
+      "/",
+      authMiddleware,
+      roleGuardMiddleware(["vendor"]),
+      statusCheck(["approved"]),
+      this.mealController.createMeal,
+    );
   }
 }
 

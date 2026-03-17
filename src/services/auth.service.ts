@@ -478,15 +478,6 @@ export class AuthService {
         return result;
       });
   };
-
-  deleteUser = async (email: string) => {
-    const deletedUser = await User.findOneAndDelete({ email });
-    if (!deletedUser) {
-      console.log("No user found with that email.");
-      throw new Error("No user found!");
-    }
-    return deletedUser;
-  };
 }
 
 // passwordReset = async (newPassword: string, token: string) => {

@@ -43,4 +43,42 @@ export class UserController {
       }
     },
   );
+
+  closeCurrentUserAccount = handleAsyncControl(
+    async (
+      req: Request<{}, {}, { password: string }>,
+      res: Response,
+    ): Promise<Response> => {
+      const userId = req.user?._id as unknown as string;
+      const { password } = req.body;
+
+      await this.userService.closeCurrentUserAccount(userId, password);
+
+      res.clearCookie("token", {
+        httpOnly: true,
+        sameSite: "strict",
+      });
+      res.clearCookie("refreshToken");
+
+      return res.status(HttpStatus.NO_CONTENT).send();
+    },
+  );
+
+  updateUserStatus = handleAsyncControl(
+    async (
+      req: Request<{ userId: string }, {}, { status: "active" | "suspended" | "deleted" }>,
+      res: Response,
+    ): Promise<Response> => {
+      const { userId } = req.params;
+      const { status } = req.body;
+
+      const user = await this.userService.updateUserStatus(userId, status);
+
+      return res.status(HttpStatus.OK).json({
+        data: user,
+        status: "ok",
+        message: "User status updated successfully",
+      } as ApiResponse);
+    },
+  );
 }

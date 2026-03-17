@@ -180,18 +180,6 @@ export class AuthController {
       }
     },
   );
-
-  handleDeleteUser = handleAsyncControl(
-    async (req: Request, res: Response): Promise<any> => {
-      const { email } = req.body;
-      console.log(req.body.email);
-      await this.authService.deleteUser(email);
-      return res.status(200).json({
-        success: true,
-        message: `User with email ${email} has been deleted.`,
-      });
-    },
-  );
 }
 
 // passwordResetRequest = handleAsyncControl(

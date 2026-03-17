@@ -44,18 +44,20 @@ export class AddressService {
       }
 
       const [userAddress] = await Address.create(
-        {
-          userId,
-          city,
-          state,
-          country,
-          postalCode,
-          latitude,
-          longitude,
-          label,
-          address,
-          isDefault,
-        },
+        [
+          {
+            userId,
+            city,
+            state,
+            country,
+            postalCode,
+            latitude,
+            longitude,
+            label,
+            address,
+            isDefault,
+          },
+        ],
         { session },
       );
 
@@ -87,18 +89,24 @@ export class AddressService {
   editUserAddress = transaction.use(
     async (
       session: ClientSession,
+      userId: string,
       addressId: string,
-      city: string,
-      state: string,
-      country: string,
-      postalCode: string,
-      latitude: number,
-      longitude: number,
-      label?: "home" | "work" | "other",
-      address?: string,
-      isDefault?: boolean,
+      data: {
+        city?: string;
+        state?: string;
+        country?: string;
+        postalCode?: string;
+        latitude?: number;
+        longitude?: number;
+        label?: "home" | "work" | "other";
+        address?: string;
+        isDefault?: boolean;
+      },
     ) => {
-      const userAddress = await Address.findById(addressId).session(session);
+      const userAddress = await Address.findOne({
+        _id: addressId,
+        userId,
+      }).session(session);
 
       if (!userAddress) {
         throw new NotFoundException(
@@ -108,26 +116,28 @@ export class AddressService {
         );
       }
 
-      if (typeof isDefault === "boolean" && isDefault) {
+      if (typeof data.isDefault === "boolean" && data.isDefault) {
         await Address.updateMany(
           { userId: userAddress.userId },
           { $set: { isDefault: false } },
         ).session(session);
       }
 
-      const updatedAddress = await Address.findByIdAndUpdate(
-        addressId,
+      const updatedAddress = await Address.findOneAndUpdate(
+        { _id: addressId, userId },
         {
           $set: {
-            city,
-            state,
-            country,
-            postalCode,
-            latitude,
-            longitude,
-            label,
-            address,
-            isDefault,
+            ...(data.city !== undefined && { city: data.city }),
+            ...(data.state !== undefined && { state: data.state }),
+            ...(data.country !== undefined && { country: data.country }),
+            ...(data.postalCode !== undefined && {
+              postalCode: data.postalCode,
+            }),
+            ...(data.latitude !== undefined && { latitude: data.latitude }),
+            ...(data.longitude !== undefined && { longitude: data.longitude }),
+            ...(data.label !== undefined && { label: data.label }),
+            ...(data.address !== undefined && { address: data.address }),
+            ...(data.isDefault !== undefined && { isDefault: data.isDefault }),
           },
         },
         {
@@ -139,35 +149,43 @@ export class AddressService {
     },
   );
 
-  toggleDefaultAddress = async (addressId: string) => {
-    const userAddress = await Address.findById(addressId);
+  toggleDefaultAddress = transaction.use(
+    async (session: ClientSession, userId: string, addressId: string) => {
+      const userAddress = await Address.findOne({
+        _id: addressId,
+        userId,
+      }).session(session);
 
-    if (!userAddress) {
-      throw new NotFoundException(
-        "Address not found",
-        HttpStatus.NOT_FOUND,
-        ErrorCode.RESOURCE_NOT_FOUND,
-      );
-    }
+      if (!userAddress) {
+        throw new NotFoundException(
+          "Address not found",
+          HttpStatus.NOT_FOUND,
+          ErrorCode.RESOURCE_NOT_FOUND,
+        );
+      }
 
-    const nextIsDefault = !userAddress.isDefault;
-
-    if (nextIsDefault) {
       await Address.updateMany(
         { userId: userAddress.userId },
         { $set: { isDefault: false } },
-      );
-    }
+      ).session(session);
 
-    userAddress.isDefault = nextIsDefault;
+      userAddress.isDefault = true;
 
-    await userAddress.save();
+      await userAddress.save({ session });
 
-    return { userAddress };
-  };
+      return { userAddress };
+    },
+  );
 
-  deleteUserAddress = async (addressId: string) =>
-    (await Address.findByIdAndDelete(addressId)) ??
+  deleteUserAddress = async (
+    requesterId: string,
+    addressId: string,
+    requesterType: string,
+  ) =>
+    (await Address.findOneAndDelete({
+      _id: addressId,
+      ...(requesterType === "admin" ? {} : { userId: requesterId }),
+    })) ??
     (() => {
       throw new NotFoundException(
         "Address not found",
@@ -185,17 +203,10 @@ export class AddressService {
       );
     }
 
-    const userAddresses = await Address.find({ userId }).populate(
-      "userId",
-      "firstName lastName",
-    );
-    if (!userAddresses) {
-      throw new NotFoundException(
-        "Address not found",
-        HttpStatus.NOT_FOUND,
-        ErrorCode.RESOURCE_NOT_FOUND,
-      );
-    }
+    const userAddresses = await Address.find({ userId })
+      .populate("userId", "firstName lastName")
+      .sort({ isDefault: -1, createdAt: -1 });
+
     return { userAddresses };
   };
 }
