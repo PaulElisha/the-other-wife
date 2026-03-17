@@ -7,7 +7,7 @@ import { mongoUri } from "../constants/env.js";
 export class Db {
   private connectionPromise: Promise<typeof mongoose> | null = null;
 
-  connect = () => {
+  connect = async () => {
     if (!mongoUri) {
       throw new Error("MONGODB_URI is not defined");
     }
