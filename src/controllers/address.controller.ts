@@ -58,20 +58,31 @@ export class AddressController {
   );
 
   editUserAddress = handleAsyncControl(
-    async (req: Request<{ id: string }>, res: Response): Promise<Response> => {
+    async (
+      req: Request<
+        { id: string },
+        {},
+        {
+          city: string;
+          state: string;
+          country: string;
+          postalCode: string;
+          latitude: number;
+          longitude: number;
+          label?: "home" | "work" | "other";
+          address?: string;
+          isDefault?: boolean;
+        }
+      >,
+      res: Response,
+    ): Promise<Response> => {
       const { id: addressId } = req.params;
+      const userId = req.user?._id as unknown as string;
       try {
         const userAddress = await this.addressService.editUserAddress(
+          userId,
           addressId,
-          req.body.city,
-          req.body.state,
-          req.body.country,
-          req.body.postalCode,
-          req.body.latitude,
-          req.body.longitude,
-          req.body.label,
-          req.body.address,
-          req.body.isDefault,
+          req.body,
         );
 
         return res.status(HttpStatus.OK).json({
@@ -88,9 +99,12 @@ export class AddressController {
   toggleDefaultAddress = handleAsyncControl(
     async (req: Request<{ id: string }>, res: Response): Promise<Response> => {
       const { id: addressId } = req.params;
+      const userId = req.user?._id as unknown as string;
       try {
-        const defaultAddress =
-          await this.addressService.toggleDefaultAddress(addressId);
+        const defaultAddress = await this.addressService.toggleDefaultAddress(
+          userId,
+          addressId,
+        );
 
         return res.status(HttpStatus.OK).json({
           status: "ok",
@@ -106,8 +120,14 @@ export class AddressController {
   deleteUserAddress = handleAsyncControl(
     async (req: Request<{ id: string }>, res: Response): Promise<Response> => {
       const { id: addressId } = req.params;
+      const userId = req.user?._id as unknown as string;
+      const userType = req.user?.userType as string;
       try {
-        await this.addressService.deleteUserAddress(addressId);
+        await this.addressService.deleteUserAddress(
+          userId,
+          addressId,
+          userType,
+        );
         return res.status(HttpStatus.NO_CONTENT).send();
       } catch (error) {
         throw error;

@@ -181,52 +181,39 @@ export class AuthController {
     },
   );
 
-  handleDeleteUser = handleAsyncControl(
-    async (req: Request, res: Response): Promise<any> => {
-      const { email } = req.body;
-      console.log(req.body.email);
-      await this.authService.deleteUser(email);
-      return res.status(200).json({
-        success: true,
-        message: `User with email ${email} has been deleted.`,
-      });
+  handleForgotPassword = handleAsyncControl(
+    async (
+      req: Request<{}, {}, { email: string }>,
+      res: Response,
+    ): Promise<any> => {
+      try {
+        const { email } = req.body;
+        console.log(req.body.email);
+        await this.authService.forgotPassword(email);
+        return res.status(200).json({
+          success: true,
+          message: `User with email ${email} has been deleted.`,
+        });
+      } catch (error) {
+        throw error;
+      }
+    },
+  );
+
+  handlePasswordReset = handleAsyncControl(
+    async (
+      req: Request<{}, {}, { otp: string; newPassword: string }>,
+      res: Response,
+    ): Promise<any> => {
+      try {
+        await this.authService.passwordReset(req.body);
+        return res.status(200).json({
+          success: true,
+          message: `Password reset successfully`,
+        });
+      } catch (error) {
+        throw error;
+      }
     },
   );
 }
-
-// passwordResetRequest = handleAsyncControl(
-//   async (
-//     req: Request<{}, {}, { phoneNumber: string }>,
-//     res: Response,
-//   ): Promise<any> => {
-//     try {
-//       const { token } = await this.authService.passwordResetRequest(
-//         req.body.phoneNumber,
-//       );
-//       return res
-//         .status(HttpStatus.OK)
-//         .json({ status: "ok", message: "User login successful" });
-//     } catch (error) {
-//       throw error;
-//     }
-//   },
-// );
-
-// passwordReset = handleAsyncControl(
-//   async (
-//     req: Request<{}, {}, { phoneNumber: string; token: string }>,
-//     res: Response,
-//   ): Promise<any> => {
-//     try {
-//       await this.authService.passwordReset(
-//         req.body.phoneNumber,
-//         req.body.token,
-//       );
-//       return res
-//         .status(HttpStatus.OK)
-//         .json({ status: "ok", message: "User login successful" });
-//     } catch (error) {
-//       throw error;
-//     }
-//   },
-// );

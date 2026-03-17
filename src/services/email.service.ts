@@ -11,13 +11,15 @@ import {
 import { MailerCallback } from "../dispatcher/mail.dispatcher.js";
 import { UserDocument } from "../models/user.model.js";
 
-const MailSubject = () => ({
+const MailHeading = () => ({
   welcomeUser:
     "Welcome to TheOtherWife – Your Comfort Food Journey Starts Here!",
   verifySignup: "Verify Your Email",
+  forgotPassword: "Forgot Password",
+  passwordReset: "Password Reset",
 });
 
-export const mailSubject = MailSubject();
+export const MailSubject = MailHeading();
 
 export type MailData = {
   user: UserDocument;

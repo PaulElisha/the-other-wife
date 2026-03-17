@@ -70,7 +70,7 @@ import { zodValidation } from "../middlewares/validation.js";
  *     tags: [Auth]
  *     parameters:
  *       - in: query
- *         name: emailToken
+ *         name: token
  *         required: true
  *         schema:
  *           type: string
@@ -208,6 +208,103 @@ import { zodValidation } from "../middlewares/validation.js";
 
 /**
  * @openapi
+ * /api/v1/auth/forgot-password:
+ *   post:
+ *     summary: Forgot password
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [email]
+ *             properties:
+ *               email: { type: string }
+ *     responses:
+ *       "200":
+ *         description: User login refreshed successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/schemas/ApiResponse"
+ *       "401":
+ *         description: Unauthorized
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/responses/401"
+ *       "403":
+ *         description: Forbidden
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/responses/403"
+ *       "404":
+ *         description: Not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/responses/404"
+ *       "500":
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/responses/500"
+ */
+
+/**
+ * @openapi
+ * /api/v1/auth/password-reset:
+ *   post:
+ *     summary: Password reset
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [newPassword, otp]
+ *             properties:
+ *               otp: { type: string }
+ *               newPassword: { type: string }
+ *     responses:
+ *       "200":
+ *         description: User login refreshed successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/schemas/ApiResponse"
+ *       "401":
+ *         description: Unauthorized
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/responses/401"
+ *       "403":
+ *         description: Forbidden
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/responses/403"
+ *       "404":
+ *         description: Not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/responses/404"
+ *       "500":
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/responses/500"
+ */
+
+/**
+ * @openapi
  * /api/v1/auth/logout:
  *   post:
  *     summary: Logout user
@@ -273,7 +370,14 @@ class AuthRouter {
       this.authController.handleLogout,
     );
     this.router.post("/refresh", this.authController.handleRefreshLogin);
-    this.router.delete("/delete", this.authController.handleDeleteUser);
+    this.router.post(
+      "/forgot-password",
+      this.authController.handleForgotPassword,
+    );
+    this.router.post(
+      "/password-reset",
+      this.authController.handlePasswordReset,
+    );
   }
 }
 

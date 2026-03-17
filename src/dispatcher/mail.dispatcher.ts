@@ -2,7 +2,7 @@
 
 import { Transporter } from "nodemailer";
 import { MailData } from "../services/email.service.js";
-import { mailSubject } from "../services/email.service.js";
+import { MailSubject } from "../services/email.service.js";
 import { from } from "../constants/env.js";
 
 export type MailerCallback = (transporter: Transporter, data: MailData) => void;
@@ -13,7 +13,7 @@ export const MailAction: Record<string, MailerCallback> = {
     return transporter.sendMail({
       from: `"Peace from TheOtherWife" <${from}>`,
       to: user.email,
-      subject: mailSubject.verifySignup,
+      subject: MailSubject.verifySignup,
       html: message,
     });
   },
@@ -22,7 +22,25 @@ export const MailAction: Record<string, MailerCallback> = {
     return transporter.sendMail({
       from: `"Peace from TheOtherWife" <${from}>`,
       to: user.email,
-      subject: mailSubject.welcomeUser,
+      subject: MailSubject.welcomeUser,
+      html: message,
+    });
+  },
+  forgotPassword: (transporter: Transporter, data: MailData) => {
+    const { user, message } = data;
+    return transporter.sendMail({
+      from: `"Peace from TheOtherWife" <${from}>`,
+      to: user.email,
+      subject: MailSubject.forgotPassword,
+      html: message,
+    });
+  },
+  passwordReset: (transporter: Transporter, data: MailData) => {
+    const { user, message } = data;
+    return transporter.sendMail({
+      from: `"Peace from TheOtherWife" <${from}>`,
+      to: user.email,
+      subject: MailSubject.passwordReset,
       html: message,
     });
   },

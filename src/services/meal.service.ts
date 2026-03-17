@@ -9,6 +9,7 @@ import Meal from "../models/meal.model.js";
 import Vendor from "../models/vendor.model.js";
 import MealCategory from "../models/mealCategory.model.js";
 import { transaction } from "../util/transaction.util.js";
+import { NotFoundException } from "../errors/not-found-exception.error.js";
 
 export class MealService {
   constructor() {}
@@ -39,7 +40,7 @@ export class MealService {
         tags,
       } = mealData;
 
-      const vendor = await Vendor.findOne({ userId });
+      const vendor = await Vendor.findOne({ userId }).session(session);
       if (!vendor) {
         throw new BadRequestException(
           "Vendor not found",
@@ -49,7 +50,9 @@ export class MealService {
       }
       const vendorId = vendor._id;
 
-      const category = await MealCategory.findOne({ category: categoryName });
+      const category = await MealCategory.findOne({
+        category: categoryName,
+      }).session(session);
       if (!category) {
         throw new BadRequestException(
           "Meal category not found",
@@ -60,18 +63,23 @@ export class MealService {
 
       const categoryId = category._id;
 
-      const meal = await Meal.create({
-        vendorId,
-        name,
-        categoryName,
-        categoryId,
-        description,
-        price,
-        availableFrom,
-        availableUntil,
-        primaryImageUrl,
-        tags,
-      });
+      const [meal] = await Meal.create(
+        [
+          {
+            vendorId,
+            name,
+            categoryName,
+            categoryId,
+            description,
+            price,
+            availableFrom,
+            availableUntil,
+            primaryImageUrl,
+            tags,
+          },
+        ],
+        { session: session },
+      );
 
       if (!meal) {
         throw new BadRequestException(
@@ -85,81 +93,81 @@ export class MealService {
     },
   );
 
-  getMeals = transaction.use(
-    async (
-      session: ClientSession,
-      userId: string,
-      data: {
-        search: string;
-        tags: string[];
-        mealId: string;
-        category: string;
-      },
-      pagination: { pageSize: number; pageNumber: number },
-    ) => {
-      userId &&
-        (() => {
-          throw new BadRequestException(
-            "UserID is required",
-            HttpStatus.BAD_REQUEST,
-            ErrorCode.VALIDATION_ERROR,
-          );
-        })();
+  getMeals = async (
+    data: {
+      search?: string;
+      tags?: string[];
+      mealId?: string;
+      category?: string;
+    },
+    pagination: { pageSize?: number; pageNumber?: number },
+  ) => {
+    const { search, tags, mealId, category } = data;
+    const pageSize = Math.min(Math.max(pagination.pageSize ?? 10, 1), 50);
+    const pageNumber = Math.max(pagination.pageNumber ?? 1, 1);
+    const skip = (pageNumber - 1) * pageSize;
 
-      const { search, tags, mealId, category } = data;
-      const { pageSize, pageNumber } = pagination;
-      const skip = (pageNumber - 1) * pageSize;
+    const query: Record<string, any> = {
+      isDeleted: false,
+      isAvailable: "available",
+    };
 
-      const mealCategory = await MealCategory.findOne({ category }).session(
-        session,
-      );
-      const categoryId = mealCategory?._id;
+    if (search) {
+      query.$or = [
+        { name: { $regex: search, $options: "i" } },
+        { description: { $regex: search, $options: "i" } },
+      ];
+    }
+
+    if (Array.isArray(tags) && tags.length > 0) {
+      query.tags = { $in: tags };
+    }
+
+    if (mealId) {
+      query._id = mealId as unknown as mongoose.Types.ObjectId;
+    }
+
+    if (category) {
+      const mealCategory = await MealCategory.findOne({ category });
 
       if (!mealCategory) {
-        throw new BadRequestException(
+        throw new NotFoundException(
           "Meal category not found",
-          HttpStatus.BAD_REQUEST,
-          ErrorCode.VALIDATION_ERROR,
+          HttpStatus.NOT_FOUND,
+          ErrorCode.RESOURCE_NOT_FOUND,
         );
       }
 
-      const query: Record<string, any> = {};
+      query.categoryId = mealCategory._id as unknown as mongoose.Types.ObjectId;
+    }
 
-      search && (query.search = { $regex: search, $options: "i" });
-      Array.isArray(tags) && tags.length > 0 && (query.tags = { $in: tags });
-      mealId && (query._id = mealId as unknown as mongoose.Types.ObjectId);
-      categoryId &&
-        (query.categoryId = categoryId as unknown as mongoose.Types.ObjectId);
+    const [meals] = await Meal.find(query)
+      .populate("vendorId")
+      .skip(skip)
+      .limit(pageSize)
+      .sort({ createdAt: -1 });
 
-      const [meals] = await Meal.find(query)
-        .populate("vendorId")
-        .skip(skip)
-        .limit(pageSize)
-        .sort({ createdAt: -1 })
-        .session(session);
+    const totalMeals = await Meal.countDocuments(query);
 
-      const totalMeals = await Meal.countDocuments(query).session(session);
+    const totalPages = Math.ceil(totalMeals / pageSize);
 
-      const totalPages = Math.ceil(totalMeals / pageSize);
+    if (!meals) {
+      throw new BadRequestException(
+        "Meals not found",
+        HttpStatus.BAD_REQUEST,
+        ErrorCode.VALIDATION_ERROR,
+      );
+    }
 
-      if (!meals) {
-        throw new BadRequestException(
-          "Meals not found",
-          HttpStatus.BAD_REQUEST,
-          ErrorCode.VALIDATION_ERROR,
-        );
-      }
-
-      return {
-        meals,
-        pagination: {
-          pageSize,
-          pageNumber,
-          totalMeals,
-          totalPages,
-          skip,
-        },
-      };
-    },
-  );
+    return {
+      meals,
+      pagination: {
+        pageSize,
+        pageNumber,
+        totalMeals,
+        totalPages,
+        skip,
+      },
+    };
+  };
 }

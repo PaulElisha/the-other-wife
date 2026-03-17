@@ -9,8 +9,7 @@ export interface MealDocument extends Document {
   categoryName: string;
   description: string;
   price: number;
-  imageUrl: string;
-  isAvailable: boolean;
+  isAvailable: string;
   availableFrom: string;
   availableUntil: string;
   primaryImageUrl: string;

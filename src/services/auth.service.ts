@@ -1,6 +1,7 @@
 /** @format */
 
 import { ClientSession } from "mongoose";
+import bcrypt from "bcrypt";
 
 import { HttpStatus } from "../config/http.config.js";
 import { ErrorCode } from "../enums/error-code.enum.js";
@@ -433,12 +434,13 @@ export class AuthService {
           user.otpExpiry = otpExpiry;
           await user.save({ session });
 
-          return { otp };
+          return { otp, otpExpiry, user };
         } catch (error) {
           throw error;
         }
       })(email)
       .then((result) => {
+        const { otp, otpExpiry, user } = result;
         let numOfAttempt = 0;
         const maxNumOfAttempt = 3;
 
@@ -449,19 +451,25 @@ export class AuthService {
 
               const htmlTemplate = await getTemplate(
                 "src/templates",
-                "welcome-email.templates.html",
+                "forgot-password.template.html",
               );
 
               const { template } = getFormattedData(htmlTemplate);
 
+              template.replace("{{otp}}", otp);
+              template.replace("{{expiry}}", otpExpiry.toISOString());
+
               const data = {
-                user: result,
+                user: user,
                 message: template,
               } as MailData;
 
-              const info = await mailer.relayTo(data, MailAction.welcomeUser);
+              const info = await mailer.relayTo(
+                data,
+                MailAction.forgotPassword,
+              );
 
-              console.log(`Email sent successfully: ${info}`);
+              console.log(`Forgot password mail sent successfully: ${info}`);
             } catch (error: any) {
               numOfAttempt++;
               if (numOfAttempt <= maxNumOfAttempt) {
@@ -479,31 +487,70 @@ export class AuthService {
       });
   };
 
-  deleteUser = async (email: string) => {
-    const deletedUser = await User.findOneAndDelete({ email });
-    if (!deletedUser) {
-      console.log("No user found with that email.");
-      throw new Error("No user found!");
-    }
-    return deletedUser;
+  passwordReset = async (body: { newPassword: string; otp: string }) => {
+    return transaction
+      .use(async (session: ClientSession, body) => {
+        const { newPassword, otp } = body;
+
+        const user = await User.findOne({
+          otp,
+          otpExpiry: { $gt: Date.now(), $lt: Date.now() + 20 * 60 * 1000 },
+        }).session(session);
+
+        if (!user) {
+          throw new NotFoundException(
+            "User not found",
+            HttpStatus.NOT_FOUND,
+            ErrorCode.AUTH_USER_NOT_FOUND,
+          );
+        }
+
+        user.passwordHash = await bcrypt.hash(newPassword, 10);
+        user.otp = "";
+        user.otpExpiry = new Date(Date.now() - 1000);
+        await user.save({ session });
+
+        return { user };
+      })(body)
+      .then((result) => {
+        const { user } = result;
+        let numOfAttempt = 0;
+        const maxNumOfAttempt = 3;
+
+        setImmediate(async () => {
+          const enableRetry = async () => {
+            try {
+              console.log(Object.freeze(result));
+
+              const htmlTemplate = await getTemplate(
+                "src/templates",
+                "password-reset.template.html",
+              );
+
+              const { template } = getFormattedData(htmlTemplate, user);
+
+              const data = {
+                user: user,
+                message: template,
+              } as MailData;
+
+              const info = await mailer.relayTo(data, MailAction.passwordReset);
+
+              console.log(`Password reset mail sent successfully: ${info}`);
+            } catch (error: any) {
+              numOfAttempt++;
+              if (numOfAttempt <= maxNumOfAttempt) {
+                await new Promise((res) => setTimeout(res, 1000));
+                return enableRetry();
+              }
+
+              console.error(error);
+            }
+          };
+
+          await enableRetry();
+        });
+        return result;
+      });
   };
 }
-
-// passwordReset = async (newPassword: string, token: string) => {
-//   const user = await User.findOne({
-//     resetToken: token,
-//     resetTokenExpiry: { $gt: Date.now(), $lt: Date.now() + 20 * 60 * 1000 },
-//   });
-//   if (!user) {
-//     throw new NotFoundException(
-//       "User not found",
-//       HttpStatus.NOT_FOUND,
-//       ErrorCode.AUTH_USER_NOT_FOUND,
-//     );
-//   }
-
-//   user.passwordHash = await bcrypt.hash(newPassword, 10);
-//   user.resetToken = null;
-//   user.resetTokenExpiry = null;
-//   await user.save();
-// };

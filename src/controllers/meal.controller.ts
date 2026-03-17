@@ -31,21 +31,22 @@ export class MealController {
   getMeals = handleAsyncControl(
     async (req: Request<{ mealId: string }>, res: Response) => {
       try {
-        const userId = req.user?._id as unknown as string;
-
         const query = {
           search: req.query.search as string,
-          tags: req.query.tags as string[],
+          tags:
+            typeof req.query.tags === "string"
+              ? req.query.tags.split(",").map((tag) => tag.trim())
+              : (req.query.tags as string[] | undefined),
           mealId: req.query.mealId as string,
           category: req.query.category as string,
         };
 
         const pagination = {
-          pageSize: parseInt(req.query.pageSize as string),
-          pageNumber: parseInt(req.query.pageNumber as string),
+          pageSize: Number(req.query.pageSize),
+          pageNumber: Number(req.query.pageNumber),
         };
 
-        const meal = await this.mealService.getMeals(userId, query, pagination);
+        const meal = await this.mealService.getMeals(query, pagination);
         return res.status(HttpStatus.OK).json({
           status: "ok",
           message: "Meals fetched successfully",
