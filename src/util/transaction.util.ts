@@ -14,9 +14,7 @@ class Transaction {
   };
 
   use =
-    <Args extends any[], R>(
-      callback: (session: ClientSession, ...args: Args) => Promise<R>,
-    ) =>
+    <Args extends any[], R>(callback: (session: ClientSession, ...args: Args) => Promise<R>) =>
     async (...args: Args) => {
       const session = await this.createTransaction();
       try {

@@ -1,13 +1,13 @@
 /** @format */
 
-import { HttpStatusCodeType } from "../config/http.config.js";
-import { ErrorCodeType } from "../enums/error-code.enum.js";
+import { HttpStatusCodeType } from "../config/http.config.ts";
+import { ErrorCodeType } from "../enums/error-code.enum.ts";
 
 export class AppError extends Error {
   constructor(
     public message: string,
     public statusCode: HttpStatusCodeType,
-    public errorCode: ErrorCodeType
+    public errorCode: ErrorCodeType,
   ) {
     super(message);
     this.message = message;

@@ -1,13 +1,13 @@
 /** @format */
 
-import Address from "../models/address.model.js";
-import { NotFoundException } from "../errors/not-found-exception.error.js";
-import { HttpStatus } from "../config/http.config.js";
-import { ErrorCode } from "../enums/error-code.enum.js";
-import Customer from "../models/customer.model.js";
-import Vendor from "../models/vendor.model.js";
-import { BadRequestException } from "../errors/bad-request-exception.error.js";
-import { transaction } from "../util/transaction.util.js";
+import Address from "../models/address.model.ts";
+import { NotFoundException } from "../errors/not-found-exception.error.ts";
+import { HttpStatus } from "../config/http.config.ts";
+import { ErrorCode } from "../enums/error-code.enum.ts";
+import Customer from "../models/customer.model.ts";
+import Vendor from "../models/vendor.model.ts";
+import { BadRequestException } from "../errors/bad-request-exception.error.ts";
+import { transaction } from "../util/transaction.util.ts";
 import { ClientSession } from "mongoose";
 
 export class AddressService {
@@ -164,7 +164,16 @@ export class AddressService {
         );
       }
 
-      userAddress.isDefault = true;
+      const nextIsDefault = !userAddress.isDefault;
+
+      if (nextIsDefault) {
+        await Address.updateMany(
+          { userId: userAddress.userId },
+          { $set: { isDefault: false } },
+        ).session(session);
+      }
+
+      userAddress.isDefault = nextIsDefault;
 
       await userAddress.save({ session: session });
 

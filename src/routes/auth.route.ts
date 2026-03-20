@@ -1,13 +1,10 @@
 /** @format */
 
 import { Router } from "express";
-import { AuthController } from "../controllers/auth.controller.js";
-import {
-  loginUserSchema,
-  registerUserSchema,
-} from "../zod-schema/auth.schema.js";
-import { authMiddleware } from "../middlewares/auth.middleware.js";
-import { zodValidation } from "../middlewares/validation.js";
+import { AuthController } from "../controllers/auth.controller.ts";
+import { loginUserSchema, registerUserSchema } from "../zod-schema/auth.schema.ts";
+import { authMiddleware } from "../middlewares/auth.middleware.ts";
+import { zodValidation } from "../middlewares/validation.ts";
 
 /**
  * @openapi
@@ -359,25 +356,11 @@ class AuthRouter {
       this.authController.handleSignup,
     );
     this.router.get("/verify", this.authController.verifySignup);
-    this.router.post(
-      "/login",
-      zodValidation(loginUserSchema),
-      this.authController.handleLogin,
-    );
-    this.router.post(
-      "/logout",
-      authMiddleware,
-      this.authController.handleLogout,
-    );
+    this.router.post("/login", zodValidation(loginUserSchema), this.authController.handleLogin);
+    this.router.post("/logout", authMiddleware, this.authController.handleLogout);
     this.router.post("/refresh", this.authController.handleRefreshLogin);
-    this.router.post(
-      "/forgot-password",
-      this.authController.handleForgotPassword,
-    );
-    this.router.post(
-      "/password-reset",
-      this.authController.handlePasswordReset,
-    );
+    this.router.post("/forgot-password", this.authController.handleForgotPassword);
+    this.router.post("/password-reset", this.authController.handlePasswordReset);
   }
 }
 

@@ -1,9 +1,9 @@
 /** @format */
 
 import { Router } from "express";
-import { VendorController } from "../controllers/vendor.controller.js";
-import { authMiddleware } from "../middlewares/auth.middleware.js";
-import { roleGuardMiddleware } from "../middlewares/role-guard.middleware.js";
+import { VendorController } from "../controllers/vendor.controller.ts";
+import { authMiddleware } from "../middlewares/auth.middleware.ts";
+import { roleGuardMiddleware } from "../middlewares/role-guard.middleware.ts";
 
 /**
  * @swagger
@@ -17,7 +17,7 @@ import { roleGuardMiddleware } from "../middlewares/role-guard.middleware.js";
  *         content:
  *           application/json:
  *             schema:
- *               $ref: "#/components/schemas/Vendor"
+ *               $ref: "#/components/schemas/ApiResponse"
  *       "401":
  *         description: Unauthorized
  *         content:
@@ -69,7 +69,7 @@ import { roleGuardMiddleware } from "../middlewares/role-guard.middleware.js";
  *         content:
  *           application/json:
  *             schema:
- *               $ref: "#/components/schemas/Vendor"
+ *               $ref: "#/components/schemas/ApiResponse"
  *       "401":
  *         description: Unauthorized
  *         content:
@@ -297,11 +297,7 @@ class VendorRouter {
   }
 
   initializeRoutes() {
-    this.router.get(
-      "/me",
-      roleGuardMiddleware(["vendor"]),
-      this.vendorController.getVendorProfile,
-    );
+    this.router.get("/me", roleGuardMiddleware(["vendor"]), this.vendorController.getVendorProfile);
     this.router.put(
       "/me",
       roleGuardMiddleware(["vendor"]),

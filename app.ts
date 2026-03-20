@@ -7,21 +7,21 @@ import rateLimit from "express-rate-limit";
 import redoc from "redoc-express";
 import helmet from "helmet";
 
-import { errorHandler } from "./src/middlewares/error-handler.middleware.js";
+import { errorHandler } from "./src/middlewares/error-handler.middleware.ts";
 
-import { hostName, port, corsOrigin } from "./src/constants/env.js";
-import { Db } from "./src/config/db.config.js";
-import { swaggerSpec } from "./src/config/swagger.config.js";
+import { hostName, port, corsOrigin } from "./src/constants/env.ts";
+import { Db } from "./src/config/db.config.ts";
+import { swaggerSpec } from "./src/config/swagger.config.ts";
 
-import { authRouter } from "./src/routes/auth.route.js";
-import { userRouter } from "./src/routes/user.route.js";
-import { addressRouter } from "./src/routes/address.route.js";
-import { customerRouter } from "./src/routes/customer.route.js";
-import { vendorRouter } from "./src/routes/vendor.route.js";
-import { cartRouter } from "./src/routes/cart.route.js";
-import { HttpStatus } from "./src/config/http.config.js";
-import { mealRouter } from "./src/routes/meal.route.js";
-import { getTemplate } from "./src/util/get-template.util.js";
+import { authRouter } from "./src/routes/auth.route.ts";
+import { userRouter } from "./src/routes/user.route.ts";
+import { addressRouter } from "./src/routes/address.route.ts";
+import { customerRouter } from "./src/routes/customer.route.ts";
+import { vendorRouter } from "./src/routes/vendor.route.ts";
+import { cartRouter } from "./src/routes/cart.route.ts";
+import { HttpStatus } from "./src/config/http.config.ts";
+import { mealRouter } from "./src/routes/meal.route.ts";
+import { getTemplate } from "./src/util/get-template.util.ts";
 
 export class App {
   app: Express;
@@ -29,6 +29,7 @@ export class App {
 
   constructor() {
     this.app = express();
+    this.app.disable("x-powered-by");
     this.app.set("trust proxy", 1);
     this.db = new Db();
     this.initiializeMiddlewares();
@@ -41,11 +42,7 @@ export class App {
         contentSecurityPolicy: {
           directives: {
             defaultSrc: ["'self'"],
-            scriptSrc: [
-              "'self'",
-              "'unsafe-inline'",
-              "https://cdn.jsdelivr.net",
-            ],
+            scriptSrc: ["'self'", "'unsafe-inline'", "https://cdn.jsdelivr.net"],
             styleSrc: ["'self'", "'unsafe-inline'", "https://cdn.jsdelivr.net"],
             imgSrc: ["'self'", "data:", "https://cdn.jsdelivr.net"],
             connectSrc: ["'self'"],
@@ -56,12 +53,7 @@ export class App {
     );
     this.app.use(express.json());
     this.app.use(express.urlencoded({ extended: true }));
-    this.app.use(
-      cors({
-        origin: corsOrigin || true,
-        credentials: true,
-      }),
-    );
+    this.app.use(cors({ origin: corsOrigin || true, credentials: true }));
     this.app.use(cookieParser());
     this.app.use(
       rateLimit({
@@ -69,9 +61,7 @@ export class App {
         max: 100,
         standardHeaders: true,
         legacyHeaders: false,
-        validate: {
-          xForwardedForHeader: false,
-        },
+        validate: { xForwardedForHeader: false },
       }),
     );
 
@@ -106,25 +96,14 @@ export class App {
 
     this.app.get("/api-docs", async (_req, res) => {
       try {
-        const template = await getTemplate(
-          "src/templates",
-          "swagger.template.html",
-        );
+        const template = await getTemplate("src/templates", "swagger.template.html");
         res.send(`${template}`);
       } catch (error: any) {
-        res
-          .status(HttpStatus.NOT_FOUND)
-          .send(`Error reading template ${error.message}`);
+        res.status(HttpStatus.NOT_FOUND).send(`Error reading template ${error.message}`);
       }
     });
 
-    this.app.get(
-      "/redoc",
-      redoc({
-        title: "The Other Wife API Docs",
-        specUrl: "/api-docs.json",
-      }),
-    );
+    this.app.get("/redoc", redoc({ title: "The Other Wife API Docs", specUrl: "/api-docs.json" }));
     this.app.get("/api-docs.json", (_req, res) => {
       res.json(swaggerSpec);
     });

@@ -1,10 +1,10 @@
 /** @format */
 
 import { Router } from "express";
-import { CartController } from "../controllers/cart.controller.js";
-import { authMiddleware } from "../middlewares/auth.middleware.js";
-import { roleGuardMiddleware } from "../middlewares/role-guard.middleware.js";
-import { zodValidation } from "../middlewares/validation.js";
+import { CartController } from "../controllers/cart.controller.ts";
+import { authMiddleware } from "../middlewares/auth.middleware.ts";
+import { roleGuardMiddleware } from "../middlewares/role-guard.middleware.ts";
+import { zodValidation } from "../middlewares/validation.ts";
 
 /**
  * @openapi

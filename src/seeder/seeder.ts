@@ -2,8 +2,8 @@
 
 import mongoose from "mongoose";
 
-import { Db } from "../config/db.config.js";
-import MealCategory, { CategoryType } from "../models/mealCategory.model.js";
+import { Db } from "../config/db.config.ts";
+import MealCategory, { CategoryType } from "../models/mealCategory.model.ts";
 
 import type { ClientSession } from "mongoose";
 

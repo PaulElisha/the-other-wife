@@ -1,18 +1,15 @@
 /** @format */
 
-import { AddressController } from "../controllers/address.controller.js";
-import { roleGuardMiddleware } from "../middlewares/role-guard.middleware.js";
+import { AddressController } from "../controllers/address.controller.ts";
+import { roleGuardMiddleware } from "../middlewares/role-guard.middleware.ts";
 import { Router } from "express";
-import { authMiddleware } from "../middlewares/auth.middleware.js";
-import { zodValidation } from "../middlewares/validation.js";
-import {
-  createAddressSchema,
-  editAddressSchema,
-} from "../zod-schema/address.schema.js";
+import { authMiddleware } from "../middlewares/auth.middleware.ts";
+import { zodValidation } from "../middlewares/validation.ts";
+import { createAddressSchema, editAddressSchema } from "../zod-schema/address.schema.ts";
 
 /**
  * @swagger
- * /api/v1/addresses/:
+ * /api/v1/addresses:
  *   post:
  *     summary: Create address
  *     tags: [Address]
@@ -68,7 +65,7 @@ import {
 
 /**
  * @swagger
- * /api/v1/addresses/edit/{addressId}:
+ * /api/v1/addresses/edit/{id}:
  *   put:
  *     summary: Edit address
  *     tags: [Address]
@@ -78,7 +75,7 @@ import {
  *         required: true
  *         schema:
  *            type: string
- *            description: Edit Address ID
+ *            description: Edit address ID
  *     requestBody:
  *       required: true
  *       content:
@@ -130,7 +127,7 @@ import {
 
 /**
  * @swagger
- * /api/v1/addresses/toggle/{addressId}:
+ * /api/v1/addresses/toggle/{id}:
  *   put:
  *     summary: Toggle default address
  *     tags: [Address]
@@ -177,7 +174,7 @@ import {
 
 /**
  * @swagger
- * /api/v1/addresses/{addressId}:
+ * /api/v1/addresses/{id}:
  *   delete:
  *     summary: Delete address
  *     tags: [Address]

@@ -1,10 +1,10 @@
 /** @format */
 
-import { HttpStatus } from "../config/http.config.js";
-import { handleAsyncControl } from "../middlewares/handle-async-control.middleware.js";
-import { VendorService } from "../services/vendor.service.js";
+import { HttpStatus } from "../config/http.config.ts";
+import { handleAsyncControl } from "../middlewares/handle-async-control.middleware.ts";
+import { VendorService } from "../services/vendor.service.ts";
 import type { Request, Response } from "express";
-import { ApiResponse } from "../util/response.util.js";
+import { ApiResponse } from "../util/response.util.ts";
 
 export class VendorController {
   vendorService: VendorService;
@@ -83,11 +83,7 @@ export class VendorController {
       const userType = req.user?.userType as unknown as string;
 
       try {
-        const vendor = await this.vendorService.approveVendor(
-          vendorId,
-          userId,
-          userType,
-        );
+        const vendor = await this.vendorService.approveVendor(vendorId, userId, userType);
         return res.status(HttpStatus.OK).json({
           status: "ok",
           message: "Vendor approved successfully",
@@ -115,11 +111,7 @@ export class VendorController {
       const rejectionReason = req.body.rejectionReason;
 
       try {
-        const vendor = await this.vendorService.rejectVendor(
-          vendorId,
-          userId,
-          rejectionReason,
-        );
+        const vendor = await this.vendorService.rejectVendor(vendorId, userId, rejectionReason);
         return res.status(HttpStatus.OK).json({
           status: "ok",
           message: "Vendor rejected successfully",

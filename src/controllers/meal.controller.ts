@@ -1,10 +1,10 @@
 /** @format */
 
 import { Request, Response } from "express";
-import { handleAsyncControl } from "../middlewares/handle-async-control.middleware.js";
-import { MealService } from "../services/meal.service.js";
-import { HttpStatus } from "../config/http.config.js";
-import { ApiResponse } from "../util/response.util.js";
+import { handleAsyncControl } from "../middlewares/handle-async-control.middleware.ts";
+import { MealService } from "../services/meal.service.ts";
+import { HttpStatus } from "../config/http.config.ts";
+import { ApiResponse } from "../util/response.util.ts";
 
 export class MealController {
   private mealService: MealService;
@@ -28,33 +28,34 @@ export class MealController {
     }
   });
 
-  getMeals = handleAsyncControl(
-    async (req: Request<{ mealId: string }>, res: Response) => {
-      try {
-        const query = {
-          search: req.query.search as string,
-          tags:
-            typeof req.query.tags === "string"
-              ? req.query.tags.split(",").map((tag) => tag.trim())
-              : (req.query.tags as string[] | undefined),
-          mealId: req.query.mealId as string,
-          category: req.query.category as string,
-        };
+  getMeals = handleAsyncControl(async (req: Request<{ mealId: string }>, res: Response) => {
+    try {
+      const query = {
+        search: req.query.search as string,
+        tags:
+          typeof req.query.tags === "string"
+            ? req.query.tags.split(",").map((tag) => tag.trim())
+            : (req.query.tags as string[] | undefined),
+        mealId: req.query.mealId as string,
+        category: req.query.category as string,
+      };
 
-        const pagination = {
-          pageSize: Number(req.query.pageSize),
-          pageNumber: Number(req.query.pageNumber),
-        };
+      const pageSizeValue = Number(req.query.pageSize);
+      const pageNumberValue = Number(req.query.pageNumber);
 
-        const meal = await this.mealService.getMeals(query, pagination);
-        return res.status(HttpStatus.OK).json({
-          status: "ok",
-          message: "Meals fetched successfully",
-          data: meal,
-        } as ApiResponse);
-      } catch (error) {
-        throw error;
-      }
-    },
-  );
+      const pagination = {
+        pageSize: Number.isFinite(pageSizeValue) ? pageSizeValue : undefined,
+        pageNumber: Number.isFinite(pageNumberValue) ? pageNumberValue : undefined,
+      };
+
+      const meal = await this.mealService.getMeals(query, pagination);
+      return res.status(HttpStatus.OK).json({
+        status: "ok",
+        message: "Meals fetched successfully",
+        data: meal,
+      } as ApiResponse);
+    } catch (error) {
+      throw error;
+    }
+  });
 }

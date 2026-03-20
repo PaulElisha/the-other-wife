@@ -1,14 +1,14 @@
 /** @format */
 
 import mongoose, { ClientSession } from "mongoose";
-import { HttpStatus } from "../config/http.config.js";
-import { ErrorCode } from "../enums/error-code.enum.js";
-import { BadRequestException } from "../errors/bad-request-exception.error.js";
-import { NotFoundException } from "../errors/not-found-exception.error.js";
-import Cart, { CartDocument } from "../models/cart.model.js";
-import { CartAction, CartActions } from "../dispatcher/cart.dispatcher.js";
-import Meal from "../models/meal.model.js";
-import { transaction } from "../util/transaction.util.js";
+import { HttpStatus } from "../config/http.config.ts";
+import { ErrorCode } from "../enums/error-code.enum.ts";
+import { BadRequestException } from "../errors/bad-request-exception.error.ts";
+import { NotFoundException } from "../errors/not-found-exception.error.ts";
+import Cart, { CartDocument } from "../models/cart.model.ts";
+import { CartAction, CartActions } from "../dispatcher/cart.dispatcher.ts";
+import Meal from "../models/meal.model.ts";
+import { transaction } from "../util/transaction.util.ts";
 
 class CartBase {
   calculateTotalAmount = (cart: CartDocument) => {
@@ -16,10 +16,7 @@ class CartBase {
       meal.totalPrice = meal.price * meal.quantity;
     });
 
-    cart.totalAmount = cart.meals.reduce(
-      (total, meal) => total + meal.totalPrice,
-      0,
-    );
+    cart.totalAmount = cart.meals.reduce((total, meal) => total + meal.totalPrice, 0);
   };
 
   modifyCart = async (
@@ -78,67 +75,23 @@ class CartBase {
 
 export class CartService extends CartBase {
   addToCart = transaction.use(
-    async (
-      session: ClientSession,
-      customerId: string,
-      mealId: string,
-      quantity: number = 1,
-    ) =>
-      await this.modifyCart(
-        session,
-        customerId,
-        mealId,
-        quantity,
-        CartActions.add,
-      ),
+    async (session: ClientSession, customerId: string, mealId: string, quantity: number = 1) =>
+      await this.modifyCart(session, customerId, mealId, quantity, CartActions.add),
   );
 
   removeFromCart = transaction.use(
-    async (
-      session: ClientSession,
-      customerId: string,
-      mealId: string,
-      quantity: number = 0,
-    ) =>
-      await this.modifyCart(
-        session,
-        customerId,
-        mealId,
-        quantity,
-        CartActions.remove,
-      ),
+    async (session: ClientSession, customerId: string, mealId: string, quantity: number = 0) =>
+      await this.modifyCart(session, customerId, mealId, quantity, CartActions.remove),
   );
 
   incrementCart = transaction.use(
-    async (
-      session: ClientSession,
-      customerId: string,
-      mealId: string,
-      quantity: number = 1,
-    ) =>
-      await this.modifyCart(
-        session,
-        customerId,
-        mealId,
-        quantity,
-        CartActions.increment,
-      ),
+    async (session: ClientSession, customerId: string, mealId: string, quantity: number = 1) =>
+      await this.modifyCart(session, customerId, mealId, quantity, CartActions.increment),
   );
 
   decrementCart = transaction.use(
-    async (
-      session: ClientSession,
-      customerId: string,
-      mealId: string,
-      quantity: number = 1,
-    ) =>
-      await this.modifyCart(
-        session,
-        customerId,
-        mealId,
-        quantity,
-        CartActions.decrement,
-      ),
+    async (session: ClientSession, customerId: string, mealId: string, quantity: number = 1) =>
+      await this.modifyCart(session, customerId, mealId, quantity, CartActions.decrement),
   );
 
   getUserCart = async (customerId: string) =>

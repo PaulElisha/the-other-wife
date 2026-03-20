@@ -2,6 +2,7 @@
 
 import mongoose, { Document, Schema, model } from "mongoose";
 import bcrypt from "bcrypt";
+import { AUTH_CONSTANTS } from "../constants/auth.constants.ts";
 
 export interface UserDocument extends Document {
   firstName: string;
@@ -24,7 +25,7 @@ export interface UserDocument extends Document {
   updatedAt: Date;
   lastLogin: Date;
   comparePassword: (password: string) => Promise<boolean>;
-  omitPassword: () => Omit<UserDocument, "password">;
+  omitPassword: () => Omit<UserDocument, "passwordHash">;
 }
 
 const UserSchema = new Schema(
@@ -69,7 +70,7 @@ const UserSchema = new Schema(
     refreshTokenExpiry: {
       type: Date,
       required: false,
-      default: new Date(Date.now() + 1000 * 60 * 60 * 24 * 30),
+      default: () => new Date(Date.now() + AUTH_CONSTANTS.REFRESH_TOKEN_EXPIRY_MS),
     },
     status: {
       type: String,
@@ -120,16 +121,11 @@ UserSchema.pre("save", async function (next) {
   next();
 });
 
-UserSchema.methods.comparePassword = async function (
-  passwordHash: string,
-): Promise<boolean> {
+UserSchema.methods.comparePassword = async function (passwordHash: string): Promise<boolean> {
   return await bcrypt.compare(passwordHash, this.passwordHash);
 };
 
-UserSchema.methods.omitPassword = function (): Omit<
-  UserDocument,
-  "passwordHash"
-> {
+UserSchema.methods.omitPassword = function (): Omit<UserDocument, "passwordHash"> {
   const { passwordHash, ...user } = this.toObject();
   return user;
 };

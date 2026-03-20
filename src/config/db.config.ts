@@ -2,7 +2,7 @@
 
 import mongoose from "mongoose";
 
-import { mongoUri } from "../constants/env.js";
+import { mongoUri } from "../constants/env.ts";
 
 export class Db {
   private connectionPromise: Promise<typeof mongoose> | null = null;

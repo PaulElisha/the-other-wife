@@ -1,20 +1,16 @@
 /** @format */
 
 import type { Request, Response, NextFunction } from "express";
-import { UnauthorizedExceptionError } from "../errors/unauthorized-exception.error.js";
-import { HttpStatus } from "../config/http.config.js";
-import { ErrorCode } from "../enums/error-code.enum.js";
+import { UnauthorizedExceptionError } from "../errors/unauthorized-exception.error.ts";
+import { HttpStatus } from "../config/http.config.ts";
+import { ErrorCode } from "../enums/error-code.enum.ts";
 
-import { jwtSecret } from "../constants/env.js";
+import { jwtSecret } from "../constants/env.ts";
 
-import { verifyToken } from "../util/generate-token.util.js";
-import { UserDocument } from "../models/user.model.js";
+import { verifyToken } from "../util/generate-token.util.ts";
+import { UserDocument } from "../models/user.model.ts";
 
-export const authMiddleware = async (
-  req: Request,
-  res: Response,
-  next: NextFunction,
-) => {
+export const authMiddleware = async (req: Request, res: Response, next: NextFunction) => {
   const accessToken = req.cookies?.token;
 
   if (!accessToken) {

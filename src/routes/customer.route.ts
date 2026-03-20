@@ -1,9 +1,9 @@
 /** @format */
 
-import { CustomerController } from "../controllers/customer.controller.js";
+import { CustomerController } from "../controllers/customer.controller.ts";
 import { Router } from "express";
-import { authMiddleware } from "../middlewares/auth.middleware.js";
-import { roleGuardMiddleware } from "../middlewares/role-guard.middleware.js";
+import { authMiddleware } from "../middlewares/auth.middleware.ts";
+import { roleGuardMiddleware } from "../middlewares/role-guard.middleware.ts";
 
 /**
  * @swagger
@@ -65,7 +65,7 @@ import { roleGuardMiddleware } from "../middlewares/role-guard.middleware.js";
  *         schema:
  *           type: string
  *           required: true
- *           description: The user ID to update the customer profile
+ *           description: The customer ID to update
  *     requestBody:
  *       required: true
  *       content:
@@ -75,6 +75,10 @@ import { roleGuardMiddleware } from "../middlewares/role-guard.middleware.js";
  *             required: [profileImageUrl]
  *             properties:
  *               profileImageUrl: { type: string }
+ *               firstName: { type: string }
+ *               lastName: { type: string }
+ *               email: { type: string, format: email }
+ *               phoneNumber: { type: string }
  *     responses:
  *       "200":
  *         description: Customer updated
@@ -121,7 +125,7 @@ import { roleGuardMiddleware } from "../middlewares/role-guard.middleware.js";
  *         schema:
  *           type: string
  *           required: true
- *           description: The user ID to delete the customer profile
+ *           description: The customer ID to delete
  *     responses:
  *       "204":
  *         description: Customer deleted

@@ -4,10 +4,7 @@ import path from "node:path";
 import fs from "node:fs/promises";
 const templateCache = new Map<string, string>();
 
-export const getTemplate = async (
-  src: string,
-  target: string,
-): Promise<string> => {
+export const getTemplate = async (src: string, target: string): Promise<string> => {
   const cacheKey = `${src}/${target}`;
 
   if (templateCache.has(cacheKey)) {

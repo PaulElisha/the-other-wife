@@ -1,10 +1,10 @@
 /** @format */
 
 import { Router } from "express";
-import { MealController } from "../controllers/meal.controller.js";
-import { authMiddleware } from "../middlewares/auth.middleware.js";
-import { roleGuardMiddleware } from "../middlewares/role-guard.middleware.js";
-import { statusCheck } from "../middlewares/status-check.middleware.js";
+import { MealController } from "../controllers/meal.controller.ts";
+import { authMiddleware } from "../middlewares/auth.middleware.ts";
+import { roleGuardMiddleware } from "../middlewares/role-guard.middleware.ts";
+import { statusCheck } from "../middlewares/status-check.middleware.ts";
 
 /**
  * @swagger
@@ -21,6 +21,7 @@ import { statusCheck } from "../middlewares/status-check.middleware.js";
  *       - name: tags
  *         in: query
  *         required: false
+ *         description: Comma-separated tags or repeated query params
  *         schema:
  *           type: array
  *           items:
@@ -60,6 +61,7 @@ import { statusCheck } from "../middlewares/status-check.middleware.js";
  *   post:
  *     summary: Create a new meal
  *     tags: [Meal]
+ *     description: Requires an authenticated approved vendor account
  *     requestBody:
  *       required: true
  *       content:

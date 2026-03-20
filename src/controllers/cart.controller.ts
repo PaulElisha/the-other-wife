@@ -1,10 +1,10 @@
 /** @format */
 
 import type { Request, Response } from "express";
-import { HttpStatus } from "../config/http.config.js";
-import { handleAsyncControl } from "../middlewares/handle-async-control.middleware.js";
-import { CartService } from "../services/cart.service.js";
-import { ApiResponse } from "../util/response.util.js";
+import { HttpStatus } from "../config/http.config.ts";
+import { handleAsyncControl } from "../middlewares/handle-async-control.middleware.ts";
+import { CartService } from "../services/cart.service.ts";
+import { ApiResponse } from "../util/response.util.ts";
 
 export class CartController {
   cartService: CartService;
@@ -14,10 +14,7 @@ export class CartController {
   }
 
   addToCart = handleAsyncControl(
-    async (
-      req: Request<{ mealId: string }, {}, {}>,
-      res: Response,
-    ): Promise<Response> => {
+    async (req: Request<{ mealId: string }, {}, {}>, res: Response): Promise<Response> => {
       const userId = req.user?._id as unknown as string;
       const mealId = req.params.mealId;
 
@@ -35,10 +32,7 @@ export class CartController {
   );
 
   removeFromCart = handleAsyncControl(
-    async (
-      req: Request<{ mealId: string }, {}, {}>,
-      res: Response,
-    ): Promise<Response> => {
+    async (req: Request<{ mealId: string }, {}, {}>, res: Response): Promise<Response> => {
       const userId = req.user?._id as unknown as string;
       const mealId = req.params.mealId;
 
@@ -52,10 +46,7 @@ export class CartController {
   );
 
   incrementCart = handleAsyncControl(
-    async (
-      req: Request<{ mealId: string }, {}, {}>,
-      res: Response,
-    ): Promise<Response> => {
+    async (req: Request<{ mealId: string }, {}, {}>, res: Response): Promise<Response> => {
       const userId = req.user?._id as unknown as string;
       const mealId = req.params.mealId;
 
@@ -73,10 +64,7 @@ export class CartController {
   );
 
   decrementCart = handleAsyncControl(
-    async (
-      req: Request<{ mealId: string }, {}, {}>,
-      res: Response,
-    ): Promise<Response> => {
+    async (req: Request<{ mealId: string }, {}, {}>, res: Response): Promise<Response> => {
       const userId = req.user?._id as unknown as string;
       const mealId = req.params.mealId;
 

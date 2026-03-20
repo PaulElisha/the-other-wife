@@ -1,13 +1,13 @@
 /** @format */
 
-import { HttpStatus } from "../config/http.config.js";
-import { ErrorCode } from "../enums/error-code.enum.js";
-import { NotFoundException } from "../errors/not-found-exception.error.js";
-import { UnauthorizedExceptionError } from "../errors/unauthorized-exception.error.js";
-import Vendor from "../models/vendor.model.js";
-import User from "../models/user.model.js";
-import { BadRequestException } from "../errors/bad-request-exception.error.js";
-import { transaction } from "../util/transaction.util.js";
+import { HttpStatus } from "../config/http.config.ts";
+import { ErrorCode } from "../enums/error-code.enum.ts";
+import { NotFoundException } from "../errors/not-found-exception.error.ts";
+import { UnauthorizedExceptionError } from "../errors/unauthorized-exception.error.ts";
+import Vendor from "../models/vendor.model.ts";
+import User from "../models/user.model.ts";
+import { BadRequestException } from "../errors/bad-request-exception.error.ts";
+import { transaction } from "../util/transaction.util.ts";
 import { ClientSession } from "mongoose";
 
 export class VendorService {
@@ -22,9 +22,7 @@ export class VendorService {
       );
     }
 
-    const vendor = await Vendor.findOne({ userId })
-      .populate("userId")
-      .populate("addressId");
+    const vendor = await Vendor.findOne({ userId }).populate("userId").populate("addressId");
 
     if (!vendor) {
       throw new NotFoundException(
@@ -75,8 +73,7 @@ export class VendorService {
       if (phoneNumber) userData.phoneNumber = phoneNumber;
 
       if (businessName) vendorData.businessName = businessName;
-      if (businessDescription)
-        vendorData.businessDescription = businessDescription;
+      if (businessDescription) vendorData.businessDescription = businessDescription;
       if (businessLogoUrl) vendorData.businessLogoUrl = businessLogoUrl;
 
       const vendor = await Vendor.findOneAndUpdate(
@@ -109,11 +106,7 @@ export class VendorService {
     },
   );
 
-  approveVendor = async (
-    vendorId: string,
-    userId: string,
-    userType: string,
-  ) => {
+  approveVendor = async (vendorId: string, userId: string, userType: string) => {
     if (!vendorId && !userType) {
       throw new BadRequestException(
         "Vendor ID and User ID and User Type are required",
@@ -152,11 +145,7 @@ export class VendorService {
     return { vendor };
   };
 
-  rejectVendor = async (
-    vendorId: string,
-    userId: string,
-    reason: string | undefined,
-  ) => {
+  rejectVendor = async (vendorId: string, userId: string, reason: string | undefined) => {
     if (!vendorId && !userId) {
       throw new BadRequestException(
         "Vendor ID and User ID are required",

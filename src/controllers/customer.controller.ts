@@ -1,10 +1,10 @@
 /** @format */
 
-import { HttpStatus } from "../config/http.config.js";
-import { handleAsyncControl } from "../middlewares/handle-async-control.middleware.js";
-import { CustomerService } from "../services/customer.service.js";
+import { HttpStatus } from "../config/http.config.ts";
+import { handleAsyncControl } from "../middlewares/handle-async-control.middleware.ts";
+import { CustomerService } from "../services/customer.service.ts";
 import type { Request, Response } from "express";
-import { ApiResponse } from "../util/response.util.js";
+import { ApiResponse } from "../util/response.util.ts";
 
 export class CustomerController {
   customerService: CustomerService;
@@ -17,10 +17,7 @@ export class CustomerController {
       try {
         const { id: customerId } = req.params;
         const userId = req?.user?._id as unknown as string;
-        const { customer } = await this.customerService.getCustomerProfile(
-          customerId,
-          userId,
-        );
+        const { customer } = await this.customerService.getCustomerProfile(customerId, userId);
         return res.status(HttpStatus.OK).json({
           status: "ok",
           message: "Customer profile fetched",
@@ -37,12 +34,11 @@ export class CustomerController {
       try {
         const { id: customerId } = req.params;
         const userId = req?.user?._id as unknown as string;
-        const customerProfile =
-          await this.customerService.updateCustomerProfile(
-            customerId,
-            userId,
-            req.body,
-          );
+        const customerProfile = await this.customerService.updateCustomerProfile(
+          customerId,
+          userId,
+          req.body,
+        );
         return res.status(HttpStatus.OK).json({
           status: "ok",
           message: "Customer updated",

@@ -3,14 +3,14 @@
 import { ClientSession } from "mongoose";
 import bcrypt from "bcrypt";
 
-import { HttpStatus } from "../config/http.config.js";
-import { ErrorCode } from "../enums/error-code.enum.js";
+import { HttpStatus } from "../config/http.config.ts";
+import { ErrorCode } from "../enums/error-code.enum.ts";
 
-import { BadRequestException } from "../errors/bad-request-exception.error.js";
-import { UnauthorizedExceptionError } from "../errors/unauthorized-exception.error.js";
-import { NotFoundException } from "../errors/not-found-exception.error.js";
+import { BadRequestException } from "../errors/bad-request-exception.error.ts";
+import { UnauthorizedExceptionError } from "../errors/unauthorized-exception.error.ts";
+import { NotFoundException } from "../errors/not-found-exception.error.ts";
 
-import User, { UserDocument } from "../models/user.model.js";
+import User, { UserDocument } from "../models/user.model.ts";
 
 import {
   generateToken,
@@ -18,14 +18,15 @@ import {
   verifyToken,
   generateEmailToken,
   generateOtp,
-} from "../util/generate-token.util.js";
-import { jwtRefreshSecret, nodeEnv } from "../constants/env.js";
-import { transaction } from "../util/transaction.util.js";
-import { CreateProfile } from "../dispatcher/profile.dispatcher.js";
-import { MailData, mailer } from "./email.service.js";
-import { getTemplate } from "../util/get-template.util.js";
-import { MailAction } from "../dispatcher/mail.dispatcher.js";
-import { getFormattedData } from "../util/get-maildata.js";
+} from "../util/generate-token.util.ts";
+import { jwtRefreshSecret, nodeEnv } from "../constants/env.ts";
+import { transaction } from "../util/transaction.util.ts";
+import { CreateProfile } from "../dispatcher/profile.dispatcher.ts";
+import { MailData, mailer } from "./email.service.ts";
+import { getTemplate } from "../util/get-template.util.ts";
+import { MailAction } from "../dispatcher/mail.dispatcher.ts";
+import { getFormattedData } from "../util/get-maildata.ts";
+import { AUTH_CONSTANTS } from "../constants/auth.constants.ts";
 
 export class AuthService {
   constructor() {}
@@ -42,14 +43,7 @@ export class AuthService {
     }) => {
       return await transaction
         .use(async (session: ClientSession, body): Promise<any> => {
-          const {
-            firstName,
-            lastName,
-            password,
-            userType,
-            phoneNumber,
-            email,
-          } = body;
+          const { firstName, lastName, password, userType, phoneNumber, email } = body;
 
           if (!allowedTypes.includes(userType as keyof typeof CreateProfile)) {
             throw new BadRequestException(
@@ -61,10 +55,7 @@ export class AuthService {
 
           try {
             const existingUser = await User.findOne({
-              $or: [
-                { ...(email && { email }) },
-                { ...(phoneNumber && { phoneNumber }) },
-              ],
+              $or: [{ ...(email && { email }) }, { ...(phoneNumber && { phoneNumber }) }],
             }).session(session);
 
             const authType = existingUser
@@ -111,9 +102,10 @@ export class AuthService {
 
             newUser.refreshToken = refreshToken;
             newUser.refreshTokenExpiry = new Date(
-              Date.now() + 7 * 24 * 60 * 60 * 1000,
+              Date.now() + AUTH_CONSTANTS.REFRESH_TOKEN_EXPIRY_MS,
             );
             newUser.emailToken = emailToken;
+
             newUser.emailTokenExpiry = emailTokenExpiry;
             await newUser.save({ session });
 
@@ -141,10 +133,7 @@ export class AuthService {
                   "verify-signup.template.html",
                 );
 
-                const { template } = getFormattedData(
-                  htmlTemplate,
-                  userWithoutPassword,
-                );
+                const { template } = getFormattedData(htmlTemplate, userWithoutPassword);
 
                 const html = template.replaceAll(
                   "{{verificationUrl}}",
@@ -154,12 +143,9 @@ export class AuthService {
                 const data = {
                   user: userWithoutPassword,
                   message: html,
-                };
+                } as MailData;
 
-                const info = await mailer.relayTo(
-                  data,
-                  MailAction.verifySignup,
-                );
+                const info = await mailer.relayTo(data, MailAction.verifySignup);
 
                 console.log(`Verify Email sent successfully: ${info}`);
               } catch (error: any) {
@@ -191,9 +177,7 @@ export class AuthService {
           }).session(session);
 
           if (!user) {
-            console.log(
-              `Verification failed: Token ${emailToken} not found or expired`,
-            );
+            console.log(`Verification failed: Token ${emailToken} not found or expired`);
             throw new NotFoundException(
               "User not found or token expired",
               HttpStatus.NOT_FOUND,
@@ -223,7 +207,7 @@ export class AuthService {
         }
       })(emailToken)
       .then((result) => {
-        const userWithoutPassword = result;
+        const userWithoutPassword: Readonly<UserDocument> = result;
         console.log("Starting setImmediate for welcome email sending...");
         let numOfAttempt = 0;
         const maxNumOfAttempt = 3;
@@ -238,15 +222,12 @@ export class AuthService {
                 "welcome-email.template.html",
               );
 
-              const { template } = getFormattedData(
-                htmlTemplate,
-                userWithoutPassword,
-              );
+              const { template } = getFormattedData(htmlTemplate, userWithoutPassword);
 
               const data = {
                 user: userWithoutPassword,
                 message: template,
-              };
+              } as MailData;
 
               const info = await mailer.relayTo(data, MailAction.welcomeUser);
 
@@ -280,9 +261,7 @@ export class AuthService {
       const { phoneNumber, email, password } = body;
 
       try {
-        let user = await User.findOne(
-          email ? { email } : { phoneNumber },
-        ).session(session);
+        let user = await User.findOne(email ? { email } : { phoneNumber }).session(session);
 
         if (!user) {
           throw new NotFoundException(
@@ -311,9 +290,7 @@ export class AuthService {
             $set: {
               lastLogin: new Date(),
               refreshToken,
-              refreshTokenExpiry: new Date(
-                Date.now() + 7 * 24 * 60 * 60 * 1000,
-              ),
+              refreshTokenExpiry: new Date(Date.now() + AUTH_CONSTANTS.REFRESH_TOKEN_EXPIRY_MS),
             },
           },
           { new: true, session: session },
@@ -333,7 +310,7 @@ export class AuthService {
   );
 
   refreshLogin = transaction.use(
-    async (session: ClientSession, refreshToken: string) => {
+    async (session: ClientSession, refreshToken: string): Promise<any> => {
       try {
         if (!refreshToken) {
           throw new BadRequestException(
@@ -367,24 +344,25 @@ export class AuthService {
           );
         }
 
+        if (user.status !== AUTH_CONSTANTS.USER_STATUS.ACTIVE) {
+          throw new UnauthorizedExceptionError(
+            `User account is ${user.status}`,
+            HttpStatus.UNAUTHORIZED,
+            ErrorCode.AUTH_UNAUTHORIZED_ACCESS,
+          );
+        }
+
         const { token: newAccessToken } = generateToken(user);
         const { refreshToken: newRefreshToken } = generateRefreshToken(user);
-        user = await User.findByIdAndUpdate(
-          user._id,
-          {
-            $set: {
-              refreshToken: newRefreshToken,
-              refreshTokenExpiry: new Date(
-                Date.now() + 7 * 24 * 60 * 60 * 1000,
-              ),
-            },
-          },
-          { new: true },
-        ).session(session);
+
+        user.refreshToken = newRefreshToken;
+        user.refreshTokenExpiry = new Date(Date.now() + AUTH_CONSTANTS.REFRESH_TOKEN_EXPIRY_MS);
+        user.lastLogin = new Date();
+        await user.save({ session });
 
         return {
-          accessToken: newAccessToken,
-          refreshToken: newRefreshToken,
+          newAccessToken,
+          newRefreshToken,
           ...user?.omitPassword(),
         };
       } catch (error) {
@@ -464,10 +442,7 @@ export class AuthService {
                 message: template,
               } as MailData;
 
-              const info = await mailer.relayTo(
-                data,
-                MailAction.forgotPassword,
-              );
+              const info = await mailer.relayTo(data, MailAction.forgotPassword);
 
               console.log(`Forgot password mail sent successfully: ${info}`);
             } catch (error: any) {

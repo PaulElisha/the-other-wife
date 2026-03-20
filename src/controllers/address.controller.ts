@@ -1,10 +1,10 @@
 /** @format */
 
 import type { Request, Response, NextFunction } from "express";
-import { handleAsyncControl } from "../middlewares/handle-async-control.middleware.js";
-import { AddressService } from "../services/address.service.js";
-import { HttpStatus } from "../config/http.config.js";
-import { ApiResponse } from "../util/response.util.js";
+import { handleAsyncControl } from "../middlewares/handle-async-control.middleware.ts";
+import { AddressService } from "../services/address.service.ts";
+import { HttpStatus } from "../config/http.config.ts";
+import { ApiResponse } from "../util/response.util.ts";
 
 export class AddressController {
   addressService: AddressService;
@@ -79,11 +79,7 @@ export class AddressController {
       const { id: addressId } = req.params;
       const userId = req.user?._id as unknown as string;
       try {
-        const userAddress = await this.addressService.editUserAddress(
-          userId,
-          addressId,
-          req.body,
-        );
+        const userAddress = await this.addressService.editUserAddress(userId, addressId, req.body);
 
         return res.status(HttpStatus.OK).json({
           status: "ok",
@@ -101,10 +97,7 @@ export class AddressController {
       const { id: addressId } = req.params;
       const userId = req.user?._id as unknown as string;
       try {
-        const defaultAddress = await this.addressService.toggleDefaultAddress(
-          userId,
-          addressId,
-        );
+        const defaultAddress = await this.addressService.toggleDefaultAddress(userId, addressId);
 
         return res.status(HttpStatus.OK).json({
           status: "ok",
@@ -123,11 +116,7 @@ export class AddressController {
       const userId = req.user?._id as unknown as string;
       const userType = req.user?.userType as string;
       try {
-        await this.addressService.deleteUserAddress(
-          userId,
-          addressId,
-          userType,
-        );
+        await this.addressService.deleteUserAddress(userId, addressId, userType);
         return res.status(HttpStatus.NO_CONTENT).send();
       } catch (error) {
         throw error;
@@ -140,8 +129,7 @@ export class AddressController {
       const userId = req.user?._id as unknown as string;
 
       try {
-        const userAddresses =
-          await this.addressService.getUserAddresses(userId);
+        const userAddresses = await this.addressService.getUserAddresses(userId);
         return res.status(HttpStatus.OK).json({
           status: "ok",
           message: "User addresses fetched successfully",

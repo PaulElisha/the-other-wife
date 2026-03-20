@@ -1,6 +1,6 @@
 /** @format */
 
-import { envconfig } from "../config/env.config.js";
+import { envconfig } from "../config/env.config.ts";
 
 export const port: string = envconfig.PORT;
 export const hostName: string = envconfig.HOST_NAME;
