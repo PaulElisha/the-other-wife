@@ -1,10 +1,10 @@
 /** @format */
 
 import { Router } from "express";
-import { AuthController } from "../controllers/auth.controller.ts";
-import { loginUserSchema, registerUserSchema } from "../zod-schema/auth.schema.ts";
-import { authMiddleware } from "../middlewares/auth.middleware.ts";
-import { zodValidation } from "../middlewares/validation.ts";
+import { AuthController } from "../controllers/auth.controller.js";
+import { loginUserSchema, registerUserSchema } from "../zod-schema/auth.schema.js";
+import { authMiddleware } from "../middlewares/auth.middleware.js";
+import { zodValidation } from "../middlewares/validation.js";
 
 /**
  * @openapi

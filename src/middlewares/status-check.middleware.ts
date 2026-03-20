@@ -1,10 +1,10 @@
 /** @format */
 
 import type { Request, Response, NextFunction } from "express";
-import Vendor from "../models/vendor.model.ts";
-import { BadRequestException } from "../errors/bad-request-exception.error.ts";
-import { HttpStatus } from "../config/http.config.ts";
-import { ErrorCode } from "../enums/error-code.enum.ts";
+import Vendor from "../models/vendor.model.js";
+import { BadRequestException } from "../errors/bad-request-exception.error.js";
+import { HttpStatus } from "../config/http.config.js";
+import { ErrorCode } from "../enums/error-code.enum.js";
 
 export const statusCheck =
   (status: Array<string>) => async (req: Request, res: Response, next: NextFunction) => {

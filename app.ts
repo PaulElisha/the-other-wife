@@ -7,21 +7,21 @@ import rateLimit from "express-rate-limit";
 import redoc from "redoc-express";
 import helmet from "helmet";
 
-import { errorHandler } from "./src/middlewares/error-handler.middleware.ts";
+import { errorHandler } from "./src/middlewares/error-handler.middleware.js";
 
-import { hostName, port, corsOrigin } from "./src/constants/env.ts";
-import { Db } from "./src/config/db.config.ts";
-import { swaggerSpec } from "./src/config/swagger.config.ts";
+import { hostName, port, corsOrigin } from "./src/constants/env.js";
+import { Db } from "./src/config/db.config.js";
+import { swaggerSpec } from "./src/config/swagger.config.js";
 
-import { authRouter } from "./src/routes/auth.route.ts";
-import { userRouter } from "./src/routes/user.route.ts";
-import { addressRouter } from "./src/routes/address.route.ts";
-import { customerRouter } from "./src/routes/customer.route.ts";
-import { vendorRouter } from "./src/routes/vendor.route.ts";
-import { cartRouter } from "./src/routes/cart.route.ts";
-import { HttpStatus } from "./src/config/http.config.ts";
-import { mealRouter } from "./src/routes/meal.route.ts";
-import { getTemplate } from "./src/util/get-template.util.ts";
+import { authRouter } from "./src/routes/auth.route.js";
+import { userRouter } from "./src/routes/user.route.js";
+import { addressRouter } from "./src/routes/address.route.js";
+import { customerRouter } from "./src/routes/customer.route.js";
+import { vendorRouter } from "./src/routes/vendor.route.js";
+import { cartRouter } from "./src/routes/cart.route.js";
+import { HttpStatus } from "./src/config/http.config.js";
+import { mealRouter } from "./src/routes/meal.route.js";
+import { getTemplate } from "./src/util/get-template.util.js";
 
 export class App {
   app: Express;

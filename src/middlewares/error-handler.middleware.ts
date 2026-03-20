@@ -3,8 +3,8 @@
 import z from "zod";
 
 import type { NextFunction, Request, Response } from "express";
-import { AppError } from "../errors/app.error.ts";
-import { HttpStatus } from "../config/http.config.ts";
+import { AppError } from "../errors/app.error.js";
+import { HttpStatus } from "../config/http.config.js";
 
 export const errorHandler = (err: Error, req: Request, res: Response, next: NextFunction) => {
   if (err instanceof AppError) {

@@ -1,9 +1,9 @@
 /** @format */
 
 import { Router } from "express";
-import { VendorController } from "../controllers/vendor.controller.ts";
-import { authMiddleware } from "../middlewares/auth.middleware.ts";
-import { roleGuardMiddleware } from "../middlewares/role-guard.middleware.ts";
+import { VendorController } from "../controllers/vendor.controller.js";
+import { authMiddleware } from "../middlewares/auth.middleware.js";
+import { roleGuardMiddleware } from "../middlewares/role-guard.middleware.js";
 
 /**
  * @swagger

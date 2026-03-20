@@ -1,7 +1,7 @@
 /** @format */
 
-import { HttpStatusCodeType } from "../config/http.config.ts";
-import { ErrorCodeType } from "../enums/error-code.enum.ts";
+import { HttpStatusCodeType } from "../config/http.config.js";
+import { ErrorCodeType } from "../enums/error-code.enum.js";
 
 export class AppError extends Error {
   constructor(

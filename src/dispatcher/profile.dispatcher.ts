@@ -2,12 +2,12 @@
 
 import type { ClientSession } from "mongoose";
 
-import Customer from "../models/customer.model.ts";
-import Vendor from "../models/vendor.model.ts";
+import Customer from "../models/customer.model.js";
+import Vendor from "../models/vendor.model.js";
 
-import { BadRequestException } from "../errors/bad-request-exception.error.ts";
-import { HttpStatus } from "../config/http.config.ts";
-import { ErrorCode } from "../enums/error-code.enum.ts";
+import { BadRequestException } from "../errors/bad-request-exception.error.js";
+import { HttpStatus } from "../config/http.config.js";
+import { ErrorCode } from "../enums/error-code.enum.js";
 
 export const CreateProfile = {
   customer: (userId: string, session: ClientSession) => Customer.create([{ userId }], { session }),

@@ -1,14 +1,14 @@
 /** @format */
 
 import mongoose, { ClientSession } from "mongoose";
-import { HttpStatus } from "../config/http.config.ts";
-import { ErrorCode } from "../enums/error-code.enum.ts";
-import { BadRequestException } from "../errors/bad-request-exception.error.ts";
-import { NotFoundException } from "../errors/not-found-exception.error.ts";
-import Cart, { CartDocument } from "../models/cart.model.ts";
-import { CartAction, CartActions } from "../dispatcher/cart.dispatcher.ts";
-import Meal from "../models/meal.model.ts";
-import { transaction } from "../util/transaction.util.ts";
+import { HttpStatus } from "../config/http.config.js";
+import { ErrorCode } from "../enums/error-code.enum.js";
+import { BadRequestException } from "../errors/bad-request-exception.error.js";
+import { NotFoundException } from "../errors/not-found-exception.error.js";
+import Cart, { CartDocument } from "../models/cart.model.js";
+import { CartAction, CartActions } from "../dispatcher/cart.dispatcher.js";
+import Meal from "../models/meal.model.js";
+import { transaction } from "../util/transaction.util.js";
 
 class CartBase {
   calculateTotalAmount = (cart: CartDocument) => {

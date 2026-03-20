@@ -6,10 +6,10 @@ import {
   email_password,
   email_port,
   email_user,
-} from "../constants/env.ts";
+} from "../constants/env.js";
 
-import { MailerCallback } from "../dispatcher/mail.dispatcher.ts"
-import { UserDocument } from "../models/user.model.ts";
+import { MailerCallback } from "../dispatcher/mail.dispatcher.js"
+import { UserDocument } from "../models/user.model.js";
 
 const MailHeading = () => ({
   welcomeUser:

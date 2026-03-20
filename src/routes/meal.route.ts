@@ -1,10 +1,10 @@
 /** @format */
 
 import { Router } from "express";
-import { MealController } from "../controllers/meal.controller.ts";
-import { authMiddleware } from "../middlewares/auth.middleware.ts";
-import { roleGuardMiddleware } from "../middlewares/role-guard.middleware.ts";
-import { statusCheck } from "../middlewares/status-check.middleware.ts";
+import { MealController } from "../controllers/meal.controller.js";
+import { authMiddleware } from "../middlewares/auth.middleware.js";
+import { roleGuardMiddleware } from "../middlewares/role-guard.middleware.js";
+import { statusCheck } from "../middlewares/status-check.middleware.js";
 
 /**
  * @swagger

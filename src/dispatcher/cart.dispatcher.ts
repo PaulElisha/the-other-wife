@@ -1,6 +1,6 @@
 /** @format */
-import Cart, { CartDocument } from "../models/cart.model.ts";
-import Meal, { MealDocument } from "../models/meal.model.ts";
+import Cart, { CartDocument } from "../models/cart.model.js";
+import Meal, { MealDocument } from "../models/meal.model.js";
 
 export type CartAction = (cart: CartDocument, meal: MealDocument, quantity: number) => void;
 

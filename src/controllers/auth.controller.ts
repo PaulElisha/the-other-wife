@@ -1,15 +1,15 @@
 /** @format */
 
-import { AuthService } from "../services/auth.service.ts";
+import { AuthService } from "../services/auth.service.js";
 
-import { handleAsyncControl } from "../middlewares/handle-async-control.middleware.ts";
+import { handleAsyncControl } from "../middlewares/handle-async-control.middleware.js";
 
 import type { Request, Response } from "express";
-import { HttpStatus } from "../config/http.config.ts";
+import { HttpStatus } from "../config/http.config.js";
 
-import { nodeEnv } from "../constants/env.ts";
-import { ApiResponse } from "../util/response.util.ts";
-import { CreateProfile } from "../dispatcher/profile.dispatcher.ts";
+import { nodeEnv } from "../constants/env.js";
+import { ApiResponse } from "../util/response.util.js";
+import { CreateProfile } from "../dispatcher/profile.dispatcher.js";
 
 export class AuthController {
   authService: AuthService;

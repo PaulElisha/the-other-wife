@@ -1,15 +1,15 @@
 /** @format */
 
 import mongoose, { ClientSession } from "mongoose";
-import { HttpStatus } from "../config/http.config.ts";
-import { ErrorCode } from "../enums/error-code.enum.ts";
-import { BadRequestException } from "../errors/bad-request-exception.error.ts";
+import { HttpStatus } from "../config/http.config.js";
+import { ErrorCode } from "../enums/error-code.enum.js";
+import { BadRequestException } from "../errors/bad-request-exception.error.js";
 
-import Meal from "../models/meal.model.ts";
-import Vendor from "../models/vendor.model.ts";
-import MealCategory from "../models/mealCategory.model.ts";
-import { transaction } from "../util/transaction.util.ts";
-import { NotFoundException } from "../errors/not-found-exception.error.ts";
+import Meal from "../models/meal.model.js";
+import Vendor from "../models/vendor.model.js";
+import MealCategory from "../models/mealCategory.model.js";
+import { transaction } from "../util/transaction.util.js";
+import { NotFoundException } from "../errors/not-found-exception.error.js";
 
 export class MealService {
   constructor() {}

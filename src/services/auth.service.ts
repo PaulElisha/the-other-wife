@@ -3,14 +3,14 @@
 import { ClientSession } from "mongoose";
 import bcrypt from "bcrypt";
 
-import { HttpStatus } from "../config/http.config.ts";
-import { ErrorCode } from "../enums/error-code.enum.ts";
+import { HttpStatus } from "../config/http.config.js";
+import { ErrorCode } from "../enums/error-code.enum.js";
 
-import { BadRequestException } from "../errors/bad-request-exception.error.ts";
-import { UnauthorizedExceptionError } from "../errors/unauthorized-exception.error.ts";
-import { NotFoundException } from "../errors/not-found-exception.error.ts";
+import { BadRequestException } from "../errors/bad-request-exception.error.js";
+import { UnauthorizedExceptionError } from "../errors/unauthorized-exception.error.js";
+import { NotFoundException } from "../errors/not-found-exception.error.js";
 
-import User, { UserDocument } from "../models/user.model.ts";
+import User, { UserDocument } from "../models/user.model.js";
 
 import {
   generateToken,
@@ -18,15 +18,15 @@ import {
   verifyToken,
   generateEmailToken,
   generateOtp,
-} from "../util/generate-token.util.ts";
-import { jwtRefreshSecret, nodeEnv } from "../constants/env.ts";
-import { transaction } from "../util/transaction.util.ts";
-import { CreateProfile } from "../dispatcher/profile.dispatcher.ts";
-import { MailData, mailer } from "./email.service.ts";
-import { getTemplate } from "../util/get-template.util.ts";
-import { MailAction } from "../dispatcher/mail.dispatcher.ts";
-import { getFormattedData } from "../util/get-maildata.ts";
-import { AUTH_CONSTANTS } from "../constants/auth.constants.ts";
+} from "../util/generate-token.util.js";
+import { jwtRefreshSecret, nodeEnv } from "../constants/env.js";
+import { transaction } from "../util/transaction.util.js";
+import { CreateProfile } from "../dispatcher/profile.dispatcher.js";
+import { MailData, mailer } from "./email.service.js";
+import { getTemplate } from "../util/get-template.util.js";
+import { MailAction } from "../dispatcher/mail.dispatcher.js";
+import { getFormattedData } from "../util/get-maildata.js";
+import { AUTH_CONSTANTS } from "../constants/auth.constants.js";
 
 export class AuthService {
   constructor() {}

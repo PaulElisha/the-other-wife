@@ -1,8 +1,8 @@
 /** @format */
 
-import { ErrorCodeType } from "../enums/error-code.enum.ts";
-import { HttpStatusCodeType } from "../config/http.config.ts";
-import { AppError } from "../errors/app.error.ts";
+import { ErrorCodeType } from "../enums/error-code.enum.js";
+import { HttpStatusCodeType } from "../config/http.config.js";
+import { AppError } from "../errors/app.error.js";
 
 export class NotFoundException extends AppError {
   constructor(

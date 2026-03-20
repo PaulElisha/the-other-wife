@@ -2,7 +2,7 @@
 
 import mongoose, { Document, Schema, model } from "mongoose";
 import bcrypt from "bcrypt";
-import { AUTH_CONSTANTS } from "../constants/auth.constants.ts";
+import { AUTH_CONSTANTS } from "../constants/auth.constants.js";
 
 export interface UserDocument extends Document {
   firstName: string;

@@ -1,10 +1,10 @@
 /** @format */
 
-import { HttpStatus } from "../config/http.config.ts";
-import { handleAsyncControl } from "../middlewares/handle-async-control.middleware.ts";
-import { VendorService } from "../services/vendor.service.ts";
+import { HttpStatus } from "../config/http.config.js";
+import { handleAsyncControl } from "../middlewares/handle-async-control.middleware.js";
+import { VendorService } from "../services/vendor.service.js";
 import type { Request, Response } from "express";
-import { ApiResponse } from "../util/response.util.ts";
+import { ApiResponse } from "../util/response.util.js";
 
 export class VendorController {
   vendorService: VendorService;

@@ -2,9 +2,9 @@
 
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
-import { jwtSecret, jwtRefreshSecret } from "../constants/env.ts";
-import { UserDocument } from "../models/user.model.ts";
-import { AUTH_CONSTANTS } from "../constants/auth.constants.ts";
+import { jwtSecret, jwtRefreshSecret } from "../constants/env.js";
+import { UserDocument } from "../models/user.model.js";
+import { AUTH_CONSTANTS } from "../constants/auth.constants.js";
 
 export const generateToken = (user: UserDocument) => {
   const payload = { _id: user._id, userType: user.userType };

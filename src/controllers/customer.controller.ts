@@ -1,10 +1,10 @@
 /** @format */
 
-import { HttpStatus } from "../config/http.config.ts";
-import { handleAsyncControl } from "../middlewares/handle-async-control.middleware.ts";
-import { CustomerService } from "../services/customer.service.ts";
+import { HttpStatus } from "../config/http.config.js";
+import { handleAsyncControl } from "../middlewares/handle-async-control.middleware.js";
+import { CustomerService } from "../services/customer.service.js";
 import type { Request, Response } from "express";
-import { ApiResponse } from "../util/response.util.ts";
+import { ApiResponse } from "../util/response.util.js";
 
 export class CustomerController {
   customerService: CustomerService;

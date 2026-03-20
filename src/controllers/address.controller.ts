@@ -1,10 +1,10 @@
 /** @format */
 
 import type { Request, Response, NextFunction } from "express";
-import { handleAsyncControl } from "../middlewares/handle-async-control.middleware.ts";
-import { AddressService } from "../services/address.service.ts";
-import { HttpStatus } from "../config/http.config.ts";
-import { ApiResponse } from "../util/response.util.ts";
+import { handleAsyncControl } from "../middlewares/handle-async-control.middleware.js";
+import { AddressService } from "../services/address.service.js";
+import { HttpStatus } from "../config/http.config.js";
+import { ApiResponse } from "../util/response.util.js";
 
 export class AddressController {
   addressService: AddressService;

@@ -1,12 +1,12 @@
 /** @format */
 
-import Customer from "../models/customer.model.ts";
-import User from "../models/user.model.ts";
-import { NotFoundException } from "../errors/not-found-exception.error.ts";
-import { HttpStatus } from "../config/http.config.ts";
-import { ErrorCode } from "../enums/error-code.enum.ts";
-import { transaction } from "../util/transaction.util.ts";
-import { BadRequestException } from "../errors/bad-request-exception.error.ts";
+import Customer from "../models/customer.model.js";
+import User from "../models/user.model.js";
+import { NotFoundException } from "../errors/not-found-exception.error.js";
+import { HttpStatus } from "../config/http.config.js";
+import { ErrorCode } from "../enums/error-code.enum.js";
+import { transaction } from "../util/transaction.util.js";
+import { BadRequestException } from "../errors/bad-request-exception.error.js";
 import { ClientSession } from "mongoose";
 
 export class CustomerService {

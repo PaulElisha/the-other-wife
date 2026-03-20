@@ -1,13 +1,13 @@
 /** @format */
 
-import { HttpStatus } from "../config/http.config.ts";
-import { ErrorCode } from "../enums/error-code.enum.ts";
-import { NotFoundException } from "../errors/not-found-exception.error.ts";
-import { UnauthorizedExceptionError } from "../errors/unauthorized-exception.error.ts";
-import Vendor from "../models/vendor.model.ts";
-import User from "../models/user.model.ts";
-import { BadRequestException } from "../errors/bad-request-exception.error.ts";
-import { transaction } from "../util/transaction.util.ts";
+import { HttpStatus } from "../config/http.config.js";
+import { ErrorCode } from "../enums/error-code.enum.js";
+import { NotFoundException } from "../errors/not-found-exception.error.js";
+import { UnauthorizedExceptionError } from "../errors/unauthorized-exception.error.js";
+import Vendor from "../models/vendor.model.js";
+import User from "../models/user.model.js";
+import { BadRequestException } from "../errors/bad-request-exception.error.js";
+import { transaction } from "../util/transaction.util.js";
 import { ClientSession } from "mongoose";
 
 export class VendorService {

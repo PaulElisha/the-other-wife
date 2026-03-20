@@ -1,11 +1,11 @@
 /** @format */
 
-import { AddressController } from "../controllers/address.controller.ts";
-import { roleGuardMiddleware } from "../middlewares/role-guard.middleware.ts";
+import { AddressController } from "../controllers/address.controller.js";
+import { roleGuardMiddleware } from "../middlewares/role-guard.middleware.js";
 import { Router } from "express";
-import { authMiddleware } from "../middlewares/auth.middleware.ts";
-import { zodValidation } from "../middlewares/validation.ts";
-import { createAddressSchema, editAddressSchema } from "../zod-schema/address.schema.ts";
+import { authMiddleware } from "../middlewares/auth.middleware.js";
+import { zodValidation } from "../middlewares/validation.js";
+import { createAddressSchema, editAddressSchema } from "../zod-schema/address.schema.js";
 
 /**
  * @swagger
