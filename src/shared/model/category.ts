@@ -1,6 +1,6 @@
 /** @format */
 
-import mongoose, { Document, Schema, model } from "mongoose";
+import { Schema, model } from "mongoose";
 import type { CategoryDocument } from "@type/env-types";
 
 const CategorySchema = new Schema({

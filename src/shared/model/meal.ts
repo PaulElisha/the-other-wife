@@ -1,6 +1,6 @@
 /** @format */
 
-import mongoose, { Document, Schema, model } from "mongoose";
+import mongoose, { Schema, model } from "mongoose";
 import type { MealDocument } from "@type/env-types";
 
 const MealSchema = new Schema({

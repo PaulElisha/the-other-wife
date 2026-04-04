@@ -1,6 +1,6 @@
 /** @format */
 
-import { NextFunction, Request, Response } from "express";
+import type { NextFunction, Request, Response } from "express";
 import z from "zod";
 import { CreateProfile, UserTypeKey } from "@module/user/user-profile.js";
 import ErrorCode from "@enum/error-code.js";

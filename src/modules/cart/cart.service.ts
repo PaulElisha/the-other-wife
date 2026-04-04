@@ -6,10 +6,10 @@ import ErrorCode from "@enum/error-code.js";
 import BadRequestException from "@error/bad-request-exception.js";
 import NotFoundException from "@error/not-found-exception.js";
 import Cart from "@model/cart.js";
-import { CartAction, CartActions } from "@module/cart/cart.dispatcher.js";
+import CartActions from "@module/cart/cart.dispatcher.js";
 import Meal from "@model/meal.js";
 import transaction from "@util/transaction.js";
-import type { CartDocument } from "@type/env-types.js";
+import type { CartAction, CartDocument } from "@type/env-types.js";
 
 class CartBase {
   calculateTotalAmount = (cart: CartDocument) => {

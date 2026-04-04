@@ -1,9 +1,7 @@
 /** @format */
-import { CartDocument, MealDocument } from "@type/env-types.js";
+import { CartAction, CartDocument, MealDocument } from "@type/env-types.js";
 
-export type CartAction = (cart: CartDocument, meal: MealDocument, quantity: number) => void;
-
-export const CartActions: Record<string, CartAction> = {
+const CartActions: Record<string, CartAction> = {
   increment: (cart: CartDocument, meal: MealDocument, quantity: number) => {
     const existingMeal = cart.meals.find((m) => m.mealId.toString() === meal._id.toString());
     if (existingMeal) {
@@ -37,3 +35,5 @@ export const CartActions: Record<string, CartAction> = {
     cart.meals = cart.meals.filter((m) => m.mealId.toString() !== meal._id.toString());
   },
 };
+
+export default CartActions;

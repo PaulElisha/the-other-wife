@@ -1,6 +1,6 @@
 /** @format */
 
-import nodemailer, { Transporter } from "nodemailer";
+import nodemailer from "nodemailer";
 
 import type { MailData, MailerCallback } from "@type/env-types";
 

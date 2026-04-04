@@ -1,6 +1,6 @@
 /** @format */
 
-import mongoose, { Document, Schema, model } from "mongoose";
+import { Schema, model } from "mongoose";
 import bcrypt from "bcrypt";
 import AUTH_CONSTANTS from "@constant/auth.js";
 import type { UserDocument } from "@type/env-types";

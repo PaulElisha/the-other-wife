@@ -33,6 +33,8 @@ export type HttpStatusCodeType = (typeof HttpStatus)[keyof typeof HttpStatus];
 
 export type ErrorCodeType = (typeof ErrorCode)[keyof typeof ErrorCode];
 
+export type CartAction = (cart: CartDocument, meal: MealDocument, quantity: number) => void;
+
 export const CategoryType = {
   LOCAL: "local",
   CONTINENTAL: "continental",
