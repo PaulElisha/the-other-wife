@@ -1,0 +1,311 @@
+/** @format */
+
+import { Router } from "express";
+import VendorController from "@module/vendor/vendor.controller.js";
+import authMiddleware from "@middleware/auth.js";
+import roleGuardMiddleware from "@middleware/role-guard.js";
+
+/**
+ * @swagger
+ * /api/v1/vendors/me:
+ *   get:
+ *     summary: Get vendor profile
+ *     tags: [Vendor]
+ *     responses:
+ *       "200":
+ *         description: Vendor profile retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/schemas/ApiResponse"
+ *       "401":
+ *         description: Unauthorized
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/responses/401"
+ *       "403":
+ *         description: Forbidden
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/responses/403"
+ *       "404":
+ *         description: Not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/responses/404"
+ *       "500":
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/responses/500"
+ */
+
+/**
+ * @swagger
+ * /api/v1/vendors/me:
+ *   put:
+ *     summary: Update vendor profile
+ *     tags: [Vendor]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               firstName: { type: string }
+ *               lastName: { type: string }
+ *               phoneNumber: { type: string }
+ *               businessName: { type: string }
+ *               businessDescription: { type: string }
+ *               businessLogoUrl: { type: string }
+ *     responses:
+ *       "200":
+ *         description: Vendor profile updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/schemas/ApiResponse"
+ *       "401":
+ *         description: Unauthorized
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/responses/401"
+ *       "403":
+ *         description: Forbidden
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/responses/403"
+ *       "404":
+ *         description: Not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/responses/404"
+ *       "500":
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/responses/500"
+ */
+
+/**
+ * @swagger
+ * /api/v1/vendors/approve/{id}:
+ *   put:
+ *     summary: Approve vendor
+ *     tags: [Vendor]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *           required: true
+ *           description: The vendor ID
+ *
+ *     responses:
+ *       "200":
+ *         description: Vendor approved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/schemas/ApiResponse"
+ *       "401":
+ *         description: Unauthorized
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/responses/401"
+ *       "403":
+ *         description: Forbidden
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/responses/403"
+ *       "404":
+ *         description: Not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/responses/404"
+ *       "500":
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/responses/500"
+ */
+
+/**
+ * @swagger
+ * /api/v1/vendors/reject/{id}:
+ *   put:
+ *     summary: Reject vendor
+ *     tags: [Vendor]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *           required: true
+ *           description: The vendor ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               rejectionReason: { type: string }
+ *     responses:
+ *       "200":
+ *         description: Vendor rejected successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/schemas/ApiResponse"
+ *       "401":
+ *         description: Unauthorized
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/responses/401"
+ *       "403":
+ *         description: Forbidden
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/responses/403"
+ *       "404":
+ *         description: Not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/responses/404"
+ *       "500":
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/responses/500"
+ */
+
+/**
+ * @swagger
+ * /api/v1/vendors/suspend/{id}:
+ *   put:
+ *     summary: Suspend vendor
+ *     tags: [Vendor]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *           required: true
+ *           description: The vendor ID
+ *     responses:
+ *       "200":
+ *         description: Vendor suspended successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/schemas/ApiResponse"
+ *       "401":
+ *         description: Unauthorized
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/responses/401"
+ *       "403":
+ *         description: Forbidden
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/responses/403"
+ *       "404":
+ *         description: Not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/responses/404"
+ *       "500":
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/responses/500"
+ */
+
+/**
+ * @swagger
+ * /api/v1/vendors/me:
+ *   delete:
+ *     summary: Delete vendor profile
+ *     tags: [Vendor]
+ *     responses:
+ *       "204":
+ *         description: Vendor profile deleted successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/schemas/ApiResponse"
+ *       "401":
+ *         description: Unauthorized
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/responses/401"
+ *       "403":
+ *         description: Forbidden
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/responses/403"
+ *       "404":
+ *         description: Not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/responses/404"
+ *       "500":
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/responses/500"
+ */
+
+class VendorRouter {
+  router: Router;
+
+  constructor() {
+    this.router = Router();
+    this.router.use(authMiddleware);
+    this.initializeRoutes();
+  }
+
+  initializeRoutes() {
+    this.router.get("/me", roleGuardMiddleware(["vendor"]), VendorController.getVendorProfile);
+    this.router.put("/me", roleGuardMiddleware(["vendor"]), VendorController.updateVendorProfile);
+    this.router.put("/approve/:id", roleGuardMiddleware(["admin"]), VendorController.approveVendor);
+    this.router.put("/reject/:id", roleGuardMiddleware(["admin"]), VendorController.rejectVendor);
+    this.router.put("/suspend/:id", roleGuardMiddleware(["admin"]), VendorController.suspendVendor);
+    this.router.delete(
+      "/me",
+      roleGuardMiddleware(["vendor"]),
+      VendorController.deleteVendorProfile,
+    );
+  }
+}
+
+export const vendorRouter = new VendorRouter().router;

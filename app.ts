@@ -2,73 +2,50 @@
 
 import express, { Express } from "express";
 import cookieParser from "cookie-parser";
-import cors from "cors";
-import rateLimit from "express-rate-limit";
 import redoc from "redoc-express";
-import helmet from "helmet";
 
-import { errorHandler } from "./src/middlewares/error-handler.middleware.js";
+import { authRouter } from "@module/auth/auth.route.js";
+import { userRouter } from "@module/user/user.route.js";
+import { addressRouter } from "@module/address/address.route.js";
+import { customerRouter } from "@module/customer/customer.route.js";
+import { vendorRouter } from "@module/vendor/vendor.route.js";
+import { cartRouter } from "@module/cart/cart.route.js";
+import { mealRouter } from "@module/meal/meal.route.js";
 
-import { hostName, port, corsOrigin } from "./src/constants/env.js";
-import { Db } from "./src/config/db.config.js";
-import { swaggerSpec } from "./src/config/swagger.config.js";
+import HttpStatus from "@config/http.config.js";
+import { limiter } from "@config/limiter.config.js";
+import helmetOptions from "@config/helmet.config.js";
+import corsOptions from "@config/cors.config.js";
+import Db from "@config/db.config.js";
+import swaggerSpec from "@config/swagger.config.js";
 
-import { authRouter } from "./src/routes/auth.route.js";
-import { userRouter } from "./src/routes/user.route.js";
-import { addressRouter } from "./src/routes/address.route.js";
-import { customerRouter } from "./src/routes/customer.route.js";
-import { vendorRouter } from "./src/routes/vendor.route.js";
-import { cartRouter } from "./src/routes/cart.route.js";
-import { HttpStatus } from "./src/config/http.config.js";
-import { mealRouter } from "./src/routes/meal.route.js";
-import { getTemplate } from "./src/util/get-template.util.js";
+import template from "@util/get-template.js";
+import Envconfig from "@/env.js";
+import errorHandler from "@middleware/error-handler.js";
 
 export class App {
   app: Express;
-  db: Db;
 
   constructor() {
     this.app = express();
     this.app.disable("x-powered-by");
     this.app.set("trust proxy", 1);
-    this.db = new Db();
     this.initiializeMiddlewares();
     this.initializeRoutes();
   }
 
   initiializeMiddlewares() {
-    this.app.use(
-      helmet({
-        contentSecurityPolicy: {
-          directives: {
-            defaultSrc: ["'self'"],
-            scriptSrc: ["'self'", "'unsafe-inline'", "https://cdn.jsdelivr.net"],
-            styleSrc: ["'self'", "'unsafe-inline'", "https://cdn.jsdelivr.net"],
-            imgSrc: ["'self'", "data:", "https://cdn.jsdelivr.net"],
-            connectSrc: ["'self'"],
-            upgradeInsecureRequests: null,
-          },
-        },
-      }),
-    );
+    this.app.use(helmetOptions);
     this.app.use(express.json());
     this.app.use(express.urlencoded({ extended: true }));
-    this.app.use(cors({ origin: corsOrigin || true, credentials: true }));
+    this.app.use(corsOptions);
     this.app.use(cookieParser());
-    this.app.use(
-      rateLimit({
-        windowMs: 15 * 60 * 1000,
-        max: 100,
-        standardHeaders: true,
-        legacyHeaders: false,
-        validate: { xForwardedForHeader: false },
-      }),
-    );
+    this.app.use(limiter);
 
     this.app.use(async (req, _res, next) => {
       try {
         console.log(`Connecting to DB for request: ${req.method} ${req.url}`);
-        await this.db.connect();
+        await Db.connect();
         next();
       } catch (error) {
         console.error("Database connection failed in middleware:", error);
@@ -78,7 +55,7 @@ export class App {
   }
 
   async initializeDb() {
-    await this.db.connect();
+    await Db.connect();
   }
 
   initializeRoutes() {
@@ -96,8 +73,8 @@ export class App {
 
     this.app.get("/api-docs", async (_req, res) => {
       try {
-        const template = await getTemplate("src/templates", "swagger.template.html");
-        res.send(`${template}`);
+        const html = await template`swagger.html`;
+        res.send(`${html}`);
       } catch (error: any) {
         res.status(HttpStatus.NOT_FOUND).send(`Error reading template ${error.message}`);
       }
@@ -113,8 +90,8 @@ export class App {
 
   async startServer() {
     await this.initializeDb();
-    this.app.listen(port, () => {
-      console.log(`Server is running on ${hostName}:${port}`);
+    this.app.listen(Envconfig.PORT, () => {
+      console.log(`Server is running on ${Envconfig.HOST_NAME}:${Envconfig.PORT}`);
     });
   }
 }

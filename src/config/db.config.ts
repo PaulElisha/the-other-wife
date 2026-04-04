@@ -2,9 +2,11 @@
 
 import mongoose from "mongoose";
 
-import { mongoUri } from "../constants/env.js";
+import Envconfig from "@/env.js";
 
-export class Db {
+const mongoUri = Envconfig.MONGODB_URI;
+
+class Db {
   private connectionPromise: Promise<typeof mongoose> | null = null;
 
   connect = async () => {
@@ -31,3 +33,5 @@ export class Db {
     }
   };
 }
+
+export default new Db();

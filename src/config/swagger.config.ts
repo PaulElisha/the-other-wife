@@ -293,6 +293,4 @@ const options = {
   ],
 };
 
-export const swaggerSpec = swaggerJSDoc(options);
-console.log("CWD:", process.cwd());
-console.log("Swagger Paths:", Object.keys((swaggerSpec as any).paths || {}));
+export default swaggerJSDoc(options);

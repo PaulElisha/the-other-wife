@@ -1,22 +1,9 @@
 /** @format */
 
 import { config } from "dotenv";
-config({ path: "./.env" });
+import type { EnvConfig } from "../type/env-types.js";
 
-type EnvConfig = {
-  PORT: string;
-  HOST_NAME: string;
-  MONGODB_URI: string;
-  NODE_ENV: string;
-  JWT_SECRET: string;
-  JWT_REFRESH_SECRET: string;
-  CORS_ORIGIN?: string;
-  EMAIL_HOST: string;
-  EMAIL_PORT: number;
-  EMAIL_USER: string;
-  EMAIL_PASSWORD: string;
-  FROM: string;
-};
+config({ path: "./.env" });
 
 const getEnvConfig = (): EnvConfig => {
   const getEnv = (key: string): string => process.env[key] ?? "";
@@ -37,6 +24,4 @@ const getEnvConfig = (): EnvConfig => {
   };
 };
 
-const envconfig = getEnvConfig();
-
-export { envconfig };
+export default getEnvConfig();

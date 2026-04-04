@@ -3,6 +3,54 @@
     "compilerOptions": {
         "rootDir": ".",
         "outDir": "./dist",
+        "baseUrl": ".",
+        "paths": {
+            "@/*": [
+                "./*"
+            ],
+            "@base/*": [
+                "./src/shared/base/*"
+            ],
+            "@app/*": [
+                "./src/*"
+            ],
+            "@config/*": [
+                "./src/config/*"
+            ],
+            "@model/*": [
+                "./src/shared/model/*"
+            ],
+            "@error/*": [
+                "src/shared/error/*"
+            ],
+            "@module/*": [
+                "./src/modules/*"
+            ],
+            "@middleware/*": [
+                "./src/shared/middleware/*"
+            ],
+            "@service/*": [
+                "src/shared/external-service/*"
+            ],
+            "@enum/*": [
+                "src/shared/enum/*"
+            ],
+            "@util/*": [
+                "src/shared/util/*"
+            ],
+            "@constant/*": [
+                "./src/constants/*"
+            ],
+            "@schema/*": [
+                "./src/shared/zod-schema/*"
+            ],
+            "@template/*": [
+                "./src/shared/template/*"
+            ],
+            "@type/*": [
+                "./src/type/*"
+            ]
+        },
         "noEmit": true,
         "emitDecoratorMetadata": true,
         "emitDeclarationOnly": true,

@@ -1,6 +1,6 @@
 /** @format */
 
-const httpConfig = () =>
+const HttpConfig = () =>
   ({
     // Success responses
     OK: 200,
@@ -23,8 +23,8 @@ const httpConfig = () =>
     BAD_GATEWAY: 502,
     SERVICE_UNAVAILABLE: 503,
     GATEWAY_TIMEOUT: 504,
-  } as const);
+  }) as const;
 
-export const HttpStatus = httpConfig();
+const HttpStatus = HttpConfig();
 
-export type HttpStatusCodeType = (typeof HttpStatus)[keyof typeof HttpStatus];
+export default HttpStatus;
