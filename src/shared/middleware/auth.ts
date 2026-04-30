@@ -1,19 +1,17 @@
 /** @format */
 
 import type { Request, Response, NextFunction } from "express";
-import type { UserDocument } from "@type/env-types";
 
 import UnauthorizedExceptionError from "@error/unauthorized-exception.js";
 import HttpStatus from "@config/http.config.js";
 import ErrorCode from "@enum/error-code.js";
-import Envconfig from "@/env.js";
 
-import { verifyToken } from "@util/generate-token.js";
+import { verifyToken } from "@util/jwt.js";
 
-const authMiddleware = async (req: Request, res: Response, next: NextFunction) => {
-  const accessToken = req.cookies?.token;
+const authenticate = async (req: Request, res: Response, next: NextFunction) => {
+  const token = req.cookies?.token;
 
-  if (!accessToken) {
+  if (!token) {
     throw new UnauthorizedExceptionError(
       "Unauthorized. Please log in.",
       HttpStatus.UNAUTHORIZED,
@@ -22,30 +20,12 @@ const authMiddleware = async (req: Request, res: Response, next: NextFunction) =
   }
 
   try {
-    const decoded = verifyToken(accessToken, Envconfig.JWT_SECRET);
-
-    if (!decoded || typeof decoded === "string") {
-      throw new UnauthorizedExceptionError(
-        `Unauthorized
-        Reason: ${decoded}`,
-        HttpStatus.UNAUTHORIZED,
-        ErrorCode.AUTH_UNAUTHORIZED_ACCESS,
-      );
-    }
-
-    req.user = decoded as unknown as UserDocument;
-
-    if (!req.user)
-      throw new UnauthorizedExceptionError(
-        `Unauthorized
-        Reason: User not found ${req.user}`,
-        HttpStatus.UNAUTHORIZED,
-        ErrorCode.AUTH_UNAUTHORIZED_ACCESS,
-      );
+    const payload = await verifyToken(token);
+    req.user = payload;
     next();
   } catch (error) {
-    throw error;
+    next(error);
   }
 };
 
-export default authMiddleware;
+export default authenticate;

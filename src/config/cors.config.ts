@@ -1,6 +1,6 @@
 /** @format */
 
 import cors from "cors";
-import Envconfig from "@/env.js";
+import Env from "@config/env.config.js";
 
-export default cors({ origin: Envconfig.CORS_ORIGIN || true, credentials: true });
+export default cors({ origin: Env.CORS_ORIGIN || true, credentials: true });

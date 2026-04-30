@@ -1,27 +1,70 @@
 /** @format */
 
-import { config } from "dotenv";
-import type { EnvConfig } from "../type/env-types.js";
+import {env as loadEnv} from "custom-env";
+import z from "zod"
 
-config({ path: "./.env" });
+process.env.APP_STAGE = process.env.APP_STAGE || "dev";
 
-const getEnvConfig = (): EnvConfig => {
-  const getEnv = (key: string): string => process.env[key] ?? "";
+const isProduction = process.env.APP_STAGE === "prod";
+const isDevelopment = process.env.APP_STAGE === "dev";
+const isTesting = process.env.APP_STAGE === "test";
 
-  return {
-    PORT: getEnv("PORT") || "8000",
-    HOST_NAME: getEnv("HOST_NAME") || "https://the-other-wife.vercel.app/",
-    MONGODB_URI: getEnv("MONGODB_URI") || "mongodb://localhost:27017",
-    NODE_ENV: getEnv("NODE_ENV") || "development",
-    JWT_SECRET: getEnv("JWT_SECRET") || "secret",
-    JWT_REFRESH_SECRET: getEnv("JWT_REFRESH_SECRET") || "refresh_secret",
-    CORS_ORIGIN: getEnv("CORS_ORIGIN") || "",
-    EMAIL_HOST: getEnv("EMAIL_HOST"),
-    EMAIL_PORT: Number(getEnv("EMAIL_PORT")),
-    EMAIL_USER: getEnv("EMAIL_USER"),
-    EMAIL_PASSWORD: getEnv("EMAIL_PASSWORD"),
-    FROM: getEnv("FROM"),
-  };
-};
+if (isProduction) {
+  loadEnv();
+} else if (isTesting) {
+  loadEnv("test");
+} else {
+  loadEnv("dev");
+}
 
-export default getEnvConfig();
+const EnvSchema = z.object({
+  PORT: z.coerce.number(),
+  HOST: z.string(),
+
+  NODE_ENV: z.enum(['production', 'development', 'testing']).default("production"),
+  APP_STAGE: z.enum(["dev", "test", "prod"]).default("dev"),
+
+  DB_URL: z.string(),
+
+  JWT_SECRET: z.string().min(32, "Must be 32 char long"),
+  JWT_EXPIRY: z.string(),
+  REFRESH_SECRET: z.string(),
+
+  SALT: z.coerce.number().min(10).max(20),
+
+  CORS_ORIGIN: z.string(),
+  VERSION: z.string(),
+
+  EMAIL_HOST: z.string(),
+  EMAIL_PORT: z.coerce.number(),
+
+  EMAIL_USER: z.string().email('Invalid email'),
+  EMAIL_PASS: z.string(),
+})
+
+export type EnvType = z.infer<typeof EnvSchema>
+let Env: EnvType;
+
+try {
+  Env = EnvSchema.parse(process.env)
+} catch (e) {
+  if (e instanceof z.ZodError) {
+    console.error("Invalid environment variables:", e.issues);
+    console.log(JSON.stringify(e.flatten().fieldErrors, null, 2));
+
+    e.issues.forEach((err) => {
+      const path = err.path.join(".");
+      console.log(`${path} - ${err.message}`);
+    });
+
+    process.exit(1);
+  }
+
+  throw e;
+}
+
+export const isProd = () => Env.APP_STAGE === "prod";
+export const isDev = () => Env.APP_STAGE === "dev";
+export const isTest = () => Env.APP_STAGE === "test";
+
+export default Env;

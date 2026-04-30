@@ -1,17 +1,14 @@
-/** @format */
-
-import z from "zod";
 import type { NextFunction, Request, Response } from "express";
+import z, { ZodType } from "zod";
 
-const zodValidation =
-  (schema: z.ZodType<any>) => (req: Request, res: Response, next: NextFunction) => {
+export const validate = (schema: ZodType) => {
+  return (req: Request, res: Response, next: NextFunction) => {
     try {
-      const value = schema.parse(req.body);
-      Object.assign(req.body, value);
+      const body = schema.parse(req.body);
+      Object.assign(req.body, body);
       next();
     } catch (error) {
-      throw error;
+      next(error);
     }
   };
-
-export default zodValidation;
+};

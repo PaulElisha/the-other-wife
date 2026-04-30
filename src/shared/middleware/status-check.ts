@@ -1,7 +1,7 @@
 /** @format */
 
 import type { Request, Response, NextFunction } from "express";
-import Vendor from "@model/vendor.js";
+import Vendor from "@/src/module/vendor/vendor.schema.js";
 import BadRequestException from "@error/bad-request-exception.js";
 import HttpStatus from "@config/http.config.js";
 import ErrorCode from "@enum/error-code.js";

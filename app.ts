@@ -19,7 +19,7 @@ import corsOptions from "@config/cors.config.js";
 import Db from "@config/db.config.js";
 import swaggerSpec from "@config/swagger.config.js";
 
-import template from "@util/get-template.js";
+import template from "@/src/shared/util/template.js";
 import Envconfig from "@/env.js";
 import errorHandler from "@middleware/error-handler.js";
 
@@ -99,9 +99,8 @@ export class App {
 const appInstance = new App();
 const app = appInstance.app;
 
-if (import.meta.url === `file://${process.argv[1]}`) {
-  appInstance.startServer();
-}
+// Start server
+appInstance.startServer();
 
 export default app;
 export { app };

@@ -1,6 +1,6 @@
 /** @format */
 
-import type { HttpStatusCodeType, ErrorCodeType } from "@type/env-types.js";
+import type { HttpStatusCodeType, ErrorCodeType } from "@/src/shared/type/types.js";
 
 import AppError from "@error/app-error.js";
 

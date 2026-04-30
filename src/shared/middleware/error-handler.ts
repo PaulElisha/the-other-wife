@@ -16,10 +16,12 @@ const errorHandler = (err: Error, req: Request, res: Response, next: NextFunctio
   }
 
   if (err instanceof z.ZodError) {
-    return res.status(HttpStatus.BAD_REQUEST).json({
-      message: "Validation error",
-      error: err.issues,
-      status: "error",
+    return res.status(400).json({
+      error: "Validation failed",
+      details: err.issues.map((e) => ({
+        field: e.path.join("."),
+        message: e.message,
+      })),
     });
   }
 

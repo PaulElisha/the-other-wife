@@ -1,37 +1,23 @@
 /** @format */
 
-import mongoose from "mongoose";
+import {drizzle} from "drizzle-orm/node-postgres"
+import { remember } from "@epic-web/remember"
+import {Pool} from "pg"
+import Env, { isProd } from "@config/env.config.js"
+import * as schema from "@shared/schema.js";
 
-import Envconfig from "@/env.js";
+let client;
 
-const mongoUri = Envconfig.MONGODB_URI;
+const createPool = () =>  new Pool({
+  connectionString: Env.DB_URL,
+})
 
-class Db {
-  private connectionPromise: Promise<typeof mongoose> | null = null;
-
-  connect = async () => {
-    if (!mongoUri) {
-      throw new Error("MONGODB_URI is not defined");
-    }
-
-    if (mongoose.connection.readyState === 1) {
-      return Promise.resolve(mongoose);
-    }
-
-    if (this.connectionPromise) {
-      return this.connectionPromise;
-    }
-
-    try {
-      this.connectionPromise = mongoose.connect(mongoUri);
-      return this.connectionPromise.finally(() => {
-        this.connectionPromise = null;
-      });
-    } catch (error) {
-      console.error("Error connecting to MongoDB:", error);
-      throw error;
-    }
-  };
+if(isProd()) {
+  client = createPool()
+} else {
+  client = remember("dbPool", () => createPool())
 }
 
-export default new Db();
+const db = drizzle(client, { schema });
+
+export default db;
