@@ -27,7 +27,6 @@ const VendorDispatcher: Record<string, any> = {
       try {
         const newUpdate = await db.update(vendors).set({
           approval_status: update,
-          approved_at: new Date(Date.now()),
           approved_by: userId
         }).where(
           and(

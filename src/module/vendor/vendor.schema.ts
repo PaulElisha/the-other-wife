@@ -20,7 +20,7 @@ export const vendors = pgTable("vendors", {
     onDelete: "cascade"
   }),
   approval_status: varchar("approval_status", {length: 255}),
-  approved_at: timestamp("approved_at"),
+  approved_at: timestamp("approved_at", {mode: "date"}).defaultNow(),
   rejection: varchar("rejection", {length: 255}),
   additional_data: json().$type<Record<string, unknown>>(),
   ...timestamps

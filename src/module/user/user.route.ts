@@ -105,7 +105,7 @@ class UserRouter {
       UserController.getCurrentUser,
     );
 
-    this.router.get("/", roleGuardMiddleware(["admin"]), UserController.getAllUsers);
+    this.router.get("/all", roleGuardMiddleware(["admin"]), UserController.getAllUsers);
   }
 }
 

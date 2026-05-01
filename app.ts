@@ -16,11 +16,10 @@ import HttpStatus from "@config/http.config.js";
 import { limiter } from "@config/limiter.config.js";
 import helmetOptions from "@config/helmet.config.js";
 import corsOptions from "@config/cors.config.js";
-import Db from "@config/db.config.js";
 import swaggerSpec from "@config/swagger.config.js";
 
 import template from "@/src/shared/util/template.js";
-import Envconfig from "@/env.js";
+import Env from "@config/env.config.js"
 import errorHandler from "@middleware/error-handler.js";
 
 export class App {
@@ -41,21 +40,6 @@ export class App {
     this.app.use(corsOptions);
     this.app.use(cookieParser());
     this.app.use(limiter);
-
-    this.app.use(async (req, _res, next) => {
-      try {
-        console.log(`Connecting to DB for request: ${req.method} ${req.url}`);
-        await Db.connect();
-        next();
-      } catch (error) {
-        console.error("Database connection failed in middleware:", error);
-        next(error);
-      }
-    });
-  }
-
-  async initializeDb() {
-    await Db.connect();
   }
 
   initializeRoutes() {
@@ -89,9 +73,8 @@ export class App {
   }
 
   async startServer() {
-    await this.initializeDb();
-    this.app.listen(Envconfig.PORT, () => {
-      console.log(`Server is running on ${Envconfig.HOST_NAME}:${Envconfig.PORT}`);
+    this.app.listen(Env.PORT, () => {
+      console.log(`Server is running on ${Env.HOST}:${Env.PORT}`);
     });
   }
 }

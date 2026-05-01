@@ -28,7 +28,9 @@ const EnvSchema = z.object({
 
   JWT_SECRET: z.string().min(32, "Must be 32 char long"),
   JWT_EXPIRY: z.string(),
+
   REFRESH_SECRET: z.string(),
+  REFRESH_EXPIRY: z.string(),
 
   SALT: z.coerce.number().min(10).max(20),
 

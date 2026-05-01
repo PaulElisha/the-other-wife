@@ -67,7 +67,7 @@
         "app.ts",
         "custom-env.d.ts",
         "drizzle.config.ts",
-        "express.d.ts"
+        "src/express.d.ts"
     ],
     "exclude": [
         "node_modules",

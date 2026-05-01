@@ -1,25 +1,24 @@
-CREATE TYPE "public"."auth_type" AS ENUM('email', 'phone_number');--> statement-breakpoint
 CREATE TYPE "public"."status" AS ENUM('inactive', 'active', 'suspended', 'deleted');--> statement-breakpoint
 CREATE TYPE "public"."user_type" AS ENUM('customer', 'vendor', 'admin');--> statement-breakpoint
 CREATE TABLE "users" (
 	"id" serial PRIMARY KEY NOT NULL,
-	"first_name" varchar(255),
-	"last_name" varchar(255),
+	"first_name" varchar(255) NOT NULL,
+	"last_name" varchar(255) NOT NULL,
 	"email" varchar(255) NOT NULL,
 	"email_token" varchar(255),
-	"email_token_ms" varchar(255),
+	"email_token_ms" timestamp,
 	"refresh_token" varchar(255),
-	"refresh_token_ms" varchar(255),
+	"refresh_token_ms" timestamp,
 	"password" varchar(255),
-	"phone_number" varchar(255),
-	"status" "status" DEFAULT 'inactive',
+	"phone_number" varchar(255) NOT NULL,
+	"status" "status" DEFAULT 'inactive' NOT NULL,
 	"user_type" "user_type" DEFAULT 'customer',
-	"auth_type" "auth_type" DEFAULT 'email',
+	"auth_type" varchar(255) DEFAULT 'email',
 	"email_verified" boolean DEFAULT false,
 	"phone_verified" boolean DEFAULT false,
-	"lastLogin" timestamp,
-	"created_at" timestamp DEFAULT now(),
-	"updated_at" timestamp DEFAULT now(),
+	"lastLogin" timestamp DEFAULT now(),
+	"created_at" timestamp DEFAULT now() NOT NULL,
+	"updated_at" timestamp DEFAULT now() NOT NULL,
 	CONSTRAINT "users_email_unique" UNIQUE("email")
 );
 --> statement-breakpoint
@@ -35,8 +34,8 @@ CREATE TABLE "addresses" (
 	"latitude" integer,
 	"longitude" integer,
 	"is_default" boolean DEFAULT false,
-	"created_at" timestamp DEFAULT now(),
-	"updated_at" timestamp DEFAULT now()
+	"created_at" timestamp DEFAULT now() NOT NULL,
+	"updated_at" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE "cart_items" (
@@ -53,8 +52,8 @@ CREATE TABLE "carts" (
 	"id" serial PRIMARY KEY NOT NULL,
 	"customer_id" integer NOT NULL,
 	"total_amount" integer,
-	"created_at" timestamp DEFAULT now(),
-	"updated_at" timestamp DEFAULT now()
+	"created_at" timestamp DEFAULT now() NOT NULL,
+	"updated_at" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE "customers" (
@@ -62,8 +61,8 @@ CREATE TABLE "customers" (
 	"user_id" integer NOT NULL,
 	"address_id" integer,
 	"profile_image" varchar(255),
-	"created_at" timestamp DEFAULT now(),
-	"updated_at" timestamp DEFAULT now()
+	"created_at" timestamp DEFAULT now() NOT NULL,
+	"updated_at" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE "meals" (
@@ -84,8 +83,8 @@ CREATE TABLE "meals" (
 	"serving_size" varchar(255),
 	"additional_data" varchar(255),
 	"is_deleted" boolean DEFAULT false,
-	"created_at" timestamp DEFAULT now(),
-	"updated_at" timestamp DEFAULT now()
+	"created_at" timestamp DEFAULT now() NOT NULL,
+	"updated_at" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE "vendors" (
@@ -97,11 +96,11 @@ CREATE TABLE "vendors" (
 	"business_logo" varchar(255),
 	"approved_by" integer,
 	"approval_status" varchar(255),
-	"approved_at" timestamp,
+	"approved_at" timestamp DEFAULT now(),
 	"rejection" varchar(255),
 	"additional_data" json,
-	"created_at" timestamp DEFAULT now(),
-	"updated_at" timestamp DEFAULT now()
+	"created_at" timestamp DEFAULT now() NOT NULL,
+	"updated_at" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE "category" (
@@ -112,16 +111,16 @@ CREATE TABLE "category" (
 	"icon" varchar(255),
 	"display_order" integer DEFAULT 0,
 	"is_active" boolean DEFAULT false,
-	"created_at" timestamp DEFAULT now(),
-	"updated_at" timestamp DEFAULT now()
+	"created_at" timestamp DEFAULT now() NOT NULL,
+	"updated_at" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE "mealcategories" (
 	"id" serial PRIMARY KEY NOT NULL,
 	"category" varchar(255),
 	"description" varchar(255),
-	"created_at" timestamp DEFAULT now(),
-	"updated_at" timestamp DEFAULT now()
+	"created_at" timestamp DEFAULT now() NOT NULL,
+	"updated_at" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
 ALTER TABLE "addresses" ADD CONSTRAINT "addresses_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint

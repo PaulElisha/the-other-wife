@@ -4,8 +4,10 @@ import bcrypt from "bcrypt";
 import PQueue from "p-queue";
 
 import HttpStatus from "@config/http.config.js";
-import ErrorCode from "@enum/error-code.js";
+import db from "@config/db.config";
+import Env from "@config/env.config";
 
+import ErrorCode from "@enum/error-code.js";
 import BadRequestException from "@error/bad-request-exception.js";
 import UnauthorizedExceptionError from "@error/unauthorized-exception.js";
 import NotFoundException from "@error/not-found-exception.js";
@@ -13,15 +15,18 @@ import NotFoundException from "@error/not-found-exception.js";
 import {users} from "@module/user/user.schema.js";
 
 import {
+  generateEmailToken,
+  generateRefreshToken,
   generateToken,
   verifyToken,
 } from "@util/jwt.js";
-import Env from "@config/env.config.js"
-import transaction from "@util/transaction.js";
+import {comparePassword, hashPassword}  from "@util/password.js";
 import { CreateProfile } from "@module/user/user-profile.js";
 import template from "@/src/shared/util/template.js";
 import AUTH_CONSTANTS from "@/src/shared/constants/auth.js";
 import EmailWorker from "@module/email/email.worker.js";
+
+import { eq, or, and, ilike, gt } from "drizzle-orm";
 
 class AuthService {
   emailQueue: PQueue;
@@ -49,101 +54,106 @@ class AuthService {
     userType: string;
     phoneNumber: string;
   }) => {
-    const result = await transaction.use(async (session: ClientSession, body): Promise<any> => {
-      const { firstName, lastName, password, userType, phoneNumber, email } = body;
+    const { firstName, lastName, password, userType, phoneNumber, email } = body;
 
-      try {
-        const existingUser = await User.findOne({
-          $or: [{ ...(email && { email }) }, { ...(phoneNumber && { phoneNumber }) }],
-        }).session(session);
+      const result = await db.transaction(async (tx) => {
+        try {
+          const [existingUser] = await tx.select().from(users).where(
+            ilike(users.email, `%${email}%`)
+          );
+    
+          const authType = existingUser
+            ? existingUser.email === email
+              ? "email"
+              : existingUser.phone_number === phoneNumber
+                ? "phone number"
+                : null
+            : null;
+    
+            console.log(`Auth type: ${authType}`);
+    
+          authType && 
+              (() => {throw new BadRequestException(
+                `${authType} already exists`,
+                HttpStatus.BAD_REQUEST,
+                authType === "email"
+                  ? ErrorCode.AUTH_EMAIL_ALREADY_EXISTS
+                  : ErrorCode.AUTH_PHONE_NUMBER_ALREADY_EXISTS,
+              )})();
+    
+          const [newUser] = await tx.insert(users).values({
+              first_name: firstName,
+              last_name: lastName,
+              email: email,
+              password: password,
+              user_type: userType as "customer" | "vendor" | "admin",
+              status: "active",
+              phone_number: phoneNumber
+          }).returning();
 
-        const authType = existingUser
-          ? existingUser.email === email
-            ? "email"
-            : existingUser.phoneNumber === phoneNumber
-              ? "phone number"
-              : null
-          : null;
+          console.log(`New User: ${JSON.stringify(newUser)}`);
+    
+          const userProfile = await (await CreateProfile[userType as keyof typeof CreateProfile](tx))({userId: newUser.id});
+          console.log(`User Profile: ${JSON.stringify(userProfile)}`);
+          // await (await userProfile)(newUser.id);
+    
+          const [accessToken, {refreshToken, refreshTokenExpiry}, {emailToken, emailTokenExpiry}] = await Promise.all([
+            generateToken({
+              id: newUser.id,
+              userType: userType,
+              email: email
+            }),
+            generateRefreshToken({
+              id: newUser.id,
+              userType: userType
+            }),
+            generateEmailToken()
+          ])
+    
+          await tx.update(users).set({
+            refresh_token: refreshToken,
+            refresh_token_ms: refreshTokenExpiry,
+            email_token: emailToken,
+            email_token_ms: emailTokenExpiry
+          });
+    
+          const { password: _, ...userWithoutPassword } = newUser;
+    
+          return {
+            accessToken,
+            refreshToken,
+            data: userWithoutPassword,
+          };
+        } catch (error) {
+          throw error;
+        }
+      });
 
-        console.log(`Auth type: ${authType}`);
-
-        authType &&
-          (() => {
-            throw new BadRequestException(
-              `${authType} already exists`,
-              HttpStatus.BAD_REQUEST,
-              authType === "email"
-                ? ErrorCode.AUTH_EMAIL_ALREADY_EXISTS
-                : ErrorCode.AUTH_PHONE_NUMBER_ALREADY_EXISTS,
-            );
-          })();
-
-        const [newUser] = await User.create(
-          [
-            {
-              firstName,
-              lastName,
-              email,
-              passwordHash: password,
-              userType,
-              phoneNumber,
-            },
-          ],
-          { session },
-        );
-
-        await CreateProfile[userType as keyof typeof CreateProfile](
-          newUser._id as unknown as string,
-          session,
-        );
-
-        const { token: accessToken } = generateToken(newUser);
-        const { refreshToken } = generateRefreshToken(newUser);
-        const { emailToken, emailTokenExpiry } = generateEmailToken();
-
-        newUser.refreshToken = refreshToken;
-        newUser.refreshTokenExpiry = new Date(Date.now() + AUTH_CONSTANTS.REFRESH_TOKEN_EXPIRY_MS);
-        newUser.emailToken = emailToken;
-
-        newUser.emailTokenExpiry = emailTokenExpiry;
-        await newUser.save({ session });
-
-        return {
-          accessToken,
-          refreshToken,
-          ...(newUser.omitPassword() as any),
-        };
-      } catch (error) {
-        throw error;
-      }
-    })(body);
-
-    const html = await template`verify-signup.html${{
-      user: result,
-      verificationUrl: `http://localhost:8000/api/v1/auth/verify?token=${result.emailToken}`,
-    }}`;
-
-    this.emailQueue.add(async () => {
-      for await (const _ of EmailWorker({
-        user: result,
-        message: html,
-      }));
-    });
-
-    return result;
-  };
+      const html = await template`verify-signup.html${{
+        user: result.data,
+        verificationUrl: `http://localhost:8000/api/v1/auth/verify?token=${result.data.email_token}`,
+      }}`;
+  
+      this.emailQueue.add(async () => {
+        await EmailWorker({
+          user: result.data,
+          message: html,
+        })
+      });
+  
+      return result;
+    }
 
   verifySignup = async (emailToken: string) => {
-    const result = await transaction.use(
-      async (session: ClientSession, emailToken: string): Promise<any> => {
+      const verifiedUser = await db.transaction(async (tx) => {
         try {
           console.log(`Verifying signup with token: ${emailToken}`);
-          let user = await User.findOne({
-            emailToken,
-            emailTokenExpiry: { $gt: new Date() },
-          }).session(session);
-
-          if (!user) {
+          const [existingUser] = await tx.select().from(users).where(and(
+            ilike(users.email_token, `%${emailToken}%`),
+            gt(users.email_token_ms, new Date())
+          ));
+  
+          if (!existingUser) {
             console.log(`Verification failed: Token ${emailToken} not found or expired`);
             throw new NotFoundException(
               "User not found or token expired",
@@ -151,41 +161,36 @@ class AuthService {
               ErrorCode.AUTH_USER_NOT_FOUND,
             );
           }
-
-          console.log(`User found for token: ${user.email}`);
-          user.isEmailVerified = true;
-          user.emailToken = "";
-          user.emailTokenExpiry = new Date(Date.now() - 1000);
-          user.lastLogin = new Date();
-          await user.save({ session });
-
-          console.log("Verified user from DB:", user);
-
-          return { ...(user.omitPassword() as any) };
+  
+          await tx.update(users).set({
+            email_verified: true,
+            email_token: null,
+            email_token_ms: new Date(Date.now() + AUTH_CONSTANTS.EMAIL_TOKEN_EXPIRY_MS),
+            lastLogin: new Date(),
+            auth_type: existingUser.email || existingUser.phone_number
+          }).where(eq(users.id, existingUser.id));
+  
+          const {password: _, ...userWithoutPassword} = existingUser;
+  
+          return {userWithoutPassword};
         } catch (error) {
           console.error("Error in verifySignup service:", error);
           throw error;
         }
-      },
-    )(emailToken);
+      });
 
-    const html = await template`welcome-email.html${{ result }}`;
+      const html = await template`welcome-email.html${{ verifiedUser }}`;
 
-    this.emailQueue.add(async () => {
-      for await (const _ of EmailWorker({
-        user: result,
-        message: html,
-      }));
-    });
-
-    console.log(`New User: ${result}`);
-
-    return result;
+      this.emailQueue.add(async () => {
+        await EmailWorker({
+          user: verifiedUser,
+          message: html,
+        })
+      })
   };
 
-  login = transaction.use(
+  login =
     async (
-      session: ClientSession,
       body: {
         phoneNumber?: string;
         email?: string;
@@ -194,229 +199,225 @@ class AuthService {
     ): Promise<any> => {
       const { phoneNumber, email, password } = body;
 
-      try {
-        const existingUser = await User.findOne({
-          ...(email && { email }),
-          ...(phoneNumber && { phoneNumber }),
-        }).session(session);
-
-        if (!existingUser) {
-          throw new NotFoundException(
-            `Incorrect ${email ? "email" : "phone number"}`,
-            HttpStatus.NOT_FOUND,
-            ErrorCode.AUTH_USER_NOT_FOUND,
+      const result = await db.transaction(async (tx) => {
+        try {
+          const [existingUser] = await tx.select().from(users).where(
+            or(
+              ilike(users.email, `%${email}%`),
+              ilike(users.phone_number, `%${phoneNumber}%`)
+            )
           );
+  
+          if (!existingUser) {
+            throw new NotFoundException(
+              `Incorrect ${email ? "email" : "phone number"}`,
+              HttpStatus.NOT_FOUND,
+              ErrorCode.AUTH_USER_NOT_FOUND,
+            );
+          }
+  
+          const hash = await hashPassword(existingUser.password as string);
+  
+          const validPassword = await comparePassword(password, hash);
+  
+          if (!validPassword) {
+            throw new UnauthorizedExceptionError(
+              `Validation Error: Password is invalid`,
+              HttpStatus.UNAUTHORIZED,
+              ErrorCode.AUTH_UNAUTHORIZED_ACCESS,
+            );
+          }
+          
+          const [accessToken, {refreshToken}] = await Promise.all([
+            generateToken({
+              id: existingUser.id,
+              userType: existingUser.user_type as string,
+              email: existingUser.email
+            }),
+            generateRefreshToken({
+              id: existingUser.id,
+              userType: existingUser.user_type as string
+            })
+          ])
+  
+          await tx.update(users).set({
+            lastLogin: new Date(),
+            refresh_token: refreshToken,
+            refresh_token_ms: new Date(Date.now() + AUTH_CONSTANTS.REFRESH_TOKEN_EXPIRY_MS)
+          }).where(eq(users.id, existingUser.id))
+  
+          const {password: _, ...userWithoutPassword} = existingUser;
+  
+          return {
+            accessToken,
+            refreshToken,
+            user: userWithoutPassword
+          };
+        } catch (error) {
+          throw error;
         }
+      });
 
-        const isValid = await existingUser.comparePassword(password);
-        if (!isValid) {
-          throw new UnauthorizedExceptionError(
-            `Incorrect password`,
-            HttpStatus.UNAUTHORIZED,
-            ErrorCode.AUTH_UNAUTHORIZED_ACCESS,
-          );
-        }
-
-        const { token: accessToken } = generateToken(existingUser);
-
-        const { refreshToken } = generateRefreshToken(existingUser);
-
-        const user = await User.findByIdAndUpdate(
-          <mongoose.Types.ObjectId>existingUser._id,
-          {
-            $set: {
-              lastLogin: new Date(),
-              refreshToken,
-              refreshTokenExpiry: new Date(Date.now() + AUTH_CONSTANTS.REFRESH_TOKEN_EXPIRY_MS),
-            },
-          },
-          session,
-        );
-
-        return {
-          accessToken,
-          ...(user?.omitPassword() as any),
-        };
-      } catch (error) {
-        throw error;
-      }
-    },
-  );
-
-  refreshLogin = transaction.use(
-    async (session: ClientSession, refreshToken: string): Promise<any> => {
-      try {
-        if (!refreshToken) {
-          throw new BadRequestException(
-            "Refresh token is required",
-            HttpStatus.BAD_REQUEST,
-            ErrorCode.VALIDATION_ERROR,
-          );
-        }
-
-        const decoded = verifyToken(refreshToken, Envconfig.JWT_REFRESH_SECRET);
-
-        if (!decoded || typeof decoded === "string") {
-          throw new UnauthorizedExceptionError(
-            "Invalid token",
-            HttpStatus.UNAUTHORIZED,
-            ErrorCode.AUTH_UNAUTHORIZED_ACCESS,
-          );
-        }
-
-        let user = await User.findOne({
-          _id: decoded._id,
-          refreshToken,
-          refreshTokenExpiry: { $gt: new Date() },
-        }).session(session);
-
-        if (!user) {
-          throw new NotFoundException(
-            "Session expired",
-            HttpStatus.NOT_FOUND,
-            ErrorCode.AUTH_INVALID_TOKEN,
-          );
-        }
-
-        if (user.status !== AUTH_CONSTANTS.USER_STATUS.ACTIVE) {
-          throw new UnauthorizedExceptionError(
-            `User account is ${user.status}`,
-            HttpStatus.UNAUTHORIZED,
-            ErrorCode.AUTH_UNAUTHORIZED_ACCESS,
-          );
-        }
-
-        const { token: newAccessToken } = generateToken(user);
-        const { refreshToken: newRefreshToken } = generateRefreshToken(user);
-
-        user.refreshToken = newRefreshToken;
-        user.refreshTokenExpiry = new Date(Date.now() + AUTH_CONSTANTS.REFRESH_TOKEN_EXPIRY_MS);
-        user.lastLogin = new Date();
-        await user.save({ session });
-
-        return {
-          newAccessToken,
-          ...(user?.omitPassword() as any),
-        };
-      } catch (error) {
-        throw error;
-      }
-    },
-  );
-
-  logout = async (userId: string): Promise<any> => {
-    if (!userId) {
-      throw new BadRequestException(
-        "User ID is required",
-        HttpStatus.BAD_REQUEST,
-        ErrorCode.VALIDATION_ERROR,
-      );
+      return result;
     }
 
-    await User.findByIdAndUpdate(<mongoose.Types.ObjectId>(<unknown>userId), {
-      $unset: { refreshToken: 1, refreshTokenExpiry: 1 },
-    });
+  // refreshLogin = transaction.use(
+  //   async (session: ClientSession, refreshToken: string): Promise<any> => {
+  //     try {
+  //       if (!refreshToken) {
+  //         throw new BadRequestException(
+  //           "Refresh token is required",
+  //           HttpStatus.BAD_REQUEST,
+  //           ErrorCode.VALIDATION_ERROR,
+  //         );
+  //       }
+
+  //       const decoded = verifyToken(refreshToken, Envconfig.JWT_REFRESH_SECRET);
+
+  //       if (!decoded || typeof decoded === "string") {
+  //         throw new UnauthorizedExceptionError(
+  //           "Invalid token",
+  //           HttpStatus.UNAUTHORIZED,
+  //           ErrorCode.AUTH_UNAUTHORIZED_ACCESS,
+  //         );
+  //       }
+
+  //       let user = await User.findOne({
+  //         _id: decoded._id,
+  //         refreshToken,
+  //         refreshTokenExpiry: { $gt: new Date() },
+  //       }).session(session);
+
+  //       if (!user) {
+  //         throw new NotFoundException(
+  //           "Session expired",
+  //           HttpStatus.NOT_FOUND,
+  //           ErrorCode.AUTH_INVALID_TOKEN,
+  //         );
+  //       }
+
+  //       if (user.status !== AUTH_CONSTANTS.USER_STATUS.ACTIVE) {
+  //         throw new UnauthorizedExceptionError(
+  //           `User account is ${user.status}`,
+  //           HttpStatus.UNAUTHORIZED,
+  //           ErrorCode.AUTH_UNAUTHORIZED_ACCESS,
+  //         );
+  //       }
+
+  //       const { token: newAccessToken } = generateToken(user);
+  //       const { refreshToken: newRefreshToken } = generateRefreshToken(user);
+
+  //       user.refreshToken = newRefreshToken;
+  //       user.refreshTokenExpiry = new Date(Date.now() + AUTH_CONSTANTS.REFRESH_TOKEN_EXPIRY_MS);
+  //       user.lastLogin = new Date();
+  //       await user.save({ session });
+
+  //       return {
+  //         newAccessToken,
+  //         ...(user?.omitPassword() as any),
+  //       };
+  //     } catch (error) {
+  //       throw error;
+  //     }
+  //   },
+  // );
+
+  logout = async (userId: number) => {
+    await db.update(users).set({
+      refresh_token: null,
+      refresh_token_ms: null
+    }).where(eq(users.id, userId));
 
     return {
       httpOnly: true,
-      secure: Envconfig.NODE_ENV === "production",
-      sameSite: "strict",
+      secure: Env.NODE_ENV === "production",
+      sameSite: "strict" as "strict",
       path: "/",
       expires: new Date(0),
     };
   };
 
-  forgotPassword = async (email: string) => {
-    const result = await transaction.use(async (session: ClientSession, email: string) => {
-      try {
-        const user = await User.findOne({ email }).session(session);
+  // forgotPassword = async (email: string) => {
+  //   const result = await transaction.use(async (session: ClientSession, email: string) => {
+  //     try {
+  //       const user = await User.findOne({ email }).session(session);
 
-        if (!user) {
-          throw new NotFoundException(
-            "User not found",
-            HttpStatus.NOT_FOUND,
-            ErrorCode.AUTH_USER_NOT_FOUND,
-          );
-        }
+  //       if (!user) {
+  //         throw new NotFoundException(
+  //           "User not found",
+  //           HttpStatus.NOT_FOUND,
+  //           ErrorCode.AUTH_USER_NOT_FOUND,
+  //         );
+  //       }
 
-        const { otp, otpExpiry } = generateOtp();
-        user.otp = otp;
-        user.otpExpiry = otpExpiry;
-        await user.save({ session });
+  //       const { otp, otpExpiry } = generateOtp();
+  //       user.otp = otp;
+  //       user.otpExpiry = otpExpiry;
+  //       await user.save({ session });
 
-        return { otp, otpExpiry, ...(user?.omitPassword() as any) };
-      } catch (error) {
-        throw error;
-      }
-    })(email);
+  //       return { otp, otpExpiry, ...(user?.omitPassword() as any) };
+  //     } catch (error) {
+  //       throw error;
+  //     }
+  //   })(email);
 
-    const html = await template`forgot-password.html${{
-      otp: result?.otp,
-      otpExpiry: result?.otpExpiry,
-    }}`;
+  //   const html = await template`forgot-password.html${{
+  //     otp: result?.otp,
+  //     otpExpiry: result?.otpExpiry,
+  //   }}`;
 
-    this.emailQueue.add(async () => {
-      for await (const _ of EmailWorker({
-        user: result,
-        message: html,
-      }));
-    });
+  //   this.emailQueue.add(async () => {
+  //     for await (const _ of EmailWorker({
+  //       user: result,
+  //       message: html,
+  //     }));
+  //   });
 
-    return result;
-  };
+  //   return result;
+  // };
 
-  passwordReset = async (body: { newPassword: string; otp: string }) => {
-    const result = await transaction.use(async (session: ClientSession, body) => {
-      const { newPassword, otp } = body;
+  // passwordReset = async (body: { newPassword: string; otp: string }) => {
+  //   const result = await transaction.use(async (session: ClientSession, body) => {
+  //     const { newPassword, otp } = body;
 
-      const user = await User.findOne({
-        otp,
-        otpExpiry: { $gt: Date.now(), $lt: Date.now() + 20 * 60 * 1000 },
-      }).session(session);
+  //     const user = await User.findOne({
+  //       otp,
+  //       otpExpiry: { $gt: Date.now(), $lt: Date.now() + 20 * 60 * 1000 },
+  //     }).session(session);
 
-      if (!user) {
-        throw new NotFoundException(
-          "User not found",
-          HttpStatus.NOT_FOUND,
-          ErrorCode.AUTH_USER_NOT_FOUND,
-        );
-      }
+  //     if (!user) {
+  //       throw new NotFoundException(
+  //         "User not found",
+  //         HttpStatus.NOT_FOUND,
+  //         ErrorCode.AUTH_USER_NOT_FOUND,
+  //       );
+  //     }
 
-      user.passwordHash = await bcrypt.hash(newPassword, 10);
-      user.otp = "";
-      user.otpExpiry = new Date(Date.now() - 1000);
-      await user.save({ session });
+  //     user.passwordHash = await bcrypt.hash(newPassword, 10);
+  //     user.otp = "";
+  //     user.otpExpiry = new Date(Date.now() - 1000);
+  //     await user.save({ session });
 
-      return { ...(user?.omitPassword() as any) };
-    })(body);
+  //     return { ...(user?.omitPassword() as any) };
+  //   })(body);
 
-    const html = await template`password-reset.html${result}`;
+  //   const html = await template`password-reset.html${result}`;
 
-    this.emailQueue.add(async () => {
-      for await (const _ of EmailWorker({
-        user: result,
-        message: html,
-      }));
-    });
-  };
+  //   this.emailQueue.add(async () => {
+  //     for await (const _ of EmailWorker({
+  //       user: result,
+  //       message: html,
+  //     }));
+  //   });
+  // };
 
   deleteUser = async (email: string) => {
-    return transaction.use(async (session: ClientSession, email: string) => {
       try {
-        const user = await User.deleteMany({}).session(session);
-
-        if (!user) {
-          throw new NotFoundException(
-            "User not found",
-            HttpStatus.NOT_FOUND,
-            ErrorCode.AUTH_USER_NOT_FOUND,
-          );
-        }
+        await db.delete(users).where(eq(users.email, email));
         return;
       } catch (error) {
         throw error;
       }
-    })(email);
   };
 }
 

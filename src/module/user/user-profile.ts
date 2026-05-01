@@ -10,15 +10,20 @@ import HttpStatus from "@config/http.config.js";
 import ErrorCode from "@enum/error-code.js";
 
 export const CreateProfile = {
-  customer: async (userId: number) => {
-     const [customer] = await db.insert(customers).values({
-    user_id: userId
-  }).returning()
+  customer: async (tx: any) => {
+    return async ({userId}: {userId: number}) => {
+      const [customer] = await tx.insert(customers).values({
+        user_id: userId,
+      }).returning()
+      return customer;
+    }
   },
-  vendor: async (userId: number) => {
-    const [vendor] = await db.insert(vendors).values({
-      user_id: userId
-    }).returning()
+  vendor: async (tx: any) => {
+    return async ({userId}: {userId: number}) => {
+      await tx.insert(vendors).values({
+        user_id: userId
+      }).returning()
+    }
   },
   admin: () => {
     throw new BadRequestException(
