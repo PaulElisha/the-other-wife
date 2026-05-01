@@ -9,7 +9,7 @@ import db from "@config/db.config";
 
 import {meals} from "@module/meal/meal.schema.js";
 import {vendors} from "@module/vendor/vendor.schema.js";
-import { mealcategories } from "@/src/shared/model/mealCategory.schema.js";
+import { mealcategories } from "@/src/module/meal/mealCategory.schema.js";
 import { eq, and, ilike, or, desc, count, sql } from "drizzle-orm";
 
 class MealService {

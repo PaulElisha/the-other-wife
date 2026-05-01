@@ -3,7 +3,7 @@
 import { CartType, ItemType } from "@module/cart/cart.schema";
 import HttpStatus from "@config/http.config.js";
 import ErrorCode from "@enum/error-code";
-import { CategoryType } from "@/src/shared/model/mealCategory.schema";
+import { CategoryType } from "@/src/module/meal/mealCategory.schema";
 
 import { Transporter } from "nodemailer";
 import Mail from "nodemailer/lib/mailer";

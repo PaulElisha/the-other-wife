@@ -28,6 +28,14 @@ import EmailWorker from "@module/email/email.worker.js";
 
 import { eq, or, and, ilike, gt } from "drizzle-orm";
 
+const UserType: Record<string, string> = {
+  customer: "customer",
+  vendor: "vendor",
+  admin: "admin"
+} as const;
+
+type UserRoleType = string;
+
 class AuthService {
   emailQueue: PQueue;
 
@@ -51,7 +59,7 @@ class AuthService {
     lastName: string;
     email: string;
     password: string;
-    userType: string;
+    userType: UserRoleType;
     phoneNumber: string;
   }) => {
     const { firstName, lastName, password, userType, phoneNumber, email } = body;
@@ -80,14 +88,18 @@ class AuthService {
                   ? ErrorCode.AUTH_EMAIL_ALREADY_EXISTS
                   : ErrorCode.AUTH_PHONE_NUMBER_ALREADY_EXISTS,
               )})();
-    
+
+          type UserRole = typeof UserType[keyof typeof UserType];
+          const roleType = Object.values(UserType).includes(userType as UserRole) 
+              ? (userType as UserRole) 
+              : UserType.customer;
+         
           const [newUser] = await tx.insert(users).values({
               first_name: firstName,
               last_name: lastName,
               email: email,
               password: password,
-              user_type: userType as "customer" | "vendor" | "admin",
-              status: "active",
+              user_type: roleType,
               phone_number: phoneNumber
           }).returning();
 

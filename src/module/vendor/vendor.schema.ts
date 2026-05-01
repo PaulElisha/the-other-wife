@@ -1,5 +1,5 @@
 
-import { json, pgEnum, pgTable, serial, timestamp, varchar, integer, boolean } from "drizzle-orm/pg-core"
+import { json, pgEnum, pgTable, serial, timestamp, varchar, integer, boolean, jsonb } from "drizzle-orm/pg-core"
 import {} from "drizzle-orm";
 
 import { timestamps, users } from "@module/user/user.schema.js";
@@ -22,7 +22,7 @@ export const vendors = pgTable("vendors", {
   approval_status: varchar("approval_status", {length: 255}),
   approved_at: timestamp("approved_at", {mode: "date"}).defaultNow(),
   rejection: varchar("rejection", {length: 255}),
-  additional_data: json().$type<Record<string, unknown>>(),
+  additional_data: jsonb("addtional_data").$type<Record<string, unknown>>(),
   ...timestamps
 });
 

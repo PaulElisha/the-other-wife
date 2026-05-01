@@ -11,6 +11,7 @@ import { customerRouter } from "@module/customer/customer.route.js";
 import { vendorRouter } from "@module/vendor/vendor.route.js";
 import { cartRouter } from "@module/cart/cart.route.js";
 import { mealRouter } from "@module/meal/meal.route.js";
+import {onboardingRouter} from "@module/onboarding/onboarding.route.js"
 
 import HttpStatus from "@config/http.config.js";
 import { limiter } from "@config/limiter.config.js";
@@ -47,13 +48,14 @@ export class App {
       res.status(HttpStatus.OK).send("Welcome to The Other Wife API");
     });
 
-    this.app.use("/api/v1/auth", authRouter);
-    this.app.use("/api/v1/users", userRouter);
-    this.app.use("/api/v1/addresses", addressRouter);
-    this.app.use("/api/v1/customers", customerRouter);
-    this.app.use("/api/v1/vendors", vendorRouter);
-    this.app.use("/api/v1/carts", cartRouter);
-    this.app.use("/api/v1/meals", mealRouter);
+    this.app.use(`${Env.VERSION}/auth`, authRouter);
+    this.app.use(`${Env.VERSION}/users`, userRouter);
+    this.app.use(`${Env.VERSION}/addresses`, addressRouter);
+    this.app.use(`${Env.VERSION}/customers`, customerRouter);
+    this.app.use(`${Env.VERSION}/vendors`, vendorRouter);
+    this.app.use(`${Env.VERSION}/carts`, cartRouter);
+    this.app.use(`${Env.VERSION}/meals`, mealRouter);
+    this.app.use(`${Env.VERSION}/onboarding`, onboardingRouter)
 
     this.app.get("/api-docs", async (_req, res) => {
       try {

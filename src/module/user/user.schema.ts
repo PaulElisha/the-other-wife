@@ -6,7 +6,6 @@ import AUTH_CONSTANTS from "@/src/shared/constants/auth.js";
 import { boolean, pgEnum, pgTable, serial, time, timestamp, varchar } from "drizzle-orm/pg-core";
 
 export const statusEnum = pgEnum("status", ["inactive", "active", "suspended", "deleted"]);
-export const typeEnum = pgEnum("user_type", ["customer", "vendor", "admin"]);
 
 export const timestamps = {
   created_at: timestamp("created_at", { mode: "date"}).notNull().defaultNow(),
@@ -24,8 +23,8 @@ export const users = pgTable("users", {
   refresh_token_ms: timestamp("refresh_token_ms", {mode: "date"}),
   password: varchar("password", {length: 255}),
   phone_number: varchar("phone_number", {length: 255}).notNull(),
-  status: statusEnum().default("inactive").notNull(),
-  user_type: typeEnum("user_type").default("customer"),
+  status: statusEnum("status").default("active"),
+  user_type: varchar("user_type", {length: 255}),
   auth_type: varchar("auth_type", {length: 255}).default("email"),
   email_verified: boolean("email_verified").default(false),
   phone_verified: boolean("phone_verified").default(false),
