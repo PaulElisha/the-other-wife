@@ -7,7 +7,7 @@ import { json } from "zod";
 
 export const onboarding = pgTable("onboarding", {
  id: serial("id").notNull().primaryKey(),
- vendorId: integer("vendorId").notNull().references(
+ vendor_id: integer("vendor_id").notNull().references(
   () => vendors.id, {onDelete: "cascade"}).unique(),
 
  state: varchar("state", {length: 255}),
@@ -23,7 +23,7 @@ export const onboarding = pgTable("onboarding", {
  account_number: text("account_number"),
  is_verified: boolean("is_verified").default(false),
 
- governmentId: varchar("governmentId", {length: 255}),
+ government_id: varchar("government_id", {length: 255}),
  business_certificate: jsonb("business_certificate").$type<{}>(),
  display_image: jsonb("display_image").$type<{}>(),
  confirmed_accuracy: boolean("confirmed_accuracy"),

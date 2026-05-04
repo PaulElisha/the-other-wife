@@ -1,14 +1,17 @@
 import db from "@config/db.config.js";
 import { vendors } from "@module/vendor/vendor.schema.js";
 import { eq, and} from "drizzle-orm";
-import { onboarding, onboarding_status, OnboardingSchema } from "@module/onboarding/onboarding.schema.js";
+import { onboarding, onboarding_status } from "@module/onboarding/onboarding.schema.js";
+
 import AuthService from "@module/auth/auth.service.js";
+import MemoEvent from "@shared/util/memo-event.js";
 import { JwtPayload, verifyToken } from "@/src/shared/util/jwt";
-import { statusEnum } from "../user/user.schema";
+
 import InternalServerError from "@/src/shared/error/internal-server";
 import HttpStatus from "@/src/config/http.config";
 import ErrorCode from "@/src/shared/enum/error-code";
 import BadRequestException from "@/src/shared/error/bad-request-exception";
+import type {Response} from "express"
 
 class OnboardingService {
  stepOne = async (vendorData: {
@@ -46,7 +49,7 @@ class OnboardingService {
   twitter && (updateData.twitter = twitter)
 
   try {
-   const [vendorId, nextStep, stepOneStatus] = await db.transaction(async (tx) => {
+   const [accessToken, refreshToken, vendorId, nextStep, stepOneStatus] = await db.transaction(async (tx) => {
     const {accessToken, refreshToken, data} = await AuthService.signup({
      firstName: updateData.firstName,
      lastName: updateData.lastName,
@@ -61,7 +64,7 @@ class OnboardingService {
     const nextStep = 2 as unknown as "2";
 
     const [stepOneOnboard] = await tx.insert(onboarding).values({
-     vendorId: vendorId,
+     vendor_id: vendorId,
      state: updateData.state,
      city: updateData.city,
      address: updateData.address,
@@ -88,7 +91,8 @@ class OnboardingService {
    });
 
    return [
-    
+    accessToken,
+    refreshToken,
     vendorId,
     nextStep,
     stepOneStatus
@@ -124,7 +128,11 @@ class OnboardingService {
   isVerified && (updateData.isVerified = isVerified);
 
   try {
-   await db.transaction(async (tx) => {
+   const {
+    currentStep,
+    nextStep,
+    status
+   } = await db.transaction(async (tx) => {
     const [stepTwoOnboard] = await tx.update(onboarding).set({
      years_of_experience: updateData.yearsOfExperience,
      cuisines: updateData.cuisines,
@@ -133,17 +141,17 @@ class OnboardingService {
      is_verified: updateData.isVerified,
      updated_at: new Date(Date.now())
     }).where(
-     eq(onboarding.vendorId, vendorId)
+     eq(onboarding.vendor_id, vendorId)
     ).returning()
 
     const [currentStatus] = await tx.select().from(onboarding_status).where(
      and(
-      eq(onboarding.vendorId, vendorId),
+      eq(onboarding.vendor_id, vendorId),
       eq(onboarding_status.onboardingId, stepTwoOnboard.id)
      )
     );
 
-    if(!currentStatus.step1_completed) {
+    if(!currentStatus.step1_completed || typeof currentStatus.step1_completed === "undefined") {
      throw new BadRequestException(
       "Step 1 is not completed",
       HttpStatus.BAD_REQUEST,
@@ -161,11 +169,25 @@ class OnboardingService {
       eq(onboarding_status.onboardingId, stepTwoOnboard.id)
      ).returning();
 
-    return [
-     nextStep,
-     stepTwoStatus
-    ]
+    return {
+     currentStep: currentStatus.steps,
+     nextStep: stepTwoStatus.steps,
+     status: stepTwoStatus.step2_completed
+    }
    });
+
+   MemoEvent.notify(vendorId, {
+    type: "STATUS_UPDATE",
+    step: currentStep,
+    completed: true,
+    nextStep: nextStep
+  })
+
+   return [
+    currentStep,
+    nextStep,
+    status,
+   ]
   } catch (error) {
    throw error;
   }
@@ -203,10 +225,10 @@ class OnboardingService {
   acceptedTerms && (updateData.acceptedTerms = acceptedTerms),
   acceptedVerification && (updateData.acceptedVerification = acceptedVerification)
 
-  await db.transaction(async (tx) => {
+   const {currentStep, nextStep, status} = await db.transaction(async (tx) => {
    try {
      const [stepTwoOnboard] = await tx.update(onboarding).set({
-      governmentId: updateData.governmentId,
+      government_id: updateData.governmentId,
       business_certificate: updateData.businessCertificate,
       display_image: updateData.displayImage,
       confirmed_accuracy: updateData.confirmedAccuracy,
@@ -214,16 +236,18 @@ class OnboardingService {
       accepted_verification: updateData.acceptedVerification,
       completed_at: new Date(Date.now()),
       updated_at: new Date(Date.now())
-     }).returning();
+     }).where(
+      eq(onboarding.vendor_id, vendorId)
+     ).returning();
 
      const [currentStatus] = await tx.select().from(onboarding_status).where(
       and(
-       eq(onboarding.vendorId, vendorId),
+       eq(onboarding.vendor_id, vendorId),
        eq(onboarding_status.onboardingId, stepTwoOnboard.id)
       )
      );
  
-     if(!currentStatus.step2_completed) {
+     if(!currentStatus.step2_completed || typeof currentStatus.step2_completed === "undefined") {
       throw new BadRequestException(
        "Step 1 is not completed",
        HttpStatus.BAD_REQUEST,
@@ -241,23 +265,41 @@ class OnboardingService {
       eq(onboarding_status.onboardingId, stepTwoOnboard.id)
      ).returning();
      
-     return [
-      stepThreeStatus
-     ]
+     return {
+      currentStep: currentStatus.steps,
+      nextStep: stepThreeStatus.steps,
+      status: stepThreeStatus.step3_completed
+     }
    } catch (error) {
      throw error
    }
   });
+
+  MemoEvent.notify(vendorId, {
+    type: "STATUS_UPDATE",
+    step: currentStep,
+    completed: status,
+    nextStep: nextStep
+  });
  }
 
  getCurrentProcess = async (vendorId: number, userId: number) => {
-  const currentOnboardingProcess = await db.select().from(onboarding).where(
+  const [currentOnboardingProcess] = await db.select().from(onboarding).innerJoin(vendors, eq(onboarding.vendor_id, vendors.id)).innerJoin(onboarding_status, eq(onboarding_status.onboardingId, onboarding.id)).where(
     and(
-    eq(onboarding.vendorId, vendorId),
+    eq(onboarding.vendor_id, vendorId),
     eq(vendors.user_id, userId)
   ));
 
-  return currentOnboardingProcess[0];
+  if(currentOnboardingProcess)
+
+  return [
+     currentOnboardingProcess?.onboarding,
+     currentOnboardingProcess?.onboarding_status
+    ];
+ }
+
+ subscribeToMemo = async(vendorId: number, res: Response) => {
+  MemoEvent.subscribe(vendorId, res);
  }
 }
 

@@ -6,7 +6,7 @@ export { carts } from "../module/cart/cart.schema.js";
 export { customers } from "../module/customer/customer.schema.js";
 export { meals } from "../module/meal/meal.schema.js";
 export { vendors } from "../module/vendor/vendor.schema.js";
-export { category } from "../module/category/category.schema.js";
+export { category } from "../module/meal/category.schema.js";
 
 // export {
 //   users,

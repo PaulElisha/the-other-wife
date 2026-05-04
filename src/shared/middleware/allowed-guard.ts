@@ -14,14 +14,14 @@ const allowGuard =
       const userType: UserTypeKey = <UserTypeKey>schema.parse(req.body.userType);
       if (userType == "admin" || !allowedUsers.includes(userType)) {
         throw new UnauthorizedExceptionError(
-          `User type ${userType} is not allowed`,
+          `${userType} is not allowed`,
           HttpConfig.UNAUTHORIZED,
           ErrorCode.AUTH_UNAUTHORIZED_ACCESS,
         );
       }
       next();
     } catch (error) {
-      throw error;
+      next(error);
     }
   };
 

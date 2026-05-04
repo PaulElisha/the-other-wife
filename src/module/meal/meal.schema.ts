@@ -3,7 +3,8 @@
 import { pgTable, serial, integer, varchar, text, pgEnum, boolean } from "drizzle-orm/pg-core";
 import { timestamps } from "@module/user/user.schema";
 import { vendors } from "@module/vendor/vendor.schema.js";
-import {category} from "@module/category/category.schema.js"
+import {category} from "@/src/module/meal/category.schema.js"
+import { createSelectSchema } from "drizzle-zod";
 
 export const meals = pgTable("meals", {
   id: serial("id").notNull().primaryKey(),
@@ -29,3 +30,5 @@ export const meals = pgTable("meals", {
   is_deleted: boolean("is_deleted").default(false),
   ...timestamps
 });
+
+export type MealSchemaType = typeof meals.$inferSelect;

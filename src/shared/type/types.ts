@@ -7,6 +7,8 @@ import { CategoryType } from "@/src/module/meal/mealCategory.schema";
 
 import { Transporter } from "nodemailer";
 import Mail from "nodemailer/lib/mailer";
+import { MealSchemaType } from "@module/meal/meal.schema.js";
+import z from "zod";
 
 export type MailerCallback = (transporter: Transporter, data: MailData) => Promise<Mail>;
 
@@ -19,7 +21,7 @@ export type HttpStatusCodeType = (typeof HttpStatus)[keyof typeof HttpStatus];
 
 export type ErrorCodeType = (typeof ErrorCode)[keyof typeof ErrorCode];
 
-export type CartAction = (cartId: number, cartItem: number) => void;
+export type CartAction = (cartId: number, mealId: number) => void;
 
 
 export type CategoryValueType = (typeof CategoryType)[keyof typeof CategoryType];

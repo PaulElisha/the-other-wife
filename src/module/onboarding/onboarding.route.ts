@@ -12,10 +12,10 @@ class OnboardingRouter {
  }
 
  private initializeRoutes() {
-  this.router.get("/current", OnboardingController.getCurrentProcess);
-  this.router.post("step-one", OnboardingController.stepOne);
-  this.router.patch("step-two", OnboardingController.stepTwo);
-  this.router.patch("step-three", OnboardingController.stepThree);
+  this.router.get("/current/:id", OnboardingController.getCurrentProcess);
+  this.router.post("/step-one", OnboardingController.stepOne);
+  this.router.patch("/step-two/:id", OnboardingController.stepTwo);
+  this.router.patch("/step-three/:id", OnboardingController.stepThree);
  }
 }
 

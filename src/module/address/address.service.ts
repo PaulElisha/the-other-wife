@@ -214,13 +214,13 @@ class AddressService {
   }
 
   getUserAddresses = async (userId: number) => {
-    const [user_address] = await db.select().from(addresses).innerJoin(users, 
-      eq(addresses.user_id, users.id))
-      .where(
-      eq(addresses.user_id, userId)
-    ).orderBy(desc(addresses.is_default), desc(addresses.created_at))
-    return user_address;
-  };
+    const user_address = await db.select().from(addresses).where(eq(addresses.id, userId)).orderBy(desc(addresses.created_at));
+    
+    return {
+      defaultAddress: user_address.filter(a => a.is_default === true)[0],
+      secondaryAddresses: user_address.filter(a => a.is_default !== true)
+    }
+  }
 }
 
 export default new AddressService();

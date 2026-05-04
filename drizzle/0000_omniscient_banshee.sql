@@ -1,5 +1,4 @@
 CREATE TYPE "public"."status" AS ENUM('inactive', 'active', 'suspended', 'deleted');--> statement-breakpoint
-CREATE TYPE "public"."user_type" AS ENUM('customer', 'vendor', 'admin');--> statement-breakpoint
 CREATE TABLE "users" (
 	"id" serial PRIMARY KEY NOT NULL,
 	"first_name" varchar(255) NOT NULL,
@@ -11,8 +10,8 @@ CREATE TABLE "users" (
 	"refresh_token_ms" timestamp,
 	"password" varchar(255),
 	"phone_number" varchar(255) NOT NULL,
-	"status" "status" DEFAULT 'inactive' NOT NULL,
-	"user_type" "user_type" DEFAULT 'customer',
+	"status" "status" DEFAULT 'active',
+	"user_type" varchar(255),
 	"auth_type" varchar(255) DEFAULT 'email',
 	"email_verified" boolean DEFAULT false,
 	"phone_verified" boolean DEFAULT false,
@@ -98,7 +97,7 @@ CREATE TABLE "vendors" (
 	"approval_status" varchar(255),
 	"approved_at" timestamp DEFAULT now(),
 	"rejection" varchar(255),
-	"additional_data" json,
+	"addtional_data" jsonb,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL
 );
@@ -123,6 +122,43 @@ CREATE TABLE "mealcategories" (
 	"updated_at" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
+CREATE TABLE "onboarding" (
+	"id" serial PRIMARY KEY NOT NULL,
+	"vendorId" integer NOT NULL,
+	"state" varchar(255),
+	"city" varchar(255),
+	"address" varchar(255),
+	"instagram" varchar(255),
+	"facebook" varchar(255),
+	"twitter" varchar(255),
+	"years_of_experience" integer,
+	"cuisines" jsonb,
+	"bank_name" text,
+	"account_number" text,
+	"is_verified" boolean DEFAULT false,
+	"governmentId" varchar(255),
+	"business_certificate" jsonb,
+	"display_image" jsonb,
+	"confirmed_accuracy" boolean,
+	"accepted_terms" boolean DEFAULT false,
+	"accepted_verification" boolean DEFAULT false,
+	"completed_at" timestamp,
+	"updated_at" timestamp,
+	CONSTRAINT "onboarding_vendorId_unique" UNIQUE("vendorId")
+);
+--> statement-breakpoint
+CREATE TABLE "onboarding_status" (
+	"id" serial PRIMARY KEY NOT NULL,
+	"onboardingId" integer NOT NULL,
+	"steps" "stepsEnum" DEFAULT '1',
+	"step1_completed" boolean DEFAULT false,
+	"step2_completed" boolean DEFAULT false,
+	"step3_completed" boolean DEFAULT false,
+	"submitted_at" timestamp DEFAULT now(),
+	"updated_at" timestamp DEFAULT now(),
+	CONSTRAINT "onboarding_status_onboardingId_unique" UNIQUE("onboardingId")
+);
+--> statement-breakpoint
 ALTER TABLE "addresses" ADD CONSTRAINT "addresses_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "cart_items" ADD CONSTRAINT "cart_items_cart_id_carts_id_fk" FOREIGN KEY ("cart_id") REFERENCES "public"."carts"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "cart_items" ADD CONSTRAINT "cart_items_meal_id_meals_id_fk" FOREIGN KEY ("meal_id") REFERENCES "public"."meals"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
@@ -133,4 +169,6 @@ ALTER TABLE "meals" ADD CONSTRAINT "meals_vendor_id_vendors_id_fk" FOREIGN KEY (
 ALTER TABLE "meals" ADD CONSTRAINT "meals_category_id_category_id_fk" FOREIGN KEY ("category_id") REFERENCES "public"."category"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "vendors" ADD CONSTRAINT "vendors_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "vendors" ADD CONSTRAINT "vendors_address_id_addresses_id_fk" FOREIGN KEY ("address_id") REFERENCES "public"."addresses"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "vendors" ADD CONSTRAINT "vendors_approved_by_users_id_fk" FOREIGN KEY ("approved_by") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;
+ALTER TABLE "vendors" ADD CONSTRAINT "vendors_approved_by_users_id_fk" FOREIGN KEY ("approved_by") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "onboarding" ADD CONSTRAINT "onboarding_vendorId_vendors_id_fk" FOREIGN KEY ("vendorId") REFERENCES "public"."vendors"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "onboarding_status" ADD CONSTRAINT "onboarding_status_onboardingId_onboarding_id_fk" FOREIGN KEY ("onboardingId") REFERENCES "public"."onboarding"("id") ON DELETE cascade ON UPDATE no action;

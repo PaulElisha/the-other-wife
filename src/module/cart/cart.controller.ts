@@ -92,6 +92,17 @@ class CartController {
       }
     },
   );
+
+  clearCart = asyncHandler(async (req: Request, res: Response, next: NextFunction): Promise<any> => {
+    const cartId = Number(req.params.id);
+    const userId = Number(req.user.id);
+
+    try {
+      await CartService.clearCart(userId, cartId);
+    } catch (error) {
+      throw error
+    }
+  })
 }
 
 export default new CartController();

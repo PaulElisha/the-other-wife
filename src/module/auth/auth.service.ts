@@ -104,9 +104,6 @@ class AuthService {
           }).returning();
 
           console.log(`New User: ${JSON.stringify(newUser)}`);
-    
-          const userProfile = await (await CreateProfile[userType as keyof typeof CreateProfile](tx))({userId: newUser.id});
-          console.log(`User Profile: ${JSON.stringify(userProfile)}`);
           // await (await userProfile)(newUser.id);
     
           const [accessToken, {refreshToken, refreshTokenExpiry}, {emailToken, emailTokenExpiry}] = await Promise.all([
@@ -130,6 +127,9 @@ class AuthService {
           });
     
           const { password: _, ...userWithoutPassword } = newUser;
+
+          const userProfile = await (await CreateProfile[userType as keyof typeof CreateProfile](tx))({userId: newUser.id});
+          console.log(`User Profile: ${JSON.stringify(userProfile)}`);
     
           return {
             accessToken,

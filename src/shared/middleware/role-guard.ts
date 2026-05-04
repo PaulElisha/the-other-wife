@@ -5,7 +5,7 @@ import UnauthorizedExceptionError from "@error/unauthorized-exception.js";
 import HttpStatus from "@config/http.config.js";
 import ErrorCode from "@enum/error-code.js";
 
-const roleGuardMiddleware = (roles: string[]) => {
+const roleGuard = (roles: string[]) => {
   return async (req: Request, res: Response, next: NextFunction) => {
     try {
       console.log("User Type: ", req?.user?.userType);
@@ -23,4 +23,4 @@ const roleGuardMiddleware = (roles: string[]) => {
   };
 };
 
-export default roleGuardMiddleware;
+export default roleGuard;
