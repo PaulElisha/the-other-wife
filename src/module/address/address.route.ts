@@ -1,11 +1,11 @@
 /** @format */
 
-import AddressController from "@module/address/address.controller.js";
-import roleGuardMiddleware from "@middleware/role-guard.js";
-import { Router } from "express";
 import authMiddleware from "@middleware/auth.js";
-import {validate} from "@middleware/validation.js";
+import roleGuardMiddleware from "@middleware/role-guard.js";
+import { validate } from "@middleware/validation.js";
+import AddressController from "@module/address/address.controller.js";
 import { createAddressSchema, editAddressSchema } from "@schema/address.js";
+import { Router } from "express";
 
 /**
  * @swagger
@@ -258,47 +258,47 @@ import { createAddressSchema, editAddressSchema } from "@schema/address.js";
  */
 
 class AddressRouter {
-  router: Router;
+ router: Router;
 
-  constructor() {
-    this.router = Router();
-    this.router.use(authMiddleware);
-    this.initializeRoutes();
-  }
+ constructor() {
+  this.router = Router();
+  this.router.use(authMiddleware);
+  this.initializeRoutes();
+ }
 
-  initializeRoutes() {
-    this.router.post(
-      "/",
-      roleGuardMiddleware(["customer", "vendor"]),
-      validate(createAddressSchema),
-      AddressController.createUserAddress,
-    );
+ initializeRoutes() {
+  this.router.post(
+   "/",
+   roleGuardMiddleware(["customer", "vendor"]),
+   validate(createAddressSchema),
+   AddressController.createUserAddress,
+  );
 
-    this.router.put(
-      "/edit/:id",
-      roleGuardMiddleware(["customer", "vendor"]),
-      validate(editAddressSchema),
-      AddressController.editUserAddress,
-    );
+  this.router.put(
+   "/edit/:id",
+   roleGuardMiddleware(["customer", "vendor"]),
+   validate(editAddressSchema),
+   AddressController.editUserAddress,
+  );
 
-    this.router.put(
-      "/toggle/:id",
-      roleGuardMiddleware(["customer", "vendor"]),
-      AddressController.toggleDefaultAddress,
-    );
+  this.router.put(
+   "/toggle/:id",
+   roleGuardMiddleware(["customer", "vendor"]),
+   AddressController.toggleDefaultAddress,
+  );
 
-    this.router.delete(
-      "/:id",
-      roleGuardMiddleware(["customer", "vendor", "admin"]),
-      AddressController.deleteUserAddress,
-    );
+  this.router.delete(
+   "/:id",
+   roleGuardMiddleware(["customer", "vendor", "admin"]),
+   AddressController.deleteUserAddress,
+  );
 
-    this.router.get(
-      "/me",
-      roleGuardMiddleware(["customer", "vendor"]),
-      AddressController.getUserAddresses,
-    );
-  }
+  this.router.get(
+   "/me",
+   roleGuardMiddleware(["customer", "vendor"]),
+   AddressController.getUserAddresses,
+  );
+ }
 }
 
 export const addressRouter = new AddressRouter().router;

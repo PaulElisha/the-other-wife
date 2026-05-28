@@ -1,9 +1,9 @@
 /** @format */
 
-import { Router } from "express";
-import VendorController from "@module/vendor/vendor.controller.js";
 import auth from "@middleware/auth.js";
 import roleGuardMiddleware from "@middleware/role-guard.js";
+import VendorController from "@module/vendor/vendor.controller.js";
+import { Router } from "express";
 
 /**
  * @swagger
@@ -286,26 +286,46 @@ import roleGuardMiddleware from "@middleware/role-guard.js";
  */
 
 class VendorRouter {
-  router: Router;
+ router: Router;
 
-  constructor() {
-    this.router = Router();
-    this.router.use(auth);
-    this.initializeRoutes();
-  }
+ constructor() {
+  this.router = Router();
+  this.router.use(auth);
+  this.initializeRoutes();
+ }
 
-  initializeRoutes() {
-    this.router.get("/me", roleGuardMiddleware(["vendor"]), VendorController.getVendorProfile);
-    this.router.put("/me", roleGuardMiddleware(["vendor"]), VendorController.updateVendorProfile);
-    this.router.put("/approve/:id", roleGuardMiddleware(["admin"]), VendorController.approveVendor);
-    this.router.put("/reject/:id", roleGuardMiddleware(["admin"]), VendorController.rejectVendor);
-    this.router.put("/suspend/:id", roleGuardMiddleware(["admin"]), VendorController.suspendVendor);
-    this.router.delete(
-      "/me",
-      roleGuardMiddleware(["vendor"]),
-      VendorController.deleteVendorProfile,
-    );
-  }
+ initializeRoutes() {
+  this.router.get(
+   "/me",
+   roleGuardMiddleware(["vendor"]),
+   VendorController.getVendorProfile,
+  );
+  this.router.put(
+   "/me",
+   roleGuardMiddleware(["vendor"]),
+   VendorController.updateVendorProfile,
+  );
+  this.router.put(
+   "/approve/:id",
+   roleGuardMiddleware(["admin"]),
+   VendorController.approveVendor,
+  );
+  this.router.put(
+   "/reject/:id",
+   roleGuardMiddleware(["admin"]),
+   VendorController.rejectVendor,
+  );
+  this.router.put(
+   "/suspend/:id",
+   roleGuardMiddleware(["admin"]),
+   VendorController.suspendVendor,
+  );
+  this.router.delete(
+   "/me",
+   roleGuardMiddleware(["vendor"]),
+   VendorController.deleteVendorProfile,
+  );
+ }
 }
 
 export const vendorRouter = new VendorRouter().router;

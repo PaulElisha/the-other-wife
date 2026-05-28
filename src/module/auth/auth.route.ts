@@ -1,12 +1,12 @@
 /** @format */
 
-import { Router } from "express";
+import allowGuard from "@middleware/allowed-guard.js";
+import authMiddleware from "@middleware/auth.js";
+import { validate } from "@middleware/validation.js";
 import AuthController from "@module/auth/auth.controller.js";
 import { loginUserSchema, registerUserSchema } from "@schema/auth.js";
-import authMiddleware from "@middleware/auth.js";
-import {validate} from "@middleware/validation.js";
-import allowGuard from "@middleware/allowed-guard.js";
 import RoleSchema from "@schema/role.js";
+import { Router } from "express";
 
 /**
  * @openapi
@@ -342,28 +342,32 @@ import RoleSchema from "@schema/role.js";
  */
 
 class AuthRouter {
-  router: Router;
+ router: Router;
 
-  constructor() {
-    this.router = Router();
-    this.initializeRoutes();
-  }
+ constructor() {
+  this.router = Router();
+  this.initializeRoutes();
+ }
 
-  initializeRoutes() {
-    this.router.post(
-      "/signup",
-      validate(registerUserSchema),
-      allowGuard(RoleSchema),
-      AuthController.handleSignup,
-    );
-    this.router.get("/verify", AuthController.verifySignup);
-    this.router.post("/login", validate(loginUserSchema), AuthController.handleLogin);
-    this.router.post("/logout", authMiddleware, AuthController.handleLogout);
-    // this.router.post("/refresh", AuthController.handleRefreshLogin);
-    // this.router.post("/forgot-password", AuthController.handleForgotPassword);
-    // this.router.post("/password-reset", AuthController.handlePasswordReset);
-    this.router.delete("/delete", AuthController.handleDeleteUser);
-  }
+ initializeRoutes() {
+  this.router.post(
+   "/signup",
+   validate(registerUserSchema),
+   allowGuard(RoleSchema),
+   AuthController.handleSignup,
+  );
+  this.router.get("/verify", AuthController.verifySignup);
+  this.router.post(
+   "/login",
+   validate(loginUserSchema),
+   AuthController.handleLogin,
+  );
+  this.router.post("/logout", authMiddleware, AuthController.handleLogout);
+  // this.router.post("/refresh", AuthController.handleRefreshLogin);
+  // this.router.post("/forgot-password", AuthController.handleForgotPassword);
+  // this.router.post("/password-reset", AuthController.handlePasswordReset);
+  this.router.delete("/delete", AuthController.handleDeleteUser);
+ }
 }
 
 export const authRouter = new AuthRouter().router;

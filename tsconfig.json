@@ -1,76 +1,46 @@
 {
-    "extends": "@tsconfig/node18/tsconfig.json",
-    "compilerOptions": {
-        "rootDir": ".",
-        "outDir": "./dist",
-        "baseUrl": ".",
-        "paths": {
-            "@/*": [
-                "./*"
-            ],
-            "@shared/*": [
-                "./src/shared/*"
-            ],
-            "@app/*": [
-                "./src/*"
-            ],
-            "@config/*": [
-                "./src/config/*"
-            ],
-            "@model/*": [
-                "./src/shared/model/*"
-            ],
-            "@error/*": [
-                "src/shared/error/*"
-            ],
-            "@module/*": [
-                "./src/module/*"
-            ],
-            "@middleware/*": [
-                "./src/shared/middleware/*"
-            ],
-            "@enum/*": [
-                "src/shared/enum/*"
-            ],
-            "@util/*": [
-                "src/shared/util/*"
-            ],
-            "@constant/*": [
-                "./src/constants/*"
-            ],
-            "@schema/*": [
-                "./src/shared/zod-schema/*"
-            ],
-            "@template/*": [
-                "./src/shared/template/*"
-            ],
-            "@type/*": [
-                "src/shared/type/*"
-            ]
-        },
-        "noEmit": true,
-        "emitDecoratorMetadata": true,
-        "emitDeclarationOnly": true,
-        "declaration": true,
-        "experimentalDecorators": true,
-        "sourceMap": true,
-        "declarationMap": true,
-        "moduleResolution": "bundler",
-        "module": "ES2022",
-        "target": "ES2022",
-        "allowJs": true,
-        "allowSyntheticDefaultImports": true,
-        "strict": true
-    },
-    "include": [
-        "src/**/*.ts",
-        "app.ts",
-        "custom-env.d.ts",
-        "drizzle.config.ts",
-        "src/express.d.ts"
-    ],
-    "exclude": [
-        "node_modules",
-        "dist"
-    ]
+ "extends": "@tsconfig/node18/tsconfig.json",
+ "compilerOptions": {
+  "rootDir": ".",
+  "outDir": "./dist",
+  "baseUrl": ".",
+  "paths": {
+   "@/*": ["./*"],
+   "@shared/*": ["./src/shared/*"],
+   "@app/*": ["./src/*"],
+   "@config/*": ["./src/config/*"],
+   "@model/*": ["./src/shared/model/*"],
+   "@error/*": ["src/shared/error/*"],
+   "@module/*": ["./src/module/*"],
+   "@middleware/*": ["./src/shared/middleware/*"],
+   "@enum/*": ["src/shared/enum/*"],
+   "@util/*": ["src/shared/util/*"],
+   "@constant/*": ["./src/constants/*"],
+   "@schema/*": ["./src/shared/zod-schema/*"],
+   "@template/*": ["./src/shared/template/*"],
+   "@type/*": ["src/shared/type/*"]
+  },
+  "noEmit": true,
+  "emitDecoratorMetadata": true,
+  "emitDeclarationOnly": true,
+  "declaration": true,
+  "experimentalDecorators": true,
+  "sourceMap": true,
+  "declarationMap": true,
+  "moduleResolution": "bundler",
+  "module": "ES2022",
+  "target": "ES2022",
+  "allowJs": true,
+  "allowSyntheticDefaultImports": true,
+  "strict": true
+ },
+ "include": [
+  "src/**/*.ts",
+  "app.ts",
+  "custom-env.d.ts",
+  "drizzle.config.ts",
+  "./src/express.d.ts",
+  "schema.ts"
+ ],
+ "exclude": ["node_modules", "dist"]
 }

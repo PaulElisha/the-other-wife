@@ -1,7 +1,7 @@
 /** @format */
 
-import {env as loadEnv} from "custom-env";
-import z from "zod"
+import { env as loadEnv } from "custom-env";
+import z from "zod";
 
 process.env.APP_STAGE = process.env.APP_STAGE || "dev";
 
@@ -10,59 +10,67 @@ const isDevelopment = process.env.APP_STAGE === "dev";
 const isTesting = process.env.APP_STAGE === "test";
 
 if (isProduction) {
-  loadEnv();
+ loadEnv("prod");
 } else if (isTesting) {
-  loadEnv("test");
+ loadEnv("test");
 } else {
-  loadEnv("dev");
+ if (isDevelopment) loadEnv("dev");
 }
 
 const EnvSchema = z.object({
-  PORT: z.coerce.number(),
-  HOST: z.string(),
+ PORT: z.coerce.number(),
+ HOST: z.string(),
 
-  NODE_ENV: z.enum(['production', 'development', 'testing']).default("production"),
-  APP_STAGE: z.enum(["dev", "test", "prod"]).default("dev"),
+ NODE_ENV: z
+  .enum(["production", "development", "testing"])
+  .default("production"),
+ APP_STAGE: z.enum(["dev", "test", "prod"]).default("dev"),
 
-  DB_URL: z.string(),
+ DB_URL: z.string(),
 
-  JWT_SECRET: z.string().min(32, "Must be 32 char long"),
-  JWT_EXPIRY: z.string(),
+ JWT_SECRET: z.string().min(32, "Must be 32 char long"),
+ JWT_EXPIRY: z.string(),
 
-  REFRESH_SECRET: z.string(),
-  REFRESH_EXPIRY: z.string(),
+ REFRESH_SECRET: z.string(),
+ REFRESH_EXPIRY: z.string(),
 
-  SALT: z.coerce.number().min(10).max(20),
+ SALT: z.coerce.number().min(10),
 
-  CORS_ORIGIN: z.string(),
-  VERSION: z.string(),
+ CORS_ORIGIN: z.string(),
+ VERSION: z.string(),
 
-  EMAIL_HOST: z.string(),
-  EMAIL_PORT: z.coerce.number(),
+ EMAIL_HOST: z.string(),
+ EMAIL_PORT: z.coerce.number(),
 
-  EMAIL_USER: z.string().email('Invalid email'),
-  EMAIL_PASS: z.string(),
-})
+ EMAIL_USER: z.email("Invalid email"),
+ EMAIL_PASS: z.string(),
 
-export type EnvType = z.infer<typeof EnvSchema>
+ PAYSTACK_INIT_URL: z.string(),
+
+ PAYSTACK_SECRET_KEY: z.string(),
+
+ SCALER: z.coerce.number().default(100),
+});
+
+export type EnvType = z.infer<typeof EnvSchema>;
 let Env: EnvType;
 
 try {
-  Env = EnvSchema.parse(process.env)
+ Env = EnvSchema.parse(process.env);
 } catch (e) {
-  if (e instanceof z.ZodError) {
-    console.error("Invalid environment variables:", e.issues);
-    console.log(JSON.stringify(e.flatten().fieldErrors, null, 2));
+ if (e instanceof z.ZodError) {
+  console.error("Invalid environment variables:", e.issues);
+  console.log(JSON.stringify(z.treeifyError(e), null, 2));
 
-    e.issues.forEach((err) => {
-      const path = err.path.join(".");
-      console.log(`${path} - ${err.message}`);
-    });
+  e.issues.forEach((err) => {
+   const path = err.path.join(".");
+   console.log(`${path} - ${err.message}`);
+  });
 
-    process.exit(1);
-  }
+  process.exit(1);
+ }
 
-  throw e;
+ throw e;
 }
 
 export const isProd = () => Env.APP_STAGE === "prod";

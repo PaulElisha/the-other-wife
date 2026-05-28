@@ -1,10 +1,10 @@
 /** @format */
 
-import { Router } from "express";
-import MealController from "@module/meal/meal.controller.js";
 import authMiddleware from "@middleware/auth.js";
 import roleGuardMiddleware from "@middleware/role-guard.js";
 import statusCheck from "@middleware/status-check.js";
+import MealController from "@module/meal/meal.controller.js";
+import { Router } from "express";
 
 /**
  * @swagger
@@ -102,23 +102,23 @@ import statusCheck from "@middleware/status-check.js";
  */
 
 class MealRouter {
-  router: Router;
+ router: Router;
 
-  constructor() {
-    this.router = Router();
-    this.router.use(authMiddleware);
-    this.initializeRoutes();
-  }
+ constructor() {
+  this.router = Router();
+  this.router.use(authMiddleware);
+  this.initializeRoutes();
+ }
 
-  initializeRoutes() {
-    this.router.get("/", MealController.getMeals);
-    this.router.post(
-      "/:vendorId",
-      roleGuardMiddleware(["vendor"]),
-      statusCheck(["approved"]),
-      MealController.createMeal,
-    );
-  }
+ initializeRoutes() {
+  this.router.get("/", MealController.getMeals);
+  this.router.post(
+   "/:vendorId",
+   roleGuardMiddleware(["vendor"]),
+   statusCheck(["approved"]),
+   MealController.createMeal,
+  );
+ }
 }
 
 export const mealRouter = new MealRouter().router;

@@ -1,69 +1,182 @@
-import db from "@/src/config/db.config";
-import { carts } from "../cart/cart.schema"
-import CartService from "../cart/cart.service";
-import { checkoutItems, checkouts } from "./checkout.schema";
-import AddressService from "../address/address.service";
+/** @format */
 
-export const CheckOutStatus = {
- OPEN: "open",
- COMPLETED: "completed",
- EXPIRED: "expired"
-} as const;
+import db from "@/src/config/db.config";
+
+import AddressService from "../address/address.service";
+import CartService from "../cart/cart.service";
+import OrderService from "../order/order.service";
+import PaymentService, { ReturnPaystackData } from "../payment/payment.service";
+
+import { checkoutItems, checkouts } from "./checkout.schema";
+import { eq, and, gt, or } from "drizzle-orm";
+import { PublishEvent } from "@/src/shared/event-bus/publisher";
+import { EventType } from "@/src/shared/event-bus/config";
+import NotFoundException from "@/src/shared/error/not-found-exception";
+import HttpStatus from "@/src/shared/enum/http";
+import ErrorCode from "@/src/shared/enum/error-code";
+import { users } from "@/schema";
+import Env from "@/src/config/env.config";
+import z, { email } from "zod";
+import { payments } from "../payment/payment.schema";
+
+export enum CheckOutStatus {
+ OPEN = "OPEN",
+ COMPLETED = "COMPLETED",
+ EXPIRED = "EXPIRED",
+}
 
 const THRESHOLD = 10000;
 const DYNAMIC_FEES_IN_PERCENT = {
  high: 0.05,
- low: 0.025
-}
+ low: 0.025,
+};
 
 function rateCheck(subtotal: number): number {
  let rate: number;
- if(subtotal < THRESHOLD) {
-  rate = subtotal * DYNAMIC_FEES_IN_PERCENT['high'];
+ if (subtotal < THRESHOLD) {
+  rate = subtotal * DYNAMIC_FEES_IN_PERCENT["high"];
  } else {
-  rate = subtotal * DYNAMIC_FEES_IN_PERCENT['low']
+  rate = subtotal * DYNAMIC_FEES_IN_PERCENT["low"];
  }
 
  return rate;
 }
 
-
 class CheckOutService {
- initializeCheckout = async (customerId: number) => {
-  const userCart = await CartService.getUserCart(customerId);
-  const {defaultAddress, } = await AddressService.getUserAddresses(customerId);
+ constructor(
+  protected cartService: typeof CartService,
+  protected addressService: typeof AddressService,
+  protected orderService: typeof OrderService,
+  protected paymentService: typeof PaymentService,
+ ) {}
 
-  const total_amount = rateCheck(userCart.cart.subtotal || 0)
+ proceedToCheckout = async (userId: number) => {
+  const { cart, cart_items } = await this.cartService.getUserCart(userId);
+  const currentUserAddress = (
+   await this.addressService.getUserAddresses(userId)
+  ).defaultAddress;
 
-  const [checkout] = await db.insert(checkouts).values({
-   user_id: customerId,
-   shipping_address: defaultAddress.address,
-   vendor_id: userCart.cart.vendor_id,
-   status: CheckOutStatus.OPEN,
-   subtotal: userCart.cart.subtotal,
-   total_amount: total_amount,
-   expired_at: new Date(Date.now() + 60 * 60 * 24 * 7)
-  }).returning();
+  const total_amount = rateCheck(cart.subtotal || 0);
 
-  let checkout_items;
+  return await db.transaction(async (tx) => {
+   const [checkOut] = await tx
+    .insert(checkouts)
+    .values({
+     customer_id: userId,
+     cart_id: cart.id,
+     shipping_address: {
+      label: currentUserAddress.label,
+      address: currentUserAddress.address,
+      city: currentUserAddress.city,
+      state: currentUserAddress.state,
+      country: currentUserAddress.country,
+      latitude: currentUserAddress.latitude,
+      longitude: currentUserAddress.longitude,
+     } as any,
+     vendor_id: cart.vendor_id,
+     status: CheckOutStatus.OPEN,
+     subtotal: cart.subtotal,
+     total_amount: total_amount,
+     expired_at: new Date(Date.now() + 60 * 60 * 24 * 7),
+    })
+    .returning();
 
-  for (const item of userCart.cart_items) {
-   checkout_items = await db.insert(checkoutItems).values({
-    checkout_id: checkout.id,
-    item_id: item.id,
-    total_price: item.total_item_price,
-    quantity: item.quantity,
-    priceAtCheckout: item.price
-   }).returning();
-  }
+   let checkOutItems;
 
-  return {
-   checkout,
-   checkout_items
-  }
- }
+   for (const item of cart_items) {
+    const itemsInCheckout = {
+     checkout_id: checkOut.id,
+     item_id: item.id,
+     total_price: item.total_item_price,
+     quantity: item.quantity,
+     priceAtCheckout: item.price,
+    };
 
- createPayment = async () => {}
+    checkOutItems = await tx
+     .insert(checkoutItems)
+     .values(itemsInCheckout)
+     .returning();
+   }
+
+   return { checkOut, checkOutItems };
+  });
+ };
+
+ confirmCheckout = async (
+  checkOutId: number,
+  userId: number,
+  channel: string,
+ ) => {
+  const result = await db.transaction(async (tx) => {
+   const [{ email }] = await tx
+    .select({
+     email: users.email,
+    })
+    .from(users)
+    .where(eq(users.id, userId))
+    .limit(1);
+
+   const [currentCheckout] = await tx
+    .select()
+    .from(checkouts)
+    .where(
+     and(
+      eq(checkouts.id, checkOutId),
+      gt(checkouts.expired_at, new Date(Date.now())),
+     ),
+    );
+
+   if (!currentCheckout || !email)
+    throw new NotFoundException(
+     "Checkout context or user record not found",
+     HttpStatus.NOT_FOUND,
+     ErrorCode.RESOURCE_NOT_FOUND,
+    );
+
+   const { order, order_items } = await this.orderService.createOrder(tx)(
+    checkOutId,
+    userId,
+   );
+
+   const paymentData = {
+    amount: <number>currentCheckout?.total_amount,
+    channel: [channel],
+   };
+
+   const payment = await this.paymentService.createPayment(tx)(
+    userId,
+    order?.id,
+    paymentData,
+   );
+
+   const data: z.infer<typeof ReturnPaystackData> =
+    await this.paymentService.initializePayment({
+     email,
+     amount: <number>currentCheckout?.total_amount,
+     reference: <string>payment?.payment_reference,
+     metadata: {
+      orderId: order.id,
+      paymentId: payment.id,
+     },
+     paystackSecretKey: Env.PAYSTACK_SECRET_KEY,
+    });
+
+   await db
+    .update(payments)
+    .set({
+     access_code: data?.access_code,
+     authorization_url: data?.authorization_url,
+    })
+    .where(eq(payments.id, payment.id));
+
+   return { orderId: order.id };
+  });
+ };
 }
 
-export default new CheckOutService()
+export default new CheckOutService(
+ CartService,
+ AddressService,
+ OrderService,
+ PaymentService,
+);

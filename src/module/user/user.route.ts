@@ -1,9 +1,9 @@
 /** @format */
 
-import { Router } from "express";
-import UserController from "@module/user/user.controller.js";
-import roleGuardMiddleware from "@middleware/role-guard.js";
 import auth from "@middleware/auth.js";
+import roleGuardMiddleware from "@middleware/role-guard.js";
+import UserController from "@module/user/user.controller.js";
+import { Router } from "express";
 
 /**
  * @swagger
@@ -90,23 +90,27 @@ import auth from "@middleware/auth.js";
  */
 
 class UserRouter {
-  router: Router;
+ router: Router;
 
-  constructor() {
-    this.router = Router();
-    this.router.use(auth);
-    this.initializeRoutes();
-  }
+ constructor() {
+  this.router = Router();
+  this.router.use(auth);
+  this.initializeRoutes();
+ }
 
-  initializeRoutes() {
-    this.router.get(
-      "/me",
-      roleGuardMiddleware(["customer", "vendor"]),
-      UserController.getCurrentUser,
-    );
+ initializeRoutes() {
+  this.router.get(
+   "/me",
+   roleGuardMiddleware(["customer", "vendor"]),
+   UserController.getCurrentUser,
+  );
 
-    this.router.get("/all", roleGuardMiddleware(["admin"]), UserController.getAllUsers);
-  }
+  this.router.get(
+   "/all",
+   roleGuardMiddleware(["admin"]),
+   UserController.getAllUsers,
+  );
+ }
 }
 
 export const userRouter = new UserRouter().router;

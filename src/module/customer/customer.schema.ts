@@ -1,18 +1,19 @@
 /** @format */
 
-import { integer, pgTable, serial, varchar } from "drizzle-orm/pg-core"
-
+import { addresses } from "@module/address/address.schema.js";
 import { timestamps, users } from "@module/user/user.schema.js";
-import {addresses} from "@module/address/address.schema.js"
+import { integer, pgTable, serial, varchar } from "drizzle-orm/pg-core";
 
 export const customers = pgTable("customers", {
-  id: serial("id").primaryKey(),
-  user_id: integer("user_id").notNull().references(() => users.id, {
-    onDelete: 'cascade'
+ id: serial("id").primaryKey(),
+ user_id: integer("user_id")
+  .notNull()
+  .references(() => users.id, {
+   onDelete: "cascade",
   }),
-  address_id: integer("address_id").references(() => addresses.id, {
-    onDelete: "cascade"
-  }),
-  profile_image: varchar("profile_image", {length: 255}),
-  ...timestamps
-})
+ address_id: integer("address_id").references(() => addresses.id, {
+  onDelete: "cascade",
+ }),
+ profile_image: varchar("profile_image", { length: 255 }),
+ ...timestamps,
+});

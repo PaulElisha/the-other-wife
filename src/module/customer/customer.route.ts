@@ -1,9 +1,9 @@
 /** @format */
 
-import CustomerController from "@module/customer/customer.controller.js";
-import { Router } from "express";
 import auth from "@middleware/auth.js";
 import roleGuardMiddleware from "@middleware/role-guard.js";
+import CustomerController from "@module/customer/customer.controller.js";
+import { Router } from "express";
 
 /**
  * @swagger
@@ -160,30 +160,30 @@ import roleGuardMiddleware from "@middleware/role-guard.js";
  */
 
 class CustomerRouter {
-  router: Router;
-  constructor() {
-    this.router = Router();
-    this.router.use(auth);
-    this.initializeRoutes();
-  }
+ router: Router;
+ constructor() {
+  this.router = Router();
+  this.router.use(auth);
+  this.initializeRoutes();
+ }
 
-  initializeRoutes() {
-    this.router.get(
-      "/:id",
-      roleGuardMiddleware(["customer", "admin"]),
-      CustomerController.getCustomerProfile,
-    );
-    this.router.put(
-      "/:id",
-      roleGuardMiddleware(["customer"]),
-      CustomerController.updateCustomerProfile,
-    );
-    this.router.delete(
-      "/:id",
-      roleGuardMiddleware(["customer", "admin"]),
-      CustomerController.deleteCustomerProfile,
-    );
-  }
+ initializeRoutes() {
+  this.router.get(
+   "/:id",
+   roleGuardMiddleware(["customer", "admin"]),
+   CustomerController.getCustomerProfile,
+  );
+  this.router.put(
+   "/:id",
+   roleGuardMiddleware(["customer"]),
+   CustomerController.updateCustomerProfile,
+  );
+  this.router.delete(
+   "/:id",
+   roleGuardMiddleware(["customer", "admin"]),
+   CustomerController.deleteCustomerProfile,
+  );
+ }
 }
 
 export const customerRouter = new CustomerRouter().router;

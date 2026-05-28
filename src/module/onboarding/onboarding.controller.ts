@@ -1,110 +1,135 @@
-import type { Request, Response, NextFunction } from "express";
+/** @format */
 
+import HttpStatus from "@/src/shared/enum/http";
 import asyncHandler from "@/src/shared/middleware/async-handler";
-import OnboardingService from "./onboarding.service";
-import HttpStatus from "@/src/config/http.config";
+import { UserRole } from "@/src/shared/type/types";
 import { ApiResponse } from "@/src/shared/util/response";
+import type { NextFunction, Request, Response } from "express";
+
+import OnboardingService, { TSteps } from "./onboarding.service";
+import { TOnboarding } from "./onboarding.schema";
+import { TUserSchema } from "../user/user.schema";
 
 class OnboardingController {
-
  stepOne = asyncHandler(
-  async (req: Request<{}, {}, {
-   vendorData: {
-    firstName: string,
-    lastName: string,
-    email: string,
-    userType: string,
-    phoneNumber: string,
-    password: string,
-   },
-   data: {
-    state: string,
-    city: string,
-    address: string,
-    instagram: string,
-    facebook: string,
-    twitter: string,
-   }
-  }>, res: Response, next: NextFunction): Promise<any> => {
+  async (
+   req: Request<
+    {},
+    {},
+    {
+     vendorData: Partial<TUserSchema>;
+     data: Partial<TOnboarding>;
+    }
+   >,
+   res: Response,
+   next: NextFunction,
+  ): Promise<any> => {
    try {
-    const {vendorData, data}= req.body;
+    const { vendorData, data } = req.body;
     const resultData = await OnboardingService.stepOne(vendorData, data);
 
     return res.status(HttpStatus.OK).json({
      status: "ok",
      message: "Step One completed",
-     data: resultData
+     data: resultData,
     } satisfies ApiResponse);
    } catch (error) {
     next(error);
    }
-  }
- )
+  },
+ );
 
- stepTwo = asyncHandler(async (req: Request<{id: string}, {}, {
-  data: {
-   yearsOfExperience: number,
-   cuisines: string, 
-   bankName: string,
-   accountNumber: string,
-   isVerified: boolean
-  }
- }>, res: Response, next: NextFunction): Promise<any> => {
-  try {
-   const vendorId = Number(req.params.id);
-   const stepTwo= req.query.stepTwo as string;
-   const {data} = req.body;
+ stepTwo = asyncHandler(
+  async (
+   req: Request<
+    { id: string },
+    {},
+    {
+     data: Partial<TOnboarding>;
+    }
+   >,
+   res: Response,
+   next: NextFunction,
+  ): Promise<any> => {
+   try {
+    const vendorId = Number(req.params.id);
+    const stepTwo = req.query.stepTwo as TSteps;
+    const { data } = req.body;
 
-   const resultData =  await OnboardingService.stepTwo(vendorId, stepTwo, data)
-   
-   return res.status(HttpStatus.OK).json({
-    status: "ok",
-    message: "Step Two completed",
-    data: resultData
-   })
-  } catch (error) {
-   next(error);
-  }
- });
+    const resultData = await OnboardingService.stepTwo(vendorId, stepTwo, data);
 
- stepThree = asyncHandler( async (req: Request<{id: string}>, res: Response, next: NextFunction): Promise<any> => {
-  try {
-   const vendorId = Number(req.params.id);
-   const lastStep = req.query.lastStep as string
-   const data = req.body;
-   const resultData = await OnboardingService.stepThree(vendorId, lastStep, data);
-
-   return res.status(HttpStatus.OK).json({
-    status: "ok",
-    message: "Data submitted successfully",
-    data: resultData
-   } satisfies ApiResponse)
-  } catch (error) {
+    return res.status(HttpStatus.OK).json({
+     status: "ok",
+     message: "Step Two completed",
+     data: resultData,
+    });
+   } catch (error) {
     next(error);
-  }
- })
+   }
+  },
+ );
 
- getCurrentProcess = asyncHandler( async (req: Request<{id: string}>, res: Response, next: NextFunction): Promise<any> => {
-  try {
+ stepThree = asyncHandler(
+  async (
+   req: Request<{ id: string }>,
+   res: Response,
+   next: NextFunction,
+  ): Promise<any> => {
+   try {
+    const vendorId = Number(req.params.id);
+    const lastStep = req.query.lastStep as string;
+    const data = req.body;
+    const resultData = await OnboardingService.stepThree(
+     vendorId,
+     lastStep,
+     data,
+    );
+
+    return res.status(HttpStatus.OK).json({
+     status: "ok",
+     message: "Data submitted successfully",
+     data: resultData,
+    } satisfies ApiResponse);
+   } catch (error) {
+    next(error);
+   }
+  },
+ );
+
+ getCurrentProcess = asyncHandler(
+  async (
+   req: Request<{ id: string }>,
+   res: Response,
+   next: NextFunction,
+  ): Promise<any> => {
+   try {
+    const vendorId = Number(req.params.id);
+    const userId = Number(req.user.id);
+
+    const resultData = await OnboardingService.getCurrentProcess(
+     vendorId,
+     userId,
+    );
+
+    return res.status(HttpStatus.OK).json({
+     status: "ok",
+     message: "Fetched current onboarding process",
+     data: resultData,
+    });
+   } catch (error) {
+    next(error);
+   }
+  },
+ );
+
+ memoEventStatus = asyncHandler(
+  async (
+   req: Request<{ id: string }>,
+   res: Response,
+   next: NextFunction,
+  ): Promise<any> => {
    const vendorId = Number(req.params.id);
-   const userId = Number(req.user.id);
-
-   const resultData = await OnboardingService.getCurrentProcess(vendorId, userId);
-
-   return res.status(HttpStatus.OK).json({
-    status: "ok",
-    message: "Fetched current onboarding process",
-    data: resultData
-   })
-   
-  } catch (error) {
-   next(error);
-  }
- })
-
- memoEventStatus = asyncHandler( async (req: Request<{id: string}>, res: Response, next: NextFunction): Promise<any> => {
-  const vendorId = Number(req.params.id);
-  try {
+   try {
     res.setHeader("Content-Type", "text/event-stream");
     res.setHeader("Cache-Control", "no-cache");
     res.setHeader("Connection", "keep-alive");
@@ -112,15 +137,14 @@ class OnboardingController {
 
     await OnboardingService.subscribeToMemo(vendorId, res);
     res.write(`data: ${JSON.stringify({ message: "connected" })}\n\n`);
-  } catch (error) {
+   } catch (error) {
     next(error);
-  }
- })
+   }
+  },
+ );
 }
 
-export default new OnboardingController()
-
-
+export default new OnboardingController();
 
 // private statusUpdates$ = new Subject<{ vendorId: string; data: any }>();
 // const heartbeat$ = interval(30000).pipe(
@@ -149,8 +173,6 @@ export default new OnboardingController()
 // notifyUpdate(vendorId: string, data: any) {
 //   this.statusUpdates$.next({ vendorId, data });
 // }
-
-
 
 // import { interval, merge, Subject } from 'rxjs';
 // import { map, filter } from 'rxjs/operators';
@@ -192,8 +214,6 @@ export default new OnboardingController()
 //   sseBus$.next({ vendorId, data });
 // };
 
-
-
 // @shared/event-bus.ts
 // import { Subject } from 'rxjs';
 // import { filter } from 'rxjs/operators';
@@ -212,7 +232,7 @@ export default new OnboardingController()
 // export const bus$ = new Subject<AppEvent>();
 
 // // Helper to listen for specific types
-// export const onEvent = (eventType: OnboardingEvents) => 
+// export const onEvent = (eventType: OnboardingEvents) =>
 //   bus$.asObservable().pipe(filter(e => e.type === eventType));
 
 // --- SERVICE B (Email Service) ---

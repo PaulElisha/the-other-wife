@@ -1,9 +1,9 @@
-import { Router } from "express";
-import OnboardingController from "@module/onboarding/onboarding.controller.js"
+/** @format */
 
+import OnboardingController from "@module/onboarding/onboarding.controller.js";
+import { Router } from "express";
 
 class OnboardingRouter {
-
  public router: Router;
 
  constructor() {
@@ -19,7 +19,7 @@ class OnboardingRouter {
  }
 }
 
-const onboardingRouter =  new OnboardingRouter().router;
+const onboardingRouter = new OnboardingRouter().router;
 
-export default onboardingRouter
-export {onboardingRouter}
+export default onboardingRouter;
+export { onboardingRouter };

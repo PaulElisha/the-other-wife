@@ -1,9 +1,9 @@
 /** @format */
 
-import { Router } from "express";
-import CartController from "@module/cart/cart.controller.js";
 import auth from "@middleware/auth.js";
 import roleGuardMiddleware from "@middleware/role-guard.js";
+import CartController from "@module/cart/cart.controller.js";
+import { Router } from "express";
 
 /**
  * @openapi
@@ -225,21 +225,21 @@ import roleGuardMiddleware from "@middleware/role-guard.js";
  */
 
 export class CartRouter {
-  router: Router;
-  constructor() {
-    this.router = Router();
-    this.router.use(auth);
-    this.router.use(roleGuardMiddleware(["customer"]));
-    this.initializeRoutes();
-  }
+ router: Router;
+ constructor() {
+  this.router = Router();
+  this.router.use(auth);
+  this.router.use(roleGuardMiddleware(["customer"]));
+  this.initializeRoutes();
+ }
 
-  initializeRoutes() {
-    this.router.get("/:id", CartController.getUserCart);
-    this.router.put("/:mealId", CartController.addToCart);
-    this.router.patch("/:mealId/increment", CartController.incrementCart);
-    this.router.patch("/:mealId/decrement", CartController.decrementCart);
-    this.router.delete("/:mealId", CartController.removeFromCart);
-  }
+ initializeRoutes() {
+  this.router.get("/:id", CartController.getUserCart);
+  this.router.put("/:mealId", CartController.addToCart);
+  this.router.patch("/:mealId/increment", CartController.incrementCart);
+  this.router.patch("/:mealId/decrement", CartController.decrementCart);
+  this.router.delete("/:mealId", CartController.removeFromCart);
+ }
 }
 
 export const cartRouter = new CartRouter().router;
