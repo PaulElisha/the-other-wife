@@ -11,10 +11,13 @@ import { meals } from "@module/meal/meal.schema.js";
 import type { CartAction } from "@type/types.js";
 import { and, eq, isNotNull, ne, sql } from "drizzle-orm";
 import { Transaction } from "../payment/payment.service";
+import { Mutex } from "async-mutex";
+
+const mutex = new Mutex();
 
 class CartBase {
  calculateTotalAmount = async (cartId: number, customerId: number) => {
-  await db.transaction(async (tx) => {
+  await db.transaction(async (tx: Transaction) => {
    const [result] = await tx
     .select({
      subtotal: sql<number>`COALESCE(SUM(${cartItems.total_item_price}), 0)`,
@@ -37,40 +40,42 @@ class CartBase {
   mealId: number,
   modifier: CartAction,
  ) => {
-  const [meal] = await db
-   .select()
-   .from(meals)
-   .where(and(eq(meals.id, mealId), isNotNull(meals.id)))
-   .limit(1);
+  await mutex.runExclusive(async () => {
+   const [meal] = await db
+    .select()
+    .from(meals)
+    .where(and(eq(meals.id, mealId), isNotNull(meals.id)))
+    .limit(1);
 
-  let cart: CartType;
+   let cart: CartType;
 
-  [cart] = await db
-   .select()
-   .from(carts)
-   .where(eq(carts.customer_id, customerId))
-   .limit(1);
+   [cart] = await db
+    .select()
+    .from(carts)
+    .where(eq(carts.customer_id, customerId))
+    .limit(1);
 
-  if (meal.vendor_id != cart.vendor_id) {
-   throw new BadRequestException(
-    "Only meals from a single vendor is allowed in a cart",
-    HttpStatus.BAD_REQUEST,
-    ErrorCode.VALIDATION_ERROR,
-   );
-  }
+   if (meal.vendor_id != cart.vendor_id) {
+    throw new BadRequestException(
+     "Only meals from a single vendor is allowed in a cart",
+     HttpStatus.BAD_REQUEST,
+     ErrorCode.VALIDATION_ERROR,
+    );
+   }
 
-  cart ??
-   ([cart] = await db
-    .insert(carts)
-    .values({
-     customer_id: customerId,
-     vendor_id: meal.vendor_id,
-    })
-    .returning());
+   cart ??
+    ([cart] = await db
+     .insert(carts)
+     .values({
+      customer_id: customerId,
+      vendor_id: meal.vendor_id,
+     })
+     .returning());
 
-  modifier(cart.id, meal.id);
-  await this.calculateTotalAmount(cart.id, customerId);
-  return cart;
+   modifier(cart.id, meal.id);
+   await this.calculateTotalAmount(cart.id, customerId);
+   return cart;
+  });
  };
 }
 
