@@ -238,7 +238,7 @@ export class CartRouter {
   this.router.put("/:mealId", CartController.addToCart);
   this.router.patch("/:mealId/increment", CartController.incrementCart);
   this.router.patch("/:mealId/decrement", CartController.decrementCart);
-  this.router.delete("/:mealId", CartController.removeFromCart);
+  this.router.delete("/:mealId", CartController.removeItemFromCart);
  }
 }
 

@@ -29,7 +29,7 @@ class CartController {
   },
  );
 
- removeFromCart = asyncHandler(
+ removeItemFromCart = asyncHandler(
   async (
    req: Request<{ mealId: string }, {}, {}>,
    res: Response,
@@ -38,7 +38,7 @@ class CartController {
    const mealId = Number(req.params.mealId);
 
    try {
-    await CartService.removeFromCart(userId, mealId);
+    await CartService.removeItemFromCart(userId, mealId);
     return res.status(HttpStatus.NO_CONTENT).send();
    } catch (error) {
     throw error;

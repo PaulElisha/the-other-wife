@@ -5,7 +5,10 @@ import db from "@/src/config/db.config";
 import AddressService from "../address/address.service";
 import CartService from "../cart/cart.service";
 import OrderService from "../order/order.service";
-import PaymentService, { ReturnPaystackData } from "../payment/payment.service";
+import PaymentService, {
+ ReturnPaystackData,
+ Transaction,
+} from "../payment/payment.service";
 
 import { checkoutItems, checkouts } from "./checkout.schema";
 import { eq, and, gt, or } from "drizzle-orm";
@@ -58,7 +61,7 @@ class CheckOutService {
 
   const total_amount = rateCheck(cart.subtotal || 0);
 
-  return await db.transaction(async (tx) => {
+  return await db.transaction(async (tx: Transaction) => {
    const [checkOut] = await tx
     .insert(checkouts)
     .values({
@@ -84,17 +87,15 @@ class CheckOutService {
    let checkOutItems;
 
    for (const item of cart_items) {
-    const itemsInCheckout = {
-     checkout_id: checkOut.id,
-     item_id: item.id,
-     total_price: item.total_item_price,
-     quantity: item.quantity,
-     priceAtCheckout: item.price,
-    };
-
     checkOutItems = await tx
      .insert(checkoutItems)
-     .values(itemsInCheckout)
+     .values({
+      checkout_id: checkOut.id,
+      item_id: item.id,
+      total_price: item.total_item_price,
+      quantity: item.quantity,
+      priceAtCheckout: item.price,
+     })
      .returning();
    }
 
@@ -107,70 +108,83 @@ class CheckOutService {
   userId: number,
   channel: string,
  ) => {
-  const result = await db.transaction(async (tx) => {
-   const [{ email }] = await tx
-    .select({
-     email: users.email,
-    })
-    .from(users)
-    .where(eq(users.id, userId))
-    .limit(1);
+  await db
+   .transaction(async (tx: Transaction) => {
+    const [{ email }] = await tx
+     .select({
+      email: users.email,
+     })
+     .from(users)
+     .where(eq(users.id, userId))
+     .limit(1);
 
-   const [currentCheckout] = await tx
-    .select()
-    .from(checkouts)
-    .where(
-     and(
-      eq(checkouts.id, checkOutId),
-      gt(checkouts.expired_at, new Date(Date.now())),
-     ),
+    const [currentCheckout] = await tx
+     .select()
+     .from(checkouts)
+     .where(
+      and(
+       eq(checkouts.id, checkOutId),
+       gt(checkouts.expired_at, new Date(Date.now())),
+      ),
+     )
+     .limit(1);
+
+    if (!currentCheckout || currentCheckout.status !== CheckOutStatus.OPEN)
+     throw new NotFoundException(
+      "Checkout already completed or expired",
+      HttpStatus.NOT_FOUND,
+      ErrorCode.RESOURCE_NOT_FOUND,
+     );
+
+    const { order, order_items } = await this.orderService.createOrder(tx)(
+     checkOutId,
+     userId,
     );
 
-   if (!currentCheckout || !email)
-    throw new NotFoundException(
-     "Checkout context or user record not found",
-     HttpStatus.NOT_FOUND,
-     ErrorCode.RESOURCE_NOT_FOUND,
-    );
-
-   const { order, order_items } = await this.orderService.createOrder(tx)(
-    checkOutId,
-    userId,
-   );
-
-   const paymentData = {
-    amount: <number>currentCheckout?.total_amount,
-    channel: [channel],
-   };
-
-   const payment = await this.paymentService.createPayment(tx)(
-    userId,
-    order?.id,
-    paymentData,
-   );
-
-   const data: z.infer<typeof ReturnPaystackData> =
-    await this.paymentService.initializePayment({
-     email,
+    const paymentData = {
      amount: <number>currentCheckout?.total_amount,
-     reference: <string>payment?.payment_reference,
-     metadata: {
-      orderId: order.id,
-      paymentId: payment.id,
+     channel: [channel],
+    };
+
+    const payment = await this.paymentService.createPayment(tx)(
+     userId,
+     order?.id,
+     paymentData,
+    );
+
+    const data: z.infer<typeof ReturnPaystackData> =
+     await this.paymentService.initializePayment({
+      email,
+      amount: <number>currentCheckout?.total_amount,
+      reference: <string>payment?.payment_reference,
+      metadata: {
+       orderId: order.id,
+       paymentId: payment.id,
+      },
+      paystackSecretKey: Env.PAYSTACK_SECRET_KEY,
+     });
+
+    await db
+     .update(payments)
+     .set({
+      access_code: data?.access_code,
+      authorization_url: data?.authorization_url,
+     })
+     .where(eq(payments.id, payment.id));
+
+    return { orderId: order.id };
+   })
+   .then((r) => {
+    PublishEvent({
+     event_type: EventType.ORDER_PLACED,
+     payload: {
+      orderId: r.orderId,
+      userId: userId,
      },
-     paystackSecretKey: Env.PAYSTACK_SECRET_KEY,
     });
 
-   await db
-    .update(payments)
-    .set({
-     access_code: data?.access_code,
-     authorization_url: data?.authorization_url,
-    })
-    .where(eq(payments.id, payment.id));
-
-   return { orderId: order.id };
-  });
+    return r;
+   });
  };
 }
 

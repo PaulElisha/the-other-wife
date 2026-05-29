@@ -10,6 +10,7 @@ import { cartItems, carts, CartType } from "@module/cart/cart.schema.js";
 import { meals } from "@module/meal/meal.schema.js";
 import type { CartAction } from "@type/types.js";
 import { and, eq, isNotNull, ne, sql } from "drizzle-orm";
+import { Transaction } from "../payment/payment.service";
 
 class CartBase {
  calculateTotalAmount = async (cartId: number, customerId: number) => {
@@ -67,7 +68,7 @@ class CartBase {
     })
     .returning());
 
-  await modifier(cart.id, meal.id);
+  modifier(cart.id, meal.id);
   await this.calculateTotalAmount(cart.id, customerId);
   return cart;
  };
@@ -77,7 +78,7 @@ class CartService extends CartBase {
  addToCart = async (customerId: number, mealId: number) =>
   await this.modifyCart(customerId, mealId, CartActions.add);
 
- removeFromCart = async (customerId: number, mealId: number) =>
+ removeItemFromCart = async (customerId: number, mealId: number) =>
   await this.modifyCart(customerId, mealId, CartActions.remove);
 
  incrementCart = async (customerId: number, mealId: number) =>

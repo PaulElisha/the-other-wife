@@ -12,8 +12,8 @@ import { cartItems, carts, orders } from "@/schema";
 import NotFoundException from "@/src/shared/error/not-found-exception";
 import { OrderStatus, PaymentStatus } from "../order/order.service";
 import { PgTransaction } from "drizzle-orm/pg-core";
-import { PublishEvent } from "@/src/shared/event-bus/publisher";
 import { EventType } from "@/src/shared/event-bus/config";
+import { PublishEvent } from "@/src/shared/event-bus/publisher";
 
 const InitializePaystack = z.object({
  email: z.email("Invalid email"),
@@ -152,86 +152,100 @@ class PaymentService {
    );
   }
 
-  const result = await db.transaction(async (tx) => {
-   const [payment] = await tx
-    .select()
-    .from(payments)
-    .where(
-     and(eq(payments.payment_reference, reference), isNotNull(reference)),
-    );
-
-   if (payment.status === PaymentStatus.SUCCEEDED) {
-    return { handled: true, payment };
-   }
-
-   const isSuccess = event?.event === "charge.success";
-
-   if (
-    !isSuccess &&
-    Number(event?.data?.amount) / Env.SCALER !== payment.amount
-   ) {
-    throw new BadRequestException(
-     "Invalid payment amount",
-     HttpStatus.BAD_REQUEST,
-     ErrorCode.VALIDATION_ERROR,
-    );
-   }
-
-   const [order] = await tx
-    .select()
-    .from(orders)
-    .where(eq(orders.id, payment.order_id));
-
-   if (payment.status === PaymentStatus.SUCCEEDED) {
-    return { handled: true, payment, order };
-   }
-
-   const customerId = payment.customer_id;
-   const orderId = payment.order_id;
-
-   if (isSuccess) {
-    await tx.update(payments).set({
-     status: PaymentStatus.SUCCEEDED,
-     transaction_id: event?.data.id,
-     paidAt: new Date(Date.now()),
-    });
-
-    await tx.update(orders).set({
-     order_status: OrderStatus.ORDER_COMPLETED,
-     payment_status: PaymentStatus.SUCCEEDED,
-     order_completed: true,
-    });
-
-    const [cart] = await tx
+  return await db
+   .transaction(async (tx) => {
+    const [payment] = await tx
      .select()
-     .from(carts)
-     .where(eq(carts.customer_id, customerId))
-     .limit(1);
-    await tx.delete(cartItems).where(eq(cartItems.cart_id, cart.id));
-   } else {
-    await tx.update(payments).set({
-     status: PaymentStatus.PENDING,
-    });
+     .from(payments)
+     .where(
+      and(eq(payments.payment_reference, reference), isNotNull(reference)),
+     );
 
-    await tx.update(orders).set({
-     payment_status: PaymentStatus.PENDING,
-     order_status: OrderStatus.ORDER_PENDING,
-     order_completed: false,
-    });
-   }
+    if (payment.status === PaymentStatus.SUCCEEDED) {
+     return { handled: true, payment };
+    }
 
-   return { handled: true, payment, order };
-  });
+    const isSuccess = event?.event === "charge.success";
 
-  PublishEvent({
-   event_type: result.order?.order_completed
-    ? EventType.ORDER_COMPLETED
-    : EventType.ORDER_PLACED,
-   payload: {
-    orderId: result?.order?.id,
-    paymentId: result?.payment?.id,
-   },
-  });
+    if (
+     !isSuccess &&
+     Number(event?.data?.amount) / Env.SCALER !== payment.amount
+    ) {
+     throw new BadRequestException(
+      "Invalid payment amount",
+      HttpStatus.BAD_REQUEST,
+      ErrorCode.VALIDATION_ERROR,
+     );
+    }
+
+    const [order] = await tx
+     .select()
+     .from(orders)
+     .where(eq(orders.id, payment.order_id));
+
+    if (payment.status === PaymentStatus.SUCCEEDED) {
+     return { handled: true, payment, order };
+    }
+
+    const customerId = payment.customer_id;
+    const orderId = payment.order_id;
+
+    if (isSuccess) {
+     await tx.update(payments).set({
+      status: PaymentStatus.SUCCEEDED,
+      transaction_id: event?.data.id,
+      paidAt: new Date(Date.now()),
+     });
+
+     await tx.update(orders).set({
+      order_status: OrderStatus.ORDER_COMPLETED,
+      payment_status: PaymentStatus.SUCCEEDED,
+      order_completed: true,
+     });
+
+     const [cart] = await tx
+      .select()
+      .from(carts)
+      .where(eq(carts.customer_id, customerId))
+      .limit(1);
+     await tx.delete(cartItems).where(eq(cartItems.cart_id, cart.id));
+
+     return {
+      handled: true,
+      eventType: EventType.ORDER_COMPLETED,
+      orderId: order.id,
+      paymentId: payment.id,
+     };
+    } else {
+     await tx.update(payments).set({
+      status: PaymentStatus.PENDING,
+     });
+
+     await tx.update(orders).set({
+      payment_status: PaymentStatus.PENDING,
+      order_status: OrderStatus.ORDER_PENDING,
+     });
+    }
+
+    return {
+     handled: true,
+     eventType: EventType.ORDER_PENDING,
+     payment,
+     order,
+    };
+   })
+   .then((r) => {
+    if (r?.handled && r.eventType) {
+     PublishEvent({
+      event_type: r.eventType,
+      payload: {
+       orderId: r.orderId,
+       paymentId: r.paymentId,
+      },
+     });
+    }
+    return r;
+   });
  };
 }
 

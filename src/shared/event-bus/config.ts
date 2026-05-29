@@ -8,6 +8,7 @@ export enum EventType {
  ORDER_ACCEPTED = "ORDER_ACCEPTED",
  ORDER_REJECTED = "ORDER_REJECTED",
  ORDER_COMPLETED = "ORDER_COMPLETED",
+ ORDER_PENDING = "ORDER_PENDING",
 }
 
 export interface EventContract<T> {

@@ -73,14 +73,6 @@ class OrderService {
      .returning();
    }
 
-   PublishEvent({
-    event_type: EventType.ORDER_PLACED,
-    payload: {
-     orderId: order.id,
-     userId: userId,
-    },
-   });
-
    return {
     order,
     order_items,
@@ -112,68 +104,79 @@ class OrderService {
  };
 
  acceptOrder = async (vendorId: number, orderId: number) => {
-  const vendorOrder = await db
-   .select()
-   .from(orders)
-   .where(and(eq(orders.id, orderId), ne(orders.customer_id, vendorId)));
+  await db
+   .transaction(async (tx: Transaction) => {
+    const vendorOrder = await db
+     .select()
+     .from(orders)
+     .where(and(eq(orders.id, orderId), ne(orders.customer_id, vendorId)));
 
-  if (vendorOrder[0].order_completed) {
-   throw new BadRequestException(
-    "Order fulfilled",
-    HttpStatus.BAD_REQUEST,
-    ErrorCode.INTERNAL_SERVER_ERROR,
-   );
-  }
+    if (vendorOrder[0].order_completed) {
+     throw new BadRequestException(
+      "Order fulfilled",
+      HttpStatus.BAD_REQUEST,
+      ErrorCode.INTERNAL_SERVER_ERROR,
+     );
+    }
 
-  const acceptedOrder = await db
-   .update(orders)
-   .set({
-    order_status: OrderStatus.ORDER_ACCEPTED,
+    const [acceptedOrder] = await db
+     .update(orders)
+     .set({
+      order_status: OrderStatus.ORDER_ACCEPTED,
+     })
+     .returning();
+
+    return acceptedOrder;
    })
-   .returning();
-
-  PublishEvent({
-   event_type: EventType.ORDER_ACCEPTED,
-   payload: {
-    orderId,
-    status: orders.order_status,
-    vendorId,
-   },
-  });
-
-  return acceptedOrder;
+   .then((o) => {
+    PublishEvent({
+     event_type: EventType.ORDER_ACCEPTED,
+     payload: {
+      orderId,
+      status: o.order_status,
+      vendorId,
+     },
+    });
+   });
  };
 
  rejectOrder = async (vendorId: number, orderId: number, reason: string) => {
-  const vendorOrder = await db
-   .select()
-   .from(orders)
-   .where(and(eq(orders.id, orderId), ne(orders.customer_id, vendorId)));
+  await db
+   .transaction(async (tx: Transaction) => {
+    const vendorOrder = await tx
+     .select()
+     .from(orders)
+     .where(and(eq(orders.id, orderId), ne(orders.customer_id, vendorId)));
 
-  if (vendorOrder[0].order_rejected !== "undefined") {
-   throw new BadRequestException(
-    "Order already rejected",
-    HttpStatus.BAD_REQUEST,
-    ErrorCode.INTERNAL_SERVER_ERROR,
-   );
-  }
+    if (vendorOrder[0].order_rejected !== "undefined") {
+     throw new BadRequestException(
+      "Order already rejected",
+      HttpStatus.BAD_REQUEST,
+      ErrorCode.INTERNAL_SERVER_ERROR,
+     );
+    }
 
-  const rejectedOrder = await db.update(orders).set({
-   order_rejected: reason,
-   order_status: OrderStatus.ORDER_REJECTED,
-  });
+    const [rejectedOrder] = await tx
+     .update(orders)
+     .set({
+      order_rejected: reason,
+      order_status: OrderStatus.ORDER_REJECTED,
+     })
+     .returning();
 
-  PublishEvent({
-   event_type: EventType.ORDER_REJECTED,
-   payload: {
-    orderId,
-    status: orders.order_status,
-    reason: orders.order_rejected,
-    vendorId,
-   },
-  });
-
-  return rejectedOrder;
+    return rejectedOrder;
+   })
+   .then((o) => {
+    PublishEvent({
+     event_type: EventType.ORDER_REJECTED,
+     payload: {
+      orderId,
+      status: o.order_status,
+      reason: o.order_rejected,
+      vendorId,
+     },
+    });
+   });
  };
 }
 
