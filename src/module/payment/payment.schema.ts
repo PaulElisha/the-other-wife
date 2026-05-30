@@ -1,7 +1,7 @@
 /** @format */
 
+import { orders, users } from "@/schema";
 import {
- date,
  integer,
  jsonb,
  pgTable,
@@ -10,7 +10,7 @@ import {
  uuid,
  varchar,
 } from "drizzle-orm/pg-core";
-import { orders, users } from "@/schema";
+
 import { timestamps } from "../user/user.schema";
 
 export const payments = pgTable("payments", {

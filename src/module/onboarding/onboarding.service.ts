@@ -17,8 +17,8 @@ import { vendors } from "@module/vendor/vendor.schema.js";
 import MemoEvent from "@shared/util/memo-event.js";
 import { and, eq } from "drizzle-orm";
 import type { Response } from "express";
+
 import { TUserSchema } from "../user/user.schema";
-import { year } from "drizzle-orm/mysql-core";
 
 const Steps = {
  "0": "0",

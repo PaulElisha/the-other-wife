@@ -2,13 +2,14 @@
 
 import { carts, meals, users, vendors } from "@/schema";
 import {
- integer,
- varchar,
- pgTable,
  boolean,
+ integer,
  jsonb,
+ pgTable,
  serial,
+ varchar,
 } from "drizzle-orm/pg-core";
+
 import { timestamps } from "../user/user.schema";
 
 export const orders = pgTable("orders", {

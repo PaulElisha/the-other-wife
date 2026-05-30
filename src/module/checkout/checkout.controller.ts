@@ -1,11 +1,12 @@
 /** @format */
 
-import asyncHandler from "@/src/shared/middleware/async-handler";
-import { Request, Response, NextFunction } from "express";
-import CheckoutService from "./checkout.service";
 import HttpStatus from "@/src/shared/enum/http";
+import asyncHandler from "@/src/shared/middleware/async-handler";
 import { ApiResponse } from "@/src/shared/util/response";
 import { AnyD1Database } from "drizzle-orm/d1";
+import { NextFunction, Request, Response } from "express";
+
+import CheckoutService from "./checkout.service";
 
 class CheckoutController {
  proceedToCheckout = asyncHandler(

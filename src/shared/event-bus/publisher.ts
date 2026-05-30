@@ -1,7 +1,7 @@
 /** @format */
 
-import eventBus$, { EventContract, EventType } from "./config";
+import eventBus$, { EventContract } from "./config";
 
-export const PublishEvent = (payload: EventContract<any>) => {
+export const PublishEvent = (payload: EventContract) => {
  eventBus$.next(payload);
 };

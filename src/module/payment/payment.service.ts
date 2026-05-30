@@ -1,19 +1,19 @@
 /** @format */
-import { eq, isNotNull, and } from "drizzle-orm";
-import { createHmac } from "node:crypto";
-import z, { number } from "zod";
-import Env from "@/src/config/env.config";
-import BadRequestException from "@/src/shared/error/bad-request-exception";
-import HttpStatus from "@/src/shared/enum/http";
-import ErrorCode from "@/src/shared/enum/error-code";
-import db from "@/src/config/db.config";
-import { payments } from "./payment.schema";
 import { cartItems, carts, orders } from "@/schema";
+import db from "@/src/config/db.config";
+import Env from "@/src/config/env.config";
+import ErrorCode from "@/src/shared/enum/error-code";
+import HttpStatus from "@/src/shared/enum/http";
+import BadRequestException from "@/src/shared/error/bad-request-exception";
 import NotFoundException from "@/src/shared/error/not-found-exception";
-import { OrderStatus, PaymentStatus } from "../order/order.service";
-import { PgTransaction } from "drizzle-orm/pg-core";
 import { EventType } from "@/src/shared/event-bus/config";
 import { PublishEvent } from "@/src/shared/event-bus/publisher";
+import { and, eq, isNotNull } from "drizzle-orm";
+import { createHmac } from "node:crypto";
+import z from "zod";
+
+import { OrderStatus, PaymentStatus } from "../order/order.service";
+import { payments } from "./payment.schema";
 
 const InitializePaystack = z.object({
  email: z.email("Invalid email"),
@@ -239,6 +239,7 @@ class PaymentService {
      PublishEvent({
       event_type: r.eventType,
       payload: {
+       userId: r.payment?.customer_id,
        orderId: r.orderId,
        paymentId: r.paymentId,
       },

@@ -34,4 +34,4 @@ export const vendors = pgTable("vendors", {
  ...timestamps,
 });
 
-export type VendorSchema = typeof vendors.$inferSelect;
+export type TVendorSchema = typeof vendors.$inferSelect;

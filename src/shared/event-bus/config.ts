@@ -11,10 +11,10 @@ export enum EventType {
  ORDER_PENDING = "ORDER_PENDING",
 }
 
-export interface EventContract<T> {
- event_type: EventType;
- payload: T;
+export interface EventContract {
+ event_type: string | "error";
+ payload: any;
 }
 
-const eventBus$ = new Subject<EventContract<any>>();
+const eventBus$ = new Subject<EventContract>();
 export default eventBus$;

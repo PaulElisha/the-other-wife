@@ -1,23 +1,33 @@
 /** @format */
 
-import { catchError, filter, map, of, retry } from "rxjs";
-import eventBus$, { EventType } from "./config";
+import { catchError, filter, map, Observable, of, retry } from "rxjs";
 
-export const SubscribeEvent = (event_type: EventType) => {
- return eventBus$.asObservable().pipe(
-  filter((e) => {
-   const hasEventType = e.event_type === event_type;
-   const hasValidPayload =
-    e.payload &&
-    typeof e.payload === "object" &&
-    ("userId" in e.payload || "vendorId" in e.payload);
-   return hasEventType && hasValidPayload;
-  }),
-  map((update) => update.payload),
+import eventBus$, { EventContract } from "./config";
+
+export interface StreamPayload {
+ event: string | "error";
+ data: any;
+}
+
+export const onSubscribe = <T extends StreamPayload>(
+ userId: string,
+): Observable<T> => {
+ return (eventBus$.asObservable() as Observable<EventContract>).pipe(
+  filter((update) => update?.payload?.userId === Number(userId)),
+  map(
+   (update): T =>
+    ({
+     event: update.event_type,
+     data: update.payload,
+    } as T),
+  ),
   retry(2),
   catchError((err) => {
    console.error("SSE Stream Error:", err);
-   return of('event: error\ndata: {"msg": "Stream disconnected"}\n\n');
+   return of({
+    event: "error" as const,
+    data: { msg: "Stream disconnected" },
+   } as T);
   }),
  );
 };

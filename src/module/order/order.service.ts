@@ -1,15 +1,16 @@
 /** @format */
 
-import { checkoutItems, checkouts, users, vendors } from "@/schema";
+import { checkoutItems, checkouts, users } from "@/schema";
 import db from "@/src/config/db.config";
-import { eq, and, isNotNull, ne } from "drizzle-orm";
-import { orderItems, orders } from "./order.schema";
-import BadRequestException from "@/src/shared/error/bad-request-exception";
-import HttpStatus from "@/src/shared/enum/http";
 import ErrorCode from "@/src/shared/enum/error-code";
-import { PublishEvent } from "@/src/shared/event-bus/publisher";
+import HttpStatus from "@/src/shared/enum/http";
+import BadRequestException from "@/src/shared/error/bad-request-exception";
 import { EventType } from "@/src/shared/event-bus/config";
+import { PublishEvent } from "@/src/shared/event-bus/publisher";
+import { and, eq, ne } from "drizzle-orm";
+
 import { Transaction } from "../payment/payment.service";
+import { orderItems, orders } from "./order.schema";
 
 export enum OrderStatus {
  ORDER_PLACED = "ORDER_PLACED",
@@ -134,7 +135,7 @@ class OrderService {
      payload: {
       orderId,
       status: o.order_status,
-      vendorId,
+      userId: vendorId,
      },
     });
    });
@@ -173,7 +174,7 @@ class OrderService {
       orderId,
       status: o.order_status,
       reason: o.order_rejected,
-      vendorId,
+      userId: vendorId,
      },
     });
    });

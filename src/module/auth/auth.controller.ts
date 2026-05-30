@@ -2,11 +2,11 @@
 
 import HttpStatus from "@/src/shared/enum/http.js";
 import asyncHandler from "@/src/shared/middleware/async-handler.js";
-import { UserRole } from "@/src/shared/type/types";
 import Env from "@config/env.config.js";
 import AuthService from "@module/auth/auth.service.js";
 import { ApiResponse } from "@util/response.js";
 import type { NextFunction, Request, Response } from "express";
+
 import { TUserSchema } from "../user/user.schema";
 
 class AuthController {

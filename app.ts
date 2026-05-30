@@ -16,6 +16,7 @@ import { mealRouter } from "@module/meal/meal.route.js";
 import { onboardingRouter } from "@module/onboarding/onboarding.route.js";
 import { userRouter } from "@module/user/user.route.js";
 import { vendorRouter } from "@module/vendor/vendor.route.js";
+import { streamEventRouter } from "./src/module/event/stream-event.route";
 import cookieParser from "cookie-parser";
 import express, { type Express } from "express";
 import redoc from "redoc-express";
@@ -53,6 +54,7 @@ export class App {
   this.app.use(`${Env.VERSION}/cart`, cartRouter);
   this.app.use(`${Env.VERSION}/meal`, mealRouter);
   this.app.use(`${Env.VERSION}/onboarding`, onboardingRouter);
+  this.app.use(`${Env.VERSION}/stream-event`, streamEventRouter);
 
   this.app.get("/api-docs", async (_req, res) => {
    try {

@@ -2,13 +2,12 @@
 
 import HttpStatus from "@/src/shared/enum/http";
 import asyncHandler from "@/src/shared/middleware/async-handler";
-import { UserRole } from "@/src/shared/type/types";
 import { ApiResponse } from "@/src/shared/util/response";
 import type { NextFunction, Request, Response } from "express";
 
-import OnboardingService, { TSteps } from "./onboarding.service";
-import { TOnboarding } from "./onboarding.schema";
 import { TUserSchema } from "../user/user.schema";
+import { TOnboarding } from "./onboarding.schema";
+import OnboardingService, { TSteps } from "./onboarding.service";
 
 class OnboardingController {
  stepOne = asyncHandler(

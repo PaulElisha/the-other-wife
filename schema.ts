@@ -11,7 +11,8 @@ import {
 } from "@module/onboarding/onboarding.schema.js";
 import { users } from "@module/user/user.schema.js";
 import { vendors } from "@module/vendor/vendor.schema.js";
-import { orders, orderItems } from "./src/module/order/order.schema";
+
+import { orderItems, orders } from "./src/module/order/order.schema";
 
 export {
  users,

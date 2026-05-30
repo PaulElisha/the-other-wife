@@ -1,11 +1,11 @@
 /** @format */
 
+import { carts } from "@/schema";
 import {
  integer,
  jsonb,
  pgTable,
  serial,
- text,
  timestamp,
  varchar,
 } from "drizzle-orm/pg-core";
@@ -13,7 +13,6 @@ import {
 import { meals } from "../meal/meal.schema";
 import { timestamps, users } from "../user/user.schema";
 import { vendors } from "../vendor/vendor.schema";
-import { carts } from "@/schema";
 
 export const checkouts = pgTable("checkouts", {
  id: serial("id").primaryKey(),

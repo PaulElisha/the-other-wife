@@ -4,14 +4,14 @@ import HttpStatus from "@/src/shared/enum/http.js";
 import BadRequestException from "@/src/shared/error/bad-request-exception";
 import db from "@config/db.config.js";
 import ErrorCode from "@enum/error-code.js";
-import NotFoundException from "@error/not-found-exception.js";
 import CartActions from "@module/cart/cart.dispatcher.js";
 import { cartItems, carts, CartType } from "@module/cart/cart.schema.js";
 import { meals } from "@module/meal/meal.schema.js";
 import type { CartAction } from "@type/types.js";
-import { and, eq, isNotNull, ne, sql } from "drizzle-orm";
-import { Transaction } from "../payment/payment.service";
 import { Mutex } from "async-mutex";
+import { and, eq, isNotNull, sql } from "drizzle-orm";
+
+import { Transaction } from "../payment/payment.service";
 
 const mutex = new Mutex();
 

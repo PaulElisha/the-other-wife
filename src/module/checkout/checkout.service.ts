@@ -1,26 +1,25 @@
 /** @format */
 
+import { users } from "@/schema";
 import db from "@/src/config/db.config";
+import Env from "@/src/config/env.config";
+import ErrorCode from "@/src/shared/enum/error-code";
+import HttpStatus from "@/src/shared/enum/http";
+import NotFoundException from "@/src/shared/error/not-found-exception";
+import { EventType } from "@/src/shared/event-bus/config";
+import { PublishEvent } from "@/src/shared/event-bus/publisher";
+import { and, eq, gt } from "drizzle-orm";
+import z, { email } from "zod";
 
 import AddressService from "../address/address.service";
 import CartService from "../cart/cart.service";
 import OrderService from "../order/order.service";
+import { payments } from "../payment/payment.schema";
 import PaymentService, {
  ReturnPaystackData,
  Transaction,
 } from "../payment/payment.service";
-
 import { checkoutItems, checkouts } from "./checkout.schema";
-import { eq, and, gt, or } from "drizzle-orm";
-import { PublishEvent } from "@/src/shared/event-bus/publisher";
-import { EventType } from "@/src/shared/event-bus/config";
-import NotFoundException from "@/src/shared/error/not-found-exception";
-import HttpStatus from "@/src/shared/enum/http";
-import ErrorCode from "@/src/shared/enum/error-code";
-import { users } from "@/schema";
-import Env from "@/src/config/env.config";
-import z, { email } from "zod";
-import { payments } from "../payment/payment.schema";
 
 export enum CheckOutStatus {
  OPEN = "OPEN",
@@ -164,7 +163,7 @@ class CheckOutService {
       paystackSecretKey: Env.PAYSTACK_SECRET_KEY,
      });
 
-    await db
+    await tx
      .update(payments)
      .set({
       access_code: data?.access_code,
