@@ -7,7 +7,7 @@ import {
  type Response,
  Router,
 } from "express";
-import {} from "better-sse";
+import { createSession } from "better-sse";
 import authenticate from "@/src/shared/middleware/auth";
 
 class StreamEventRouter {
@@ -21,17 +21,23 @@ class StreamEventRouter {
   this.router.get(
    "/stream-event",
    asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
-    const id = req.user.id as string;
+    const id = req.user.id;
 
-    res.writeHead(200, {
-     "Content-Type": "text/event-stream",
-     "Cache-Control": "no-cache",
-     Connection: "keep-alive",
+    const session = await createSession(req, res);
+
+    const subscriber = onSubscribe<StreamPayload>(id).subscribe({
+     next: (payload) => {
+      session.push(payload.data, payload.event);
+     },
+     error: (err) => {
+      console.error(err);
+      res.end();
+     },
     });
 
-    const subscriber = onSubscribe<StreamPayload>(id).subscribe((payload) => {
-     res.write(`event: ${payload.event}\n`);
-     res.write(`data: ${JSON.stringify(payload.data)}\n\n`);
+    session.on("disconnected", () => {
+     subscriber.unsubscribe();
+     res.end();
     });
 
     req.on("close", () => {

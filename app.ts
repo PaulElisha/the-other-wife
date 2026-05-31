@@ -54,7 +54,7 @@ export class App {
   this.app.use(`${Env.VERSION}/cart`, cartRouter);
   this.app.use(`${Env.VERSION}/meal`, mealRouter);
   this.app.use(`${Env.VERSION}/onboarding`, onboardingRouter);
-  this.app.use(`${Env.VERSION}/stream-event`, streamEventRouter);
+  this.app.use(`${Env.VERSION}`, streamEventRouter);
 
   this.app.get("/api-docs", async (_req, res) => {
    try {
