@@ -151,10 +151,19 @@ class CheckOutService {
      paymentData,
     );
 
+    return {
+     email,
+     total_amount: currentCheckout.total_amount,
+     payment,
+     order,
+    };
+   })
+   .then(async (result) => {
+    const { email, total_amount, payment, order } = result;
     const data: z.infer<typeof ReturnPaystackData> =
      await this.paymentService.initializePayment({
       email,
-      amount: <number>currentCheckout?.total_amount,
+      amount: <number>total_amount,
       reference: <string>payment?.payment_reference,
       metadata: {
        orderId: order.id,
@@ -163,7 +172,7 @@ class CheckOutService {
       paystackSecretKey: Env.PAYSTACK_SECRET_KEY,
      });
 
-    await tx
+    await db
      .update(payments)
      .set({
       access_code: data?.access_code,
@@ -181,8 +190,6 @@ class CheckOutService {
       userId: userId,
      },
     });
-
-    return r;
    });
  };
 }

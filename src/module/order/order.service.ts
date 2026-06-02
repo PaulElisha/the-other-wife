@@ -85,6 +85,7 @@ class OrderService {
   const [userOrders] = await db
    .select()
    .from(orders)
+   .innerJoin(orderItems, eq(orderItems.order_id, orders.id))
    .where(eq(orders.customer_id, customerId));
 
   return userOrders;

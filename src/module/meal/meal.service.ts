@@ -145,8 +145,6 @@ class MealService {
    .from(meals)
    .where(and(...filters));
 
-  // const totalMeals = await Meal.countDocuments(query);
-
   const totalMeals = Number(totalCountResult.total);
   const totalPages = Math.ceil(totalMeals / pageSize);
 
