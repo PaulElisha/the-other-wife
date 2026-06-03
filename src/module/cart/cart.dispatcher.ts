@@ -6,42 +6,53 @@ import InternalServerError from "@/src/shared/error/internal-server";
 import { and, eq, sql } from "drizzle-orm";
 
 import { meals } from "../meal/meal.schema.js";
-import { cartItems } from "./cart.schema";
+import { cartItems, ItemType } from "./cart.schema";
+import { Transaction } from "../payment/payment.service.js";
 
-const CartActions: Record<string, any> = {
- increment: async (cartId: number, mealId: number, quantity: number = 1) => {
-  const updatedItem = await db
-   .update(cartItems)
-   .set({
-    quantity: sql`${cartItems.quantity} + ${quantity}`,
-    total_item_price: sql`(${cartItems.quantity} + ${quantity}) * ${cartItems.price}`,
-   })
-   .where(and(eq(cartItems.cart_id, cartId), eq(cartItems.meal_id, mealId)))
-   .returning();
+const CartActions: Record<
+ string,
+ (
+  tx: Transaction,
+ ) => (cartId: number, mealId: number) => Promise<ItemType> | Promise<void>
+> = {
+ increment:
+  (tx: Transaction) =>
+  async (cartId: number, mealId: number, quantity: number = 1) => {
+   const updatedItem = await tx
+    .update(cartItems)
+    .set({
+     quantity: sql`${cartItems.quantity} + ${quantity}`,
+     total_item_price: sql`(${cartItems.quantity} + ${quantity}) * ${cartItems.price}`,
+    })
+    .where(and(eq(cartItems.cart_id, cartId), eq(cartItems.meal_id, mealId)))
+    .returning();
 
-  return updatedItem[0];
- },
- decrement: async (cartId: number, mealId: number, quantity: number = 1) => {
-  const updatedItem = await db
-   .update(cartItems)
-   .set({
-    quantity: sql`GREATEST(${cartItems.quantity} - ${quantity}, 1)`,
-    total_item_price: sql`GREATEST(${cartItems.quantity} - ${quantity}, 1) * ${cartItems.price}`,
-   })
-   .where(and(eq(cartItems.cart_id, cartId), eq(cartItems.meal_id, mealId)))
-   .returning();
+   return updatedItem[0];
+  },
+ decrement:
+  (tx: Transaction) =>
+  async (cartId: number, mealId: number, quantity: number = 1) => {
+   const updatedItem = await tx
+    .update(cartItems)
+    .set({
+     quantity: sql`GREATEST(${cartItems.quantity} - ${quantity}, 1)`,
+     total_item_price: sql`GREATEST(${cartItems.quantity} - ${quantity}, 1) * ${cartItems.price}`,
+    })
+    .where(and(eq(cartItems.cart_id, cartId), eq(cartItems.meal_id, mealId)))
+    .returning();
 
-  return updatedItem[0];
- },
- add: async (cartId: number, mealId: number, quantity: number = 1) => {
-  const [mealItem] = await db.transaction(async (tx) => {
+   return updatedItem[0];
+  },
+ add:
+  (tx: Transaction) =>
+  async (cartId: number, mealId: number, quantity: number = 1) => {
    const [{ price }] = await tx
     .select({ price: meals.price })
     .from(meals)
     .where(eq(meals.id, mealId))
     .limit(1);
 
-   const mealItem = await tx
+   const [mealItem] = await tx
     .insert(cartItems)
     .values({
      cart_id: cartId,
@@ -52,13 +63,10 @@ const CartActions: Record<string, any> = {
     })
     .returning();
 
-   return [mealItem[0]];
-  });
-
-  return mealItem;
- },
- remove: async (cartId: number, mealId: number) => {
-  const deletedItem = await db
+   return mealItem;
+  },
+ remove: (tx: Transaction) => async (cartId: number, mealId: number) => {
+  const deletedItem = await tx
    .delete(cartItems)
    .where(and(eq(cartItems.cart_id, cartId), eq(cartItems.meal_id, mealId)))
    .returning();

@@ -1,14 +1,13 @@
 /** @format */
 
 import { catchError, filter, map, Observable, of, retry } from "rxjs";
+import eventBus$, { EventContract, EventType } from "./config";
 
-import eventBus$, { EventContract } from "./config";
-
-export const onSubscribe = <T extends EventContract>(
- userId: string,
+export const onEvent = <T extends EventContract>(
+ event: keyof typeof EventType,
 ): Observable<T> => {
  return (eventBus$.asObservable() as Observable<EventContract>).pipe(
-  filter((update) => update?.payload?.userId === Number(userId)),
+  filter((update) => update?.event_type === event),
   map(
    (update): T =>
     ({
@@ -18,10 +17,10 @@ export const onSubscribe = <T extends EventContract>(
   ),
   retry(2),
   catchError((err) => {
-   console.error("SSE Stream Error:", err);
+   console.error("Communication Error:", err);
    return of({
     event_type: "error" as const,
-    payload: { msg: "Stream disconnected" },
+    payload: { msg: "Communication failed" },
    } as T);
   }),
  );

@@ -1,5 +1,6 @@
 /** @format */
 
+import { Transaction } from "@/src/module/payment/payment.service";
 import HttpStatus from "@/src/shared/enum/http.js";
 import ErrorCode from "@enum/error-code";
 import { UserType } from "@module/auth/auth.service.js";
@@ -26,7 +27,9 @@ export type HttpStatusCodeType = (typeof HttpStatus)[keyof typeof HttpStatus];
 
 export type ErrorCodeType = (typeof ErrorCode)[keyof typeof ErrorCode];
 
-export type CartAction = (cartId: number, mealId: number) => void;
+export type CartAction = (
+ tx: Transaction,
+) => (cartId: number, mealId: number) => void;
 
 export type CategoryValueType =
  (typeof CategoryType)[keyof typeof CategoryType];

@@ -29,7 +29,8 @@ export const vendors = pgTable("vendors", {
  }),
  approval_status: varchar("approval_status", { length: 255 }),
  approved_at: timestamp("approved_at", { mode: "date" }).defaultNow(),
- rejection: varchar("rejection", { length: 255 }),
+ rejection_reason: varchar("rejection", { length: 255 }),
+ suspension_reason: varchar("rejection", { length: 255 }),
  additional_data: jsonb("addtional_data").$type<Record<string, unknown>>(),
  ...timestamps,
 });

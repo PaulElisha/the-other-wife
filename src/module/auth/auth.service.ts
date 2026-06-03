@@ -2,6 +2,8 @@
 
 import AUTH_CONSTANTS from "@/src/shared/constants/auth.js";
 import HttpStatus from "@/src/shared/enum/http.js";
+import { EventType } from "@/src/shared/event-bus/config";
+import { PublishEvent } from "@/src/shared/event-bus/publisher";
 import template from "@/src/shared/util/template.js";
 import db from "@config/db.config";
 import Env from "@config/env.config";
@@ -9,7 +11,6 @@ import ErrorCode from "@enum/error-code.js";
 import BadRequestException from "@error/bad-request-exception.js";
 import NotFoundException from "@error/not-found-exception.js";
 import UnauthorizedExceptionError from "@error/unauthorized-exception.js";
-import EmailWorker from "@module/email/email.worker.js";
 import { CreateProfile } from "@module/user/user-profile.js";
 import { TUserSchema, users } from "@module/user/user.schema.js";
 import { UserRole } from "@shared/type/types.js";
@@ -20,7 +21,6 @@ import {
 } from "@util/jwt.js";
 import { comparePassword, hashPassword } from "@util/password.js";
 import { and, eq, gt, ilike, or } from "drizzle-orm";
-import PQueue from "p-queue";
 
 export const UserType = {
  customer: "customer",
@@ -29,24 +29,7 @@ export const UserType = {
 } as const;
 
 class AuthService<T extends TUserSchema> {
- emailQueue: PQueue;
-
- constructor() {
-  this.emailQueue = new PQueue({
-   concurrency: 5,
-   interval: 100,
-  });
-
-  this.emailQueue.on("active", () => {
-   console.log(
-    `Lanes: ${this.emailQueue.pending} | Waiting: ${this.emailQueue.size}`,
-   );
-  });
-
-  this.emailQueue.on("error", (error) => {
-   console.error("Queue Job Error:", error);
-  });
- }
+ constructor() {}
 
  signup = async (body: Partial<T>) => {
   const { first_name, last_name, password, user_type, phone_number, email } =
@@ -140,11 +123,12 @@ class AuthService<T extends TUserSchema> {
    verificationUrl: `http://localhost:8000/api/v1/auth/verify?token=${result.data.email_token}`,
   }}`;
 
-  this.emailQueue.add(async () => {
-   await EmailWorker({
-    user: <T>result.data,
+  PublishEvent({
+   event_type: EventType.USER_REGISTERED,
+   payload: {
+    user: result.data,
     message: html,
-   });
+   },
   });
 
   return result;
@@ -199,11 +183,12 @@ class AuthService<T extends TUserSchema> {
 
   const html = await template`welcome-email.html${{ verifiedUser }}`;
 
-  this.emailQueue.add(async () => {
-   await EmailWorker({
-    user: <T>verifiedUser.data,
+  PublishEvent({
+   event_type: EventType.USER_VERIFIED,
+   payload: {
+    user: verifiedUser.data,
     message: html,
-   });
+   },
   });
  };
 

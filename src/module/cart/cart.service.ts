@@ -16,8 +16,8 @@ import { Transaction } from "../payment/payment.service";
 const mutex = new Mutex();
 
 class CartBase {
- calculateTotalAmount = async (cartId: number, customerId: number) => {
-  await db.transaction(async (tx: Transaction) => {
+ calculateTotalAmount =
+  (tx: Transaction) => async (cartId: number, customerId: number) => {
    const [result] = await tx
     .select({
      subtotal: sql<number>`COALESCE(SUM(${cartItems.total_item_price}), 0)`,
@@ -32,8 +32,7 @@ class CartBase {
     })
     .where(and(eq(carts.id, cartId), eq(carts.customer_id, customerId)))
     .returning();
-  });
- };
+  };
 
  modifyCart = async (
   customerId: number,
@@ -41,40 +40,42 @@ class CartBase {
   modifier: CartAction,
  ) => {
   await mutex.runExclusive(async () => {
-   const [meal] = await db
-    .select()
-    .from(meals)
-    .where(and(eq(meals.id, mealId), isNotNull(meals.id)))
-    .limit(1);
+   await db.transaction(async (tx: Transaction) => {
+    const [meal] = await tx
+     .select()
+     .from(meals)
+     .where(and(eq(meals.id, mealId), isNotNull(meals.id)))
+     .limit(1);
 
-   let cart: CartType;
+    let cart: CartType;
 
-   [cart] = await db
-    .select()
-    .from(carts)
-    .where(eq(carts.customer_id, customerId))
-    .limit(1);
+    [cart] = await tx
+     .select()
+     .from(carts)
+     .where(eq(carts.customer_id, customerId))
+     .limit(1);
 
-   if (meal.vendor_id != cart.vendor_id) {
-    throw new BadRequestException(
-     "Only meals from a single vendor is allowed in a cart",
-     HttpStatus.BAD_REQUEST,
-     ErrorCode.VALIDATION_ERROR,
-    );
-   }
+    if (meal.vendor_id != cart.vendor_id) {
+     throw new BadRequestException(
+      "Only meals from a single vendor is allowed in a cart",
+      HttpStatus.BAD_REQUEST,
+      ErrorCode.VALIDATION_ERROR,
+     );
+    }
 
-   cart ??
-    ([cart] = await db
-     .insert(carts)
-     .values({
-      customer_id: customerId,
-      vendor_id: meal.vendor_id,
-     })
-     .returning());
+    cart ??
+     ([cart] = await tx
+      .insert(carts)
+      .values({
+       customer_id: customerId,
+       vendor_id: meal.vendor_id,
+      })
+      .returning());
 
-   modifier(cart.id, meal.id);
-   await this.calculateTotalAmount(cart.id, customerId);
-   return cart;
+    modifier(tx)(cart.id, meal.id);
+    await this.calculateTotalAmount(tx)(cart.id, customerId);
+    return cart;
+   });
   });
  };
 }
@@ -118,7 +119,7 @@ class CartService extends CartBase {
 
   const deletedItems = await db
    .delete(cartItems)
-   .where(eq(cartItems.cart_id, cartId))
+   .where(isNotNull(cartItems.cart_id))
    .returning();
 
   return deletedItems;

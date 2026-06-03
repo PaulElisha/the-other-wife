@@ -1,5 +1,6 @@
 /** @format */
-import { onSubscribe, StreamPayload } from "@/src/shared/event-bus/subscriber";
+import { onSubscribe } from "@/src/shared/event-bus/subscriber";
+import { EventContract } from "@/src/shared/event-bus/config";
 import asyncHandler from "@/src/shared/middleware/async-handler";
 import {
  type NextFunction,
@@ -25,9 +26,9 @@ class StreamEventRouter {
 
     const session = await createSession(req, res);
 
-    const subscriber = onSubscribe<StreamPayload>(id).subscribe({
+    const subscriber = onSubscribe<EventContract>(id).subscribe({
      next: (payload) => {
-      session.push(payload.data, payload.event);
+      session.push(payload.payload, payload.event_type);
      },
      error: (err) => {
       console.error(err);

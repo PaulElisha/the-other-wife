@@ -7,9 +7,10 @@ import ErrorCode from "@enum/error-code.js";
 import NotFoundException from "@error/not-found-exception.js";
 import { addresses } from "@module/address/address.schema.js";
 import { users } from "@module/user/user.schema.js";
-import { vendors, VendorSchema } from "@module/vendor/vendor.schema.js";
+import { vendors, TVendorSchema } from "@module/vendor/vendor.schema.js";
 import { and, eq } from "drizzle-orm";
 import z from "zod";
+import { Transaction } from "../payment/payment.service";
 
 const Update = {
  pending: "pending",
@@ -24,89 +25,105 @@ type UpdateType = (typeof Update)[keyof typeof Update];
 const VendorDispatcher: Record<
  string,
  (
+  tx: Transaction,
+ ) => (
   vendorId: number,
   userId: number,
   update: keyof typeof Update,
   reason?: string,
- ) => Promise<VendorSchema>
+ ) => Promise<TVendorSchema>
 > = {
- approve: async (vendorId: number, userId: number, update: UpdateType) => {
-  try {
-   const newUpdate = await db
-    .update(vendors)
-    .set({
-     approval_status: update,
-     approved_by: userId,
-    })
-    .where(and(eq(vendors.id, vendorId), eq(vendors.user_id, userId)))
-    .returning();
-   return newUpdate[0];
-  } catch (error) {
-   throw error;
-  }
+ approve: (tx: Transaction) => {
+  return async (vendorId: number, userId: number, update: UpdateType) => {
+   try {
+    const newUpdate = await tx
+     .update(vendors)
+     .set({
+      approval_status: update,
+      approved_by: userId,
+     })
+     .where(and(eq(vendors.id, vendorId), eq(vendors.user_id, userId)))
+     .returning();
+    return newUpdate[0];
+   } catch (error) {
+    throw error;
+   }
+  };
  },
- reject: async (
-  vendorId: number,
-  userId: number,
-  update: UpdateType,
-  reason?: string,
- ) => {
-  try {
-   const newUpdate = await db
-    .update(vendors)
-    .set({
-     approval_status: update,
-     rejection: reason,
-    })
-    .where(and(eq(vendors.id, vendorId), eq(vendors.user_id, userId)))
-    .returning();
-   return newUpdate[0];
-  } catch (error) {
-   throw error;
-  }
+ reject: (tx: Transaction) => {
+  return async (
+   vendorId: number,
+   userId: number,
+   update: UpdateType,
+   reason?: string,
+  ) => {
+   try {
+    const newUpdate = await tx
+     .update(vendors)
+     .set({
+      approval_status: update,
+      rejection_reason: reason,
+     })
+     .where(and(eq(vendors.id, vendorId), eq(vendors.user_id, userId)))
+     .returning();
+    return newUpdate[0];
+   } catch (error) {
+    throw error;
+   }
+  };
  },
- suspend: async (vendorId: number, userId: number, update: UpdateType) => {
-  try {
-   const newUpdate = await db
-    .update(vendors)
-    .set({
-     approval_status: update,
-    })
-    .where(and(eq(vendors.id, vendorId), eq(vendors.user_id, userId)))
-    .returning();
-   return newUpdate[0];
-  } catch (error) {
-   throw error;
-  }
+ suspend: (tx: Transaction) => {
+  return async (
+   vendorId: number,
+   userId: number,
+   update: UpdateType,
+   reason?: string,
+  ) => {
+   try {
+    const newUpdate = await tx
+     .update(vendors)
+     .set({
+      approval_status: update,
+      suspension_reason: reason,
+     })
+     .where(and(eq(vendors.id, vendorId), eq(vendors.user_id, userId)))
+     .returning();
+    return newUpdate[0];
+   } catch (error) {
+    throw error;
+   }
+  };
  },
 };
 
-class VendorBase<T extends VendorSchema> {
+class VendorBase<T extends TVendorSchema> {
  modifyVendorStatus = async (
-  vendorId: number,
   userId: number,
   handler: (
+   tx: Transaction,
+  ) => (
    vendorId: number,
    userId: number,
    update: UpdateType,
    reason?: string,
   ) => Promise<T>,
- ) => {
-  const [vendor] = await db
-   .select()
-   .from(vendors)
-   .innerJoin(users, eq(vendors.user_id, users.id))
-   .where(and(eq(vendors.id, vendorId), eq(vendors.user_id, userId)));
+ ): Promise<(update: UpdateType, reason?: string) => Promise<T>> => {
+  return await db.transaction(async (tx: Transaction) => {
+   const [vendor] = await tx
+    .select()
+    .from(vendors)
+    .where(eq(vendors.user_id, userId));
 
-  throwNotFoundException(vendor);
+   throwNotFoundException(vendor);
 
-  return async (update: UpdateType, reason?: string): Promise<T> => {
-   return await handler(vendorId, userId, update, reason);
-  };
+   return async (update: UpdateType, reason?: string): Promise<T> => {
+    return await handler(tx)(vendor.id, userId, update, reason);
+   };
+  });
  };
 }
 
-class VendorService extends VendorBase<VendorSchema> {
+class VendorService extends VendorBase<TVendorSchema> {
  getVendorProfile = async (vendorId: number, userId: number) => {
   const vendorProfile = await db
    .select()
@@ -197,26 +214,26 @@ class VendorService extends VendorBase<VendorSchema> {
   }
  };
 
- approveVendor = async (vendorId: number, userId: number, userType: string) => {
+ approveVendor = async (userId: number) => {
   const vendor = await (
-   await this.modifyVendorStatus(vendorId, userId, VendorDispatcher.approve)
+   await this.modifyVendorStatus(userId, VendorDispatcher.approve)
   )(Update.approved);
 
   return vendor;
  };
 
- rejectVendor = async (vendorId: number, userId: number, reason?: string) => {
+ rejectVendor = async (userId: number, reason?: string) => {
   const vendor = await (
-   await this.modifyVendorStatus(vendorId, userId, VendorDispatcher.approve)
+   await this.modifyVendorStatus(userId, VendorDispatcher.reject)
   )(Update.rejected, reason);
 
   return vendor;
  };
 
- suspendVendor = async (vendorId: number, userId: number) => {
+ suspendVendor = async (userId: number, reason?: string) => {
   const vendor = await (
-   await this.modifyVendorStatus(vendorId, userId, VendorDispatcher.approve)
-  )(Update.suspended);
+   await this.modifyVendorStatus(userId, VendorDispatcher.suspend)
+  )(Update.suspended, reason);
 
   return vendor;
  };

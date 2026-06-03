@@ -9,7 +9,7 @@ import NotFoundException from "@/src/shared/error/not-found-exception";
 import { EventType } from "@/src/shared/event-bus/config";
 import { PublishEvent } from "@/src/shared/event-bus/publisher";
 import { and, eq, gt } from "drizzle-orm";
-import z, { email } from "zod";
+import z from "zod";
 
 import AddressService from "../address/address.service";
 import CartService from "../cart/cart.service";
