@@ -16,17 +16,16 @@ class AuthController {
    res: Response,
    next: NextFunction,
   ): Promise<any> => {
-   const { first_name, last_name, email, password, user_type, phone_number } =
-    req.body;
+   const data = req.body;
 
    try {
     const user = await AuthService.signup({
-     first_name,
-     last_name,
-     email,
-     password,
-     user_type,
-     phone_number,
+     first_name: data?.first_name,
+     last_name: data?.last_name,
+     email: data?.email,
+     password: data?.password,
+     user_type: data?.user_type,
+     phone_number: data?.phone_number,
     });
 
     return res.status(HttpStatus.OK).json({

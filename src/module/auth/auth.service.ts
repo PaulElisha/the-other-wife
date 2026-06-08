@@ -55,7 +55,7 @@ class AuthService<T extends TUserSchema> {
     authType &&
      (() => {
       throw new BadRequestException(
-       `${authType} already exists`,
+       `Account already exists`,
        HttpStatus.BAD_REQUEST,
        authType === "email"
         ? ErrorCode.AUTH_EMAIL_ALREADY_EXISTS

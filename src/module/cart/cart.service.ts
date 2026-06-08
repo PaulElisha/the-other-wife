@@ -30,8 +30,7 @@ class CartBase {
     .set({
      subtotal: result.subtotal,
     })
-    .where(and(eq(carts.id, cartId), eq(carts.customer_id, customerId)))
-    .returning();
+    .where(and(eq(carts.id, cartId), eq(carts.customer_id, customerId)));
   };
 
  modifyCart = async (
