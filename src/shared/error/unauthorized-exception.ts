@@ -1,9 +1,6 @@
 /** @format */
 
-import type {
- ErrorCodeType,
- HttpStatusCodeType,
-} from "@/src/shared/type/types.js";
+import type { ErrorCodeType, HttpStatusCodeType } from "@type/types.js";
 import AppError from "@error/app-error.js";
 
 export default class UnauthorizedExceptionError extends AppError {

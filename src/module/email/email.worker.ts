@@ -15,9 +15,10 @@ export async function EmailWorker<T extends TUserSchema>(
   try {
    await Mailer.relayTo(MailAction.verifySignup)(task);
   } catch (err) {
-   attempts++;
    console.error(`Attempt ${attempts} failed`);
    if (attempts < max) await new Promise((res) => setTimeout(res, 1000));
+   attempts++;
+   console.log(`Running ${attempts} attempt`);
   }
  }
 }

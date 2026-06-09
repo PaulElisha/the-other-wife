@@ -2,7 +2,7 @@
 
 import AUTH_CONSTANTS from "@/src/shared/constants/auth.js";
 import Env from "@config/env.config.js";
-import { createSecretKey } from "crypto";
+import { createSecretKey, KeyObject } from "crypto";
 import { type JWTPayload, jwtVerify, SignJWT } from "jose";
 
 export interface JwtPayload extends JWTPayload {
@@ -11,8 +11,8 @@ export interface JwtPayload extends JWTPayload {
  email?: string;
 }
 
-const JwtSecretKey = createSecretKey(Env.JWT_SECRET, "utf-8");
-const JwtRefreshSecretKey = createSecretKey(Env.REFRESH_SECRET, "utf-8");
+export const JwtSecretKey = createSecretKey(Env.JWT_SECRET, "utf-8");
+export const JwtRefreshSecretKey = createSecretKey(Env.REFRESH_SECRET, "utf-8");
 
 export const generateToken = async <T extends JwtPayload>(payload: T) => {
  return new SignJWT(payload)
@@ -47,8 +47,11 @@ export const generateOtp = async () => ({
  otpExpiry: new Date(Date.now() + AUTH_CONSTANTS.OTP_EXPIRY_MS),
 });
 
-export const verifyToken = async (token: string): Promise<JwtPayload> => {
- const { payload } = await jwtVerify(token, JwtSecretKey);
+export const verifyToken = async (
+ token: string,
+ tokenSecret: KeyObject,
+): Promise<JwtPayload> => {
+ const { payload } = await jwtVerify(token, tokenSecret);
 
  return <JwtPayload>payload;
 };

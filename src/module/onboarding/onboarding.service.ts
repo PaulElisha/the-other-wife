@@ -5,7 +5,7 @@ import HttpStatus from "@/src/shared/enum/http";
 import BadRequestException from "@/src/shared/error/bad-request-exception";
 import InternalServerError from "@/src/shared/error/internal-server";
 import { UserRole } from "@/src/shared/type/types";
-import { JwtPayload, verifyToken } from "@/src/shared/util/jwt";
+import { JwtPayload, JwtSecretKey, verifyToken } from "@/src/shared/util/jwt";
 import db from "@config/db.config.js";
 import AuthService from "@module/auth/auth.service.js";
 import {
@@ -14,11 +14,11 @@ import {
  TOnboarding,
 } from "@module/onboarding/onboarding.schema.js";
 import { vendors } from "@module/vendor/vendor.schema.js";
-import MemoEvent from "@shared/util/memo-event.js";
 import { and, eq } from "drizzle-orm";
 import type { Response } from "express";
 
 import { TUserSchema } from "../user/user.schema";
+import Env from "@/src/config/env.config";
 
 const Steps = {
  "0": "0",
@@ -64,7 +64,7 @@ class OnboardingService<T extends TSteps, U extends TOnboarding> {
       phone_number: updateData.phoneNumber,
      });
 
-     const payload: JwtPayload = await verifyToken(accessToken);
+     const payload: JwtPayload = await verifyToken(accessToken, JwtSecretKey);
      const vendorId = payload.id ?? null;
      const nextStep = "2";
 
@@ -185,13 +185,6 @@ class OnboardingService<T extends TSteps, U extends TOnboarding> {
     },
    );
 
-   MemoEvent.notify(vendorId, {
-    type: "STATUS_UPDATE",
-    step: <T>currentStep,
-    completed: true,
-    nextStep: <T>nextStep,
-   });
-
    return [currentStep, nextStep, status];
   } catch (error) {
    throw error;
@@ -285,13 +278,6 @@ class OnboardingService<T extends TSteps, U extends TOnboarding> {
     throw error;
    }
   });
-
-  MemoEvent.notify(vendorId, {
-   type: "STATUS_UPDATE",
-   step: <T>currentStep,
-   completed: <boolean>status,
-   nextStep: <T>nextStep,
-  });
  };
 
  getCurrentProcess = async (vendorId: number, userId: number) => {
@@ -310,10 +296,6 @@ class OnboardingService<T extends TSteps, U extends TOnboarding> {
     currentOnboardingProcess?.onboarding,
     currentOnboardingProcess?.onboarding_status,
    ];
- };
-
- subscribeToMemo = async (vendorId: number, res: Response) => {
-  MemoEvent.subscribe(vendorId, res);
  };
 }
 

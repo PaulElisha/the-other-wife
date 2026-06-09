@@ -2,6 +2,7 @@
 
 import { env as loadEnv } from "custom-env";
 import z from "zod";
+import { createSecretKey } from "crypto";
 
 process.env.APP_STAGE = process.env.APP_STAGE || "dev";
 

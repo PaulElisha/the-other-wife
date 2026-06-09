@@ -1,9 +1,6 @@
 /** @format */
 
-import type {
- ErrorCodeType,
- HttpStatusCodeType,
-} from "@/src/shared/type/types.js";
+import type { ErrorCodeType, HttpStatusCodeType } from "@type/types.js";
 
 export default class AppError extends Error {
  constructor(

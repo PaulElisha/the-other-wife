@@ -9,6 +9,6 @@ const AUTH_CONSTANTS = {
   SUSPENDED: "suspended",
   DELETED: "deleted",
  },
-};
+} as const;
 
 export default AUTH_CONSTANTS;

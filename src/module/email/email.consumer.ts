@@ -1,8 +1,8 @@
 /** @format */
 
 import EmailWorker from "./email.worker";
-import { onEvent } from "@/src/shared/event-bus/consumer";
-import { EventContract, EventType } from "@/src/shared/event-bus/config";
+import { onEvent } from "@shared/event-bus/consumer";
+import { EventContract, EventType } from "@shared/event-bus/config";
 
 onEvent<EventContract>(EventType.USER_REGISTERED).subscribe({
  next: async (payload) => {

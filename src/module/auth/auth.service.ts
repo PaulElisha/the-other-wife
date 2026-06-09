@@ -18,9 +18,11 @@ import {
  generateEmailToken,
  generateRefreshToken,
  generateToken,
+ JwtRefreshSecretKey,
+ verifyToken,
 } from "@util/jwt.js";
 import { comparePassword, hashPassword } from "@util/password.js";
-import { and, eq, gt, ilike, or } from "drizzle-orm";
+import { and, eq, gt, ilike, isNotNull, ne, or } from "drizzle-orm";
 
 export const UserType = {
  customer: "customer",
@@ -265,66 +267,59 @@ class AuthService<T extends TUserSchema> {
   return result;
  };
 
- // refreshLogin = transaction.use(
- //   async (session: ClientSession, refreshToken: string): Promise<any> => {
- //     try {
- //       if (!refreshToken) {
- //         throw new BadRequestException(
- //           "Refresh token is required",
- //           HttpStatus.BAD_REQUEST,
- //           ErrorCode.VALIDATION_ERROR,
- //         );
- //       }
+ refreshLogin = async (refresh_token: string): Promise<any> => {
+  return await db.transaction(async (tx) => {
+   if (!refresh_token) {
+    throw new BadRequestException(
+     "Refresh token is required",
+     HttpStatus.BAD_REQUEST,
+     ErrorCode.VALIDATION_ERROR,
+    );
+   }
 
- //       const decoded = verifyToken(refreshToken, Envconfig.JWT_REFRESH_SECRET);
+   const decoded = await verifyToken(refresh_token, JwtRefreshSecretKey);
 
- //       if (!decoded || typeof decoded === "string") {
- //         throw new UnauthorizedExceptionError(
- //           "Invalid token",
- //           HttpStatus.UNAUTHORIZED,
- //           ErrorCode.AUTH_UNAUTHORIZED_ACCESS,
- //         );
- //       }
+   if (!decoded || typeof decoded === "string") {
+    throw new UnauthorizedExceptionError(
+     "Invalid token",
+     HttpStatus.UNAUTHORIZED,
+     ErrorCode.AUTH_UNAUTHORIZED_ACCESS,
+    );
+   }
 
- //       let user = await User.findOne({
- //         _id: decoded._id,
- //         refreshToken,
- //         refreshTokenExpiry: { $gt: new Date() },
- //       }).session(session);
+   const [user] = await tx
+    .select()
+    .from(users)
+    .where(
+     and(
+      isNotNull(users.id),
+      eq(users.id, decoded.id),
+      ne(users.status, AUTH_CONSTANTS.USER_STATUS.ACTIVE),
+      eq(users.refresh_token, refresh_token),
+      gt(users.refresh_token_ms, new Date()),
+     ),
+    )
+    .limit(1);
 
- //       if (!user) {
- //         throw new NotFoundException(
- //           "Session expired",
- //           HttpStatus.NOT_FOUND,
- //           ErrorCode.AUTH_INVALID_TOKEN,
- //         );
- //       }
+   const [token, { refreshToken, refreshTokenExpiry }] = await Promise.all([
+    generateToken(decoded),
+    generateRefreshToken(decoded),
+   ]);
 
- //       if (user.status !== AUTH_CONSTANTS.USER_STATUS.ACTIVE) {
- //         throw new UnauthorizedExceptionError(
- //           `User account is ${user.status}`,
- //           HttpStatus.UNAUTHORIZED,
- //           ErrorCode.AUTH_UNAUTHORIZED_ACCESS,
- //         );
- //       }
+   await tx.update(users).set({
+    refresh_token: refreshToken,
+    refresh_token_ms: refreshTokenExpiry,
+    lastLogin: new Date(),
+   });
 
- //       const { token: newAccessToken } = generateToken(user);
- //       const { refreshToken: newRefreshToken } = generateRefreshToken(user);
+   const { password: _, ...userWithoutPassword } = user;
 
- //       user.refreshToken = newRefreshToken;
- //       user.refreshTokenExpiry = new Date(Date.now() + AUTH_CONSTANTS.REFRESH_TOKEN_EXPIRY_MS);
- //       user.lastLogin = new Date();
- //       await user.save({ session });
-
- //       return {
- //         newAccessToken,
- //         ...(user?.omitPassword() as any),
- //       };
- //     } catch (error) {
- //       throw error;
- //     }
- //   },
- // );
+   return {
+    newAcessToken: token,
+    userWithoutPassword,
+   };
+  });
+ };
 
  logout = async (userId: number) => {
   await db

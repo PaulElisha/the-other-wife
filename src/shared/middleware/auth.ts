@@ -1,14 +1,15 @@
 /** @format */
 
+import Env from "@/src/config/env.config";
 import HttpStatus from "@/src/shared/enum/http.js";
 import ErrorCode from "@enum/error-code.js";
 import UnauthorizedExceptionError from "@error/unauthorized-exception.js";
-import { verifyToken } from "@util/jwt.js";
+import { JwtRefreshSecretKey, verifyToken } from "@util/jwt.js";
 import type { NextFunction, Request, Response } from "express";
 
 const authenticate = async (
  req: Request,
- res: Response,
+ _res: Response,
  next: NextFunction,
 ) => {
  const token = req.cookies?.token;
@@ -22,7 +23,7 @@ const authenticate = async (
  }
 
  try {
-  const payload = await verifyToken(token);
+  const payload = await verifyToken(token, JwtRefreshSecretKey);
   req.user = payload;
   next();
  } catch (error) {
